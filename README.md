@@ -1,4 +1,4 @@
-# MDCS-py
+# mdcs-py
 
 This is an Python Script that takes in parameters and an xml file to perform the various tasks set out by the user to create and populate a Mosaic Dataset.
 An application that uses MDCS can be found on the Image Managnent workflow Solutions
