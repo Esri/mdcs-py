@@ -20,7 +20,7 @@ import arcpy
 import sys, os
 from xml.dom import minidom
 
-#checking
+#checking - chs
 
 
 scriptPath = os.path.dirname(__file__)
