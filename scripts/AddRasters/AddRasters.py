@@ -50,6 +50,13 @@ class AddRasters(Base.Base):
         return True
 
 
+    def GetValue(self, dic_values, key):
+        try:
+            if (dic_values.has_key(key)):
+                return dic_values[key]
+            return ''
+        except:
+            return ''
 
     def AddRasters(self):
 
@@ -106,7 +113,7 @@ class AddRasters(Base.Base):
                             self.log(arcpy.GetMessages(), self.const_warning_text)
 
                         try:
-                            arcpy.AddRastersToMosaicDataset_management(fullPath, rasterType, hshAddRaster['data_path'],'NO_CELL_SIZES','NO_BOUNDARY','','','','',set_spatial_reference, set_filter)
+                            arcpy.AddRastersToMosaicDataset_management(fullPath, rasterType, hshAddRaster['data_path'],self.GetValue(hshAddRaster, 'update_cellsize_ranges'),self.GetValue(hshAddRaster, 'update_boundary'),self.GetValue(hshAddRaster,'update_overviews'),self.GetValue(hshAddRaster,'maximum_pyramid_levels'),self.GetValue(hshAddRaster,'maximum_cell_size'),self.GetValue(hshAddRaster,'minimum_dimension'),self.GetValue(hshAddRaster,'spatial_reference'), set_filter, self.GetValue(hshAddRaster,'sub_folder'), self.GetValue(hshAddRaster,'duplicate_items_action'), self.GetValue(hshAddRaster,'build_pyramids'), self.GetValue(hshAddRaster,'calculate_statistics'), self.GetValue(hshAddRaster,'build_thumbnails'), self.GetValue(hshAddRaster,'operation_description'), self.GetValue(hshAddRaster,'force_spatial_reference'))
                         except:
                             self.log("Failed to add rasters to mosaic dataset : " + fullPath, self.const_warning_text)
                             self.log(arcpy.GetMessages(), self.const_warning_text)
