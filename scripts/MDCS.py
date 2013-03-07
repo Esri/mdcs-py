@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: This is the main program entry point to the Elevation project
 # Created	    	: 14-08-2012
-# LastUpdated  		: 30-01-2013
+# LastUpdated  		: 06-03-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	: Object of this class should be instantiated.
@@ -69,27 +69,15 @@ def main(argc, argv):
     pass
 
     argc = len(argv)
-    if (argc < 2):
-        print "\nMDCS.py v5.1\nUsage: MDCS.py <Optional:command[CM|AF|AR|CR|BF|IF|IG|DN|SP]> <config_file>" \
+    if (argc < 21):
+        print "\nMDCS.py v5.1\nUsage: MDCS.py <Optional:command> <config_file>" \
         "\nNote: Commands can be combined with '+' to do multiple operations." \
-        "\nAvailable commands:" \
-        "\n\tCM = Create Mosaic Datasets." \
-        "\n\tAF = Add Fields." \
-        "\n\tAR = Add Rasters." \
-        "\n\tCR = Create Referenced MDs." \
-        "\n\tBF = Build Footprints." \
-        "\n\tBB = Build Boundary." \
-        "\n\tIF = Import Fields." \
-        "\n\tIG = Import Geometry." \
-        "\n\tDN = Define NoData values." \
-        "\n\tSP = Set properties." \
-        "\n\tSS = Set statistics." \
-        "\n\tCC = Calculate cell size ranges."
-        "\n\tBO = Build overviews."
-        "\n\tDO = Define overviews."
-        "\n\tAI = Add index."
-        "\n\tCV = Calculate values"
-        "\n\tBP = Build Pyramid"
+        "\nAvailable commands:"
+
+        user_cmds = solutionsLib.Solutions().getAvailableCommands()
+        for key in user_cmds:
+            print "\t" + key + ' = ' + user_cmds[key]['desc']
+
         sys.exit(1)
 
 

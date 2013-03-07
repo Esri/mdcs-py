@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: To have a library of python modules to facilitate code to reuse for Raster Solutions projects.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 21-02-2013
+# LastUpdated  		: 06-03-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -19,8 +19,6 @@
 import arcpy
 import sys, os
 from xml.dom import minidom
-
-#checking - chs
 
 
 scriptPath = os.path.dirname(__file__)
@@ -45,28 +43,11 @@ class Solutions(Base.Base):
         self.userInfo = None
         self.config = ''
 
+
+    def getAvailableCommands(self):
+        return self.commands
+
     #mapping commands to functions
-
-    ##CM = Create Mosaic Datasets. #Done.
-    ##AF = Add Fields.  #Done
-    ##AR = Add Rasters  #Done
-    ##CR = Create Referenced MDs    #Done
-    ##BF = Build Footprints.    #Done
-    ##BB = Build Boundary   #Done
-    ##IF = Import Fields,   #Done
-    ##IG = Import Geometry  #Done
-    ##DN = Define NoData values.    #Done
-    ##SP = Set properties.  #Done
-    ##SS = Set statistics.  #Done
-    ##CC = Calculate cellsize ranges. #Done
-    ##BO = Build overviews. #Done
-    ##DO = Define overviews. # done
-    ##BP = build Pyramid # Done
-    ##CS = calculate Statistic # done
-    ## BPS = build Pyramid and statistic
-    ## BS = build Seamline
-    ## CBMD = Color Balance
-
     def executeCommand(self, com):
 
     #create the geodatabse to hold all relevant mosaic datasets.
@@ -499,7 +480,38 @@ class Solutions(Base.Base):
                 except:
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
 
+
+        elif(com == 'SY'):
+                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                processKey = 'synchronizemosaicdataset'
+                self.log("Synchronize mosaic dataset:" + fullPath, self.m_log.const_general_text)
+
+                try:
+                    arcpy.SynchronizeMosaicDataset_management(
+                    fullPath,
+                    self.getProcessInfoValue(processKey, 'where_clause'),
+                    self.getProcessInfoValue(processKey, 'new_items'),
+                    self.getProcessInfoValue(processKey, 'sync_only_stale'),
+                    self.getProcessInfoValue(processKey, 'update_cellsize_ranges'),
+                    self.getProcessInfoValue(processKey, 'update_boundary'),
+                    self.getProcessInfoValue(processKey, 'update_overviews'),
+                    self.getProcessInfoValue(processKey, 'build_pyramids'),
+                    self.getProcessInfoValue(processKey, 'calculate_statistics'),
+                    self.getProcessInfoValue(processKey, 'build_thumbnails'),
+                    self.getProcessInfoValue(processKey, 'build_item_cache'),
+                    self.getProcessInfoValue(processKey, 'rebuild_raster'),
+                    self.getProcessInfoValue(processKey, 'update_fields'),
+                    self.getProcessInfoValue(processKey, 'fields_to_update'),
+                    self.getProcessInfoValue(processKey, 'existing_items'),
+                    self.getProcessInfoValue(processKey, 'broken_items')
+                     )
+                    return True
+                except:
+                    self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+
+
         return False            #main function body return, no matching command found!
+
 
 
     commands = \
@@ -594,6 +606,10 @@ class Solutions(Base.Base):
         },
     'CP' :
         {   'desc' : 'Compact file geodatabase.',
+            'fnc' : executeCommand
+        },
+    'SY' :
+        {   'desc' : 'Rebuilds or updates each raster item in the mosaic dataset.',
             'fnc' : executeCommand
         }
     }
