@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: A component to Add rasters/data to existing mosaic datasets.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 17-09-2012
+# LastUpdated  		: 06-03-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	: Object of this class should be instantiated.
