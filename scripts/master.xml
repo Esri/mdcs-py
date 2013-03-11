@@ -100,7 +100,7 @@
 			<compression_quality>0-100</compression_quality>
 			<skip_existing>OVERWRITE;SKIP_EXISTING</skip_existing>
 		</BuildPyramids>        
-	<ColorBalancecMosaicDataset>
+	<ColorBalanceMosaicDataset>
 			<balancing_method>DODGING;HISTOGRAM;STANDARD_DEVIATION</balancing_method>
 			<color_surface_type>SINGLE_COLOR;COLOR_GRID;FIRST_ORDER;SECOND_ORDER;SECOND_ORDER;THIRD_ORDER</color_surface_type>
 			<target_raster>#</target_raster>
@@ -108,7 +108,7 @@
 			<exclude_raster>#</exclude_raster>
 			<stretch_type>NONE;ADAPTIVE;MINIMUM_MAXIMUM;STANDARD_DEVIATION</stretch_type>
 			<block_field>#</block_field>
-		</ColorBalancecMosaicDataset>
+		</ColorBalanceMosaicDataset>
 	<EditRasterFunction>
 			<edit_mosaic_dataset_item>EDIT_MOSAIC_DATASET_ITEM;EDIT_MOSAIC_DATASET</edit_mosaic_dataset_item>
 			<edit_options>INSERT;REPLACE;REMOVE</edit_options>
