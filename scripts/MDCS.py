@@ -69,7 +69,7 @@ def main(argc, argv):
     pass
 
     argc = len(argv)
-    if (argc < 21):
+    if (argc < 2):
         print "\nMDCS.py v5.1\nUsage: MDCS.py <Optional:command> <config_file>" \
         "\nNote: Commands can be combined with '+' to do multiple operations." \
         "\nAvailable commands:"
