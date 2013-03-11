@@ -98,8 +98,8 @@ class Solutions(Base.Base):
             try:
                 self.m_log.Message("\tColor Balancing mosaic dataset : " + self.processInfo.mdName, self.m_log.const_general_text)
                 fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
-                processKey = 'colorbalancecmosaicdataset'
-                arcpy.CalculateStatistics_management(fullPath,
+                processKey = 'colorbalancemosaicdataset'
+                arcpy.ColorBalanceMosaicDataset_management(fullPath,
                 self.getProcessInfoValue(processKey,'balancing_method'),
                 self.getProcessInfoValue(processKey,'color_surface_type'),
                 self.getProcessInfoValue(processKey,'target_raster'),
