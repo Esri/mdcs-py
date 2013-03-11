@@ -225,7 +225,7 @@ class Solutions(Base.Base):
                 arcpy.BuildSeamlines_management(fullPath,
                 self.getProcessInfoValue(processKey,'cell_size'),
                 self.getProcessInfoValue(processKey,'sort_method'),
-                self.getProcessInfoValue(processKey,'sort_order'),ti
+                self.getProcessInfoValue(processKey,'sort_order'),
                 self.getProcessInfoValue(processKey,'order_by_attribute'),
                 self.getProcessInfoValue(processKey,'order_by_base_value'),
                 self.getProcessInfoValue(processKey,'view_point'),
