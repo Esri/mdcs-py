@@ -98,8 +98,8 @@ class Solutions(Base.Base):
             try:
                 self.m_log.Message("\tColor Balancing mosaic dataset : " + self.processInfo.mdName, self.m_log.const_general_text)
                 fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
-                processKey = 'colorbalancecmosaicdataset'
-                arcpy.CalculateStatistics_management(fullPath,
+                processKey = 'colorbalancemosaicdataset'
+                arcpy.ColorBalanceMosaicDataset_management(fullPath,
                 self.getProcessInfoValue(processKey,'balancing_method'),
                 self.getProcessInfoValue(processKey,'color_surface_type'),
                 self.getProcessInfoValue(processKey,'target_raster'),
@@ -151,7 +151,7 @@ class Solutions(Base.Base):
                 self.m_log.Message("\tRecomputing footprint for the mosaic dataset : " + self.processInfo.mdName, self.m_log.const_general_text)
                 fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
                 processKey = 'buildpyramidsandstatistics'
-                arcpy.CalculateStatistics_management(fullPath,
+                arcpy.BuildPyramidsAndStatistics_management(fullPath,
                 self.getProcessInfoValue(processKey,'include_subdirectories'),
                 self.getProcessInfoValue(processKey,'build_pyramids'),
                 self.getProcessInfoValue(processKey,'calculate_statistics'),
@@ -222,7 +222,7 @@ class Solutions(Base.Base):
                 self.m_log.Message("\tBuild Seamline for the mosaic dataset : " + self.processInfo.mdName, self.m_log.const_general_text)
                 fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
                 processKey = 'buildseamlines'
-                arcpy.CalculateStatistics_management(fullPath,
+                arcpy.BuildSeamlines_management(fullPath,
                 self.getProcessInfoValue(processKey,'cell_size'),
                 self.getProcessInfoValue(processKey,'sort_method'),
                 self.getProcessInfoValue(processKey,'sort_order'),
