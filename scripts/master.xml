@@ -21,6 +21,20 @@
             <data_path>@DataPath</data_path>
           </Sources>
           <filter>@Filter</filter>
+          <update_cellsize_ranges>UPDATE_CELL_SIZES;NO_CELL_SIZES</update_cellsize_ranges>
+          <update_boundary>UPDATE_BOUNDARY,NO_BOUNDARY</update_boundary>
+          <update_overviews>UPDATE_OVERVIEWS;No_OVERVIEWS</update_overviews>
+          <maximum_pyramid_levels></maximum_pyramid_levels>
+          <maximum_cell_size></maximum_cell_size>
+          <minimum_dimension></minimum_dimension>
+          <spatial_reference></spatial_reference>
+          <sub_folder>SUBFOLDERS;NO_SUBFOLDERS</sub_folder>
+          <duplicate_items_action>ALLOW_DUPLICATES;EXCLUDE_DUPLICATES;OVERWRITE_DUPLICATES</duplicate_items_action>
+          <build_pyramids>NO_PYRAMIDS;BUILD_PYRAMIDS</build_pyramids>
+          <calculate_statistics>CALCULATE_STATISTICS;NO_STATISTICS </calculate_statistics>
+          <build_thumbnails>BUILD_THUMBNAILS;NOTHUMBNAILS</build_thumbnails>
+          <operation_description></operation_description>
+          <force_spatial_reference>FORCE_SPATIAL_REFERENCE;NO_FORCE_SPATIAL_REFERENCE</force_spatial_reference>
          </AddRaster>
          <AddRaster>	   
           <dataset_id>@ID</dataset_id>
@@ -29,6 +43,20 @@
             <data_path>@DataPath</data_path>
           </Sources>
           <filter>@Filter</filter>
+          <update_cellsize_ranges>UPDATE_CELL_SIZES;NO_CELL_SIZES</update_cellsize_ranges>
+          <update_boundary>UPDATE_BOUNDARY,NO_BOUNDARY</update_boundary>
+          <update_overviews>UPDATE_OVERVIEWS;No_OVERVIEWS</update_overviews>
+          <maximum_pyramid_levels></maximum_pyramid_levels>
+          <maximum_cell_size></maximum_cell_size>
+          <minimum_dimension></minimum_dimension>
+          <spatial_reference></spatial_reference>
+          <sub_folder>SUBFOLDERS;NO_SUBFOLDERS</sub_folder>
+          <duplicate_items_action>ALLOW_DUPLICATES;EXCLUDE_DUPLICATES;OVERWRITE_DUPLICATES</duplicate_items_action>
+          <build_pyramids>NO_PYRAMIDS;BUILD_PYRAMIDS</build_pyramids>
+          <calculate_statistics>CALCULATE_STATISTICS;NO_STATISTICS </calculate_statistics>
+          <build_thumbnails>BUILD_THUMBNAILS;NOTHUMBNAILS</build_thumbnails>
+          <operation_description></operation_description>
+          <force_spatial_reference>FORCE_SPATIAL_REFERENCE;NO_FORCE_SPATIAL_REFERENCE</force_spatial_reference>
          </AddRaster>
         </AddRasters> 
         <DefaultProperties>
@@ -65,8 +93,7 @@
 	  <end_time_field>#</end_time_field>
 	  <time_format>#</time_format>
 	  <geographic_transform>#</geographic_transform>
-	  <max_num_of_download_items>50</max_num_of_download_items
->
+	  <max_num_of_download_items>50</max_num_of_download_items>
 	  <max_num_of_records_returned>2000</max_num_of_records_returned>
 
         </DefaultProperties>
@@ -180,6 +207,26 @@
 			<bands_for_valid_data_range>@bands_for_nodata_value</bands_for_valid_data_range>
 			<Composite_nodata_value>NO_COMPOSITE_NODATA;COMPOSITE_NODATA</Composite_nodata_value>
 		</DefineMosaicDatasetNoData>
+    
+    <SynchronizeMosaicDataset>   
+       <in_mosaic_dataset></in_mosaic_dataset>
+       <where_clause></where_clause>
+       <new_items>NO_NEW_ITEMS;UPDATE_WITH_NEW_ITEMS</new_items>
+       <sync_only_stale>SYNC_STALE;SYNC_ALL</sync_only_stale>
+       <update_cellsize_ranges>UPDATE_CELL_SIZES;NO_CELL_SIZES</update_cellsize_ranges>
+       <update_boundary>UPDATE_BOUNDARY;NO_BOUNDARY</update_boundary>
+       <update_overviews>UPDATE_OVERVIEWS;NO_OVERVIEWS</update_overviews>
+       <build_pyramids>BUILD_PYRAMIDS;NO_PYRAMIDS</build_pyramids>
+       <calculate_statistics>CALCULATE_STATISTICS;NO_STATISTICS</calculate_statistics>
+       <build_thumbnails>NO_THUMBNAILS;BUILD_THUMBNAILS</build_thumbnails>
+       <build_item_cache>BUILD_ITEM_CACHE;NO_ITEM_CACHE</build_item_cache>
+       <rebuild_raster>REBUILD_RASTER,NO_RASTER</rebuild_raster>
+       <update_fields>UPDATE_FIELDS;NO_FIELDS</update_fields>
+       <fields_to_update>Specify which fields should be updated</fields_to_update>
+       <existing_items>UPDATE_EXISTING_ITEMS;IGNORE_EXISTING_ITEMS</existing_items>
+       <broken_items>IGNORE_BROKEN_ITEMS;REMOVE_BROKEN_ITEMS</broken_items>
+      </SynchronizeMosaicDataset>
+                                            
         <ImportGeometry>
 			<target_featureclass_type>FOOTPRINT;SEAMLINE;BOUNDARY</target_featureclass_type>
 			<target_join_field>@target_join_field</target_join_field>
