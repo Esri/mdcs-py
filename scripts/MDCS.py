@@ -69,7 +69,7 @@ def main(argc, argv):
     pass
 
     argc = len(argv)
-    if (argc < 21):
+    if (argc < 2):
 
     #command-line argument codes.
     #-i:config file.
