@@ -262,7 +262,7 @@ class AddRasters(Base.Base):
 
                                                         elif (nodeName == 'raster_type'):
                                                             nodeName = 'art'
-                                                            if (nodeValue.lower().find('art.xml') >= 0):
+                                                            if (nodeValue.lower().find('.art') >= 0):
                                                                 nodeValue = self.prefixFolderPath(nodeValue, self.const_raster_type_path_)
 
                                                         elif (nodeName == 'spatial_reference'):
