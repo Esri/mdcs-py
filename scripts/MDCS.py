@@ -5,7 +5,7 @@
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
 # Date          	: 16-09-2012
-# Purpose 	    	: This is the main program entry point to the Elevation project
+# Purpose 	    	: This is the main program entry point to MDCS.
 # Created	    	: 14-08-2012
 # LastUpdated  		: 06-03-2013
 # Required Argument 	: Not applicable
