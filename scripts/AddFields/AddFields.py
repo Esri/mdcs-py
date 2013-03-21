@@ -8,8 +8,8 @@
 # Purpose 	    	: A component to create custom fields in mosaic datasets.
 # Created	    	: 14-08-2012
 # LastUpdated  		: 17-09-2012
-# Required Argument 	: Not applicable
-# Optional Argument 	: Not applicable
+# Required Argument 	: Not applicable.
+# Optional Argument 	: Not applicable.
 # Usage         	: Object of this class should be instantiated.
 # Copyright	    	: (c) ESRI 2012
 # License	    	: <your license>
