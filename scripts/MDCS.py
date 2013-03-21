@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: This is the main program entry point to MDCS.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 06-03-2013
+# LastUpdated  		: 17-03-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	: Object of this class should be instantiated.
@@ -70,7 +70,28 @@ def main(argc, argv):
 
     argc = len(argv)
     if (argc < 2):
-        print "\nMDCS.py v5.1\nUsage: MDCS.py <Optional:command> <config_file>" \
+
+    #command-line argument codes.
+    #-i:config file.
+    #-c:command codes
+    #-m:mosaic dataset name
+    #-s:Source data paths. (as inputs to command (AR/AR)
+    #-l:Full path to log file (including file name)
+
+        user_args = \
+        [
+        "-m: Mosaic dataset path including GDB and MD name [e.g. c:\WorldElevation.gdb\Portland]",
+        "-s: Source data paths. (As inputs to command (AR)",
+        "-l: Log file to write to disk [path+file name]"
+        ]
+
+        print "\nMDCS.py v5.2\nUsage: MDCS.py -c:<Optional:command> -i:<config_file>" \
+        "\n\nFlags to override configuration values," \
+
+        for arg in user_args:
+            print arg
+
+        print \
         "\nNote: Commands can be combined with '+' to do multiple operations." \
         "\nAvailable commands:"
 
@@ -79,16 +100,6 @@ def main(argc, argv):
             print "\t" + key + ' = ' + user_cmds[key]['desc']
 
         sys.exit(1)
-
-
-    #command-line argument codes.
-    #/i:config file.
-    #/c:command codes
-    #/w:workspace
-    #/g:geodatabase
-    #/m:mosaic dataset name
-    #/s:Source data paths. (as inputs to command (AR/AR)
-    #/l:Full path to log file (including file name)
 
 
     base = Base.Base()
@@ -109,8 +120,6 @@ def main(argc, argv):
 
         subCode = values.pop(0)[1].lower()
         value = ':'.join(values).strip()
-
-
 
         if (subCode == 'c'):
             com = value.replace(' ', '')        #remove spaces in between.
