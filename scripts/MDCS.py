@@ -8,7 +8,7 @@
 # Purpose 	    	: This is the main program entry point to MDCS.
 # Created	    	: 14-08-2012
 # LastUpdated  		: 21-03-2013
-# Required Argument : Not applicable..
+# Required Argument : Not applicable.
 # Optional Argument : Not applicable.
 # Usage         	: Object of this class should be instantiated.
 # Copyright	    : (c) ESRI 2012
