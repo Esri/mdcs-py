@@ -292,7 +292,7 @@ class Solutions(Base.Base):
                     confTableName = os.path.basename(joinTable)
 
                     joinFeildList = [f.name for f in arcpy.ListFields(joinTable)]
-                    print joinFeildList
+                    self.log(joinFeildList)
                     mlayer = os.path.basename(fullPath) +"layer" + str(j)
                     j = j + 1
                     arcpy.MakeMosaicLayer_management(fullPath,mlayer)
@@ -324,7 +324,7 @@ class Solutions(Base.Base):
         elif(com == 'BB'):
                 fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
                 processKey = 'buildboundary'
-                print ("Building the boundary as an envelope.")
+                self.log ("Building the boundary "+ self.getProcessInfoValue(processKey, 'simplification_method'))
                 try:
                     arcpy.BuildBoundary_management(
                     fullPath,
