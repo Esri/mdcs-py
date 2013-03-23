@@ -324,7 +324,7 @@ class Solutions(Base.Base):
         elif(com == 'BB'):
                 fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
                 processKey = 'buildboundary'
-                self.log ("Building the boundary "+ simplification_method)
+                self.log ("Building the boundary "+ self.getProcessInfoValue(processKey, 'simplification_method'))
                 try:
                     arcpy.BuildBoundary_management(
                     fullPath,
