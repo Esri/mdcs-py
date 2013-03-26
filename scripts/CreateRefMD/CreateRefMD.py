@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: To create referenced Mosaic datasets
 # Created	    	: 14-08-2012
-# LastUpdated  		: 17-09-2012
+# LastUpdated  		: 26-09-2012
 # Required Argument 	:
 # Optional Argument 	:
 # Usage         	: c:\Python27\ArcGIS10.1\python.exe CreateRefMD.py.py CreateMD.xml
