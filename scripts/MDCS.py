@@ -9,7 +9,7 @@
 # Created	    	: 14-08-2012
 # LastUpdated  		: 26-03-2013
 # Required Argument : Not applicable.
-# Optional Argument : Not applicable
+# Optional Argument : Not applicable.
 # Usage         	: Object of this class should be instantiated.
 # Copyright	    : (c) ESRI 2012
 # License	    : <your license>
