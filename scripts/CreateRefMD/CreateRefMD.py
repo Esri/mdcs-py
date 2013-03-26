@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: To create referenced Mosaic datasets
 # Created	    	: 14-08-2012
-# LastUpdated  		: 26-09-2012
+# LastUpdated  		: 26-03-2013
 # Required Argument 	:
 # Optional Argument 	:
 # Usage         	: c:\Python27\ArcGIS10.1\python.exe CreateRefMD.py.py CreateMD.xml
@@ -215,12 +215,15 @@ class CreateReferencedMD(Base.Base):
                                 if (node.nodeName == 'function_path'):
                                     #only file name specified and no-folder.
                                     #prefix with self.const_raster_type_path_
-                                    rftNode = node.firstChild.nodeValue.strip()
-                                    rft =  self.prefixFolderPath(rftNode, self.const_raster_function_templates_path_)
-                                    if (os.path.exists(rft) == False):
-                                            rft = rftNode
-                                    for md in self.dic_derive_lst.keys():
-                                        self.dic_derive_lst[md]['ref'][refMD].append(rft)
+
+                                    if (node.childNodes.length > 0):
+                                        rftNode = node.firstChild.nodeValue.strip()
+                                        if (len(rftNode) != 0):
+                                            rft =  self.prefixFolderPath(rftNode, self.const_raster_function_templates_path_)
+                                            if (os.path.exists(rft) == False):
+                                                    rft = rftNode
+                                            for md in self.dic_derive_lst.keys():
+                                                self.dic_derive_lst[md]['ref'][refMD].append(rft)
 
 
 
