@@ -11,7 +11,7 @@
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable.
 # Usage         	:  Object of this class should be instantiated.
-# Copyright	    	: (c) ESRI 2012..
+# Copyright	    	: (c) ESRI 2012...
 # License	    	: <your license>
 #-------------------------------------------------------------------------------
 #!/usr/bin/env python
