@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: To create referenced Mosaic datasets
 # Created	    	: 14-08-2012
-# LastUpdated  		: 26-03-2013
+# LastUpdated  		: 27-03-2013
 # Required Argument 	:
 # Optional Argument 	:
 # Usage         	: c:\Python27\ArcGIS10.1\python.exe CreateRefMD.py.py CreateMD.xml
@@ -32,11 +32,12 @@ class CreateReferencedMD(Base.Base):
     gdbName = ''
     gdbNameExt = ''
     dic_derive_lst = {}
+    dic_ref_info = {}
     rftLocation = ''
     doc = None
     workspace = ''
     gdbPath = ''
-
+    m_numBands = ''
     m_base = None
 
     def __init__(self, base=None):
@@ -47,6 +48,7 @@ class CreateReferencedMD(Base.Base):
             self.m_MD = base.m_md
 
         self.m_base = base
+
 
     def createReferencedMD(self):
         self.log("Creating reference mosaic datasets:", self.const_general_text)
@@ -59,14 +61,31 @@ class CreateReferencedMD(Base.Base):
                     mdPath = os.path.join(self.gdbPath, r)
 
                     inMosaic = os.path.join(self.gdbPath, self.dic_derive_lst[k]['key'])
-##                    inMosaic = os.path.join(self.gdbPath,self.m_MD)
-#                    inMosaic = self.m_base.m_sources
                     refMosaic = os.path.join(self.gdbPath, r)
 
                     self.log("Creating MD:" + r, self.const_general_text)
+
                     if not arcpy.Exists(mdPath):
                         try:
-                            arcpy.CreateReferencedMosaicDataset_management(inMosaic, refMosaic, self.srs, "", self.pixel_type, "", "", "", "", "", "", "", "","NO_BOUNDARY")
+                            if (len(self.dic_ref_info) > 0):
+                                arcpy.CreateReferencedMosaicDataset_management(\
+                                self.m_base.getInternalPropValue(self.dic_ref_info, 'in_dataset'),\
+                                refMosaic,\
+                                self.srs,\
+                                self.m_numBands,\
+                                self.pixel_type,\
+                                self.m_base.getInternalPropValue(self.dic_ref_info, 'where_clause'),\
+                                self.m_base.getInternalPropValue(self.dic_ref_info, 'in_template_dataset'),\
+                                self.m_base.getInternalPropValue(self.dic_ref_info, 'extent'),\
+                                self.m_base.getInternalPropValue(self.dic_ref_info, 'select_using_features'),\
+                                self.m_base.getInternalPropValue(self.dic_ref_info, 'lod_field'),\
+                                self.m_base.getInternalPropValue(self.dic_ref_info, 'minPS_field>'),\
+                                self.m_base.getInternalPropValue(self.dic_ref_info, 'maxPS_field>'),\
+                                self.m_base.getInternalPropValue(self.dic_ref_info, 'pixelSize'),\
+                                self.m_base.getInternalPropValue(self.dic_ref_info, 'build_boundary')\
+                                )
+                            else:
+                                arcpy.CreateReferencedMosaicDataset_management(inMosaic, refMosaic, self.srs, "", self.pixel_type, "", "", "", "", "", "", "", "","NO_BOUNDARY")
                         except:
                             self.log("\tFailed to create refrence MD  " + r, self.const_warning_text)
                             self.log(arcpy.GetMessages(), self.const_warning_text)
@@ -131,6 +150,8 @@ class CreateReferencedMD(Base.Base):
         self.srs = self.getXMLNodeValue(self.doc, "SRS")         #workspace/location on filesystem where the .gdb is created.
         self.pixel_type =  self.getXMLNodeValue(self.doc, "pixel_type")
 
+        self.m_numBands  = self.getXMLNodeValue(self.doc, "num_bands")
+
         Nodelist = self.doc.getElementsByTagName("MosaicDataset")
         if (Nodelist.length == 0):
             self.log("Error: MosaicDatasets node not found! Invalid schema.", self.const_critical_text)
@@ -150,6 +171,16 @@ class CreateReferencedMD(Base.Base):
                                     refMD = node.firstChild.nodeValue
                             except:
                                 Error = True
+
+
+                        elif (node.nodeName == 'CreateReferencedMosaicDataset'):
+                            for node in node.childNodes:
+                                if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
+                                    nodeName = node.nodeName.lower()
+                                    if (node.childNodes.length > 0):
+                                        if (self.dic_ref_info.has_key(nodeName) == False):
+                                            self.dic_ref_info[nodeName] = node.firstChild.nodeValue
+
 
                         elif(node.nodeName == 'AddRasters'):
 
@@ -213,9 +244,6 @@ class CreateReferencedMD(Base.Base):
 
                             for node in node.childNodes:
                                 if (node.nodeName == 'function_path'):
-                                    #only file name specified and no-folder.
-                                    #prefix with self.const_raster_type_path_
-
                                     if (node.childNodes.length > 0):
                                         rftNode = node.firstChild.nodeValue.strip()
                                         if (len(rftNode) != 0):
@@ -224,8 +252,6 @@ class CreateReferencedMD(Base.Base):
                                                     rft = rftNode
                                             for md in self.dic_derive_lst.keys():
                                                 self.dic_derive_lst[md]['ref'][refMD].append(rft)
-
-
 
 
         except:

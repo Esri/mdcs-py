@@ -103,6 +103,13 @@ class Base(object):
         return node[0].firstChild.data
 
 
+    def getInternalPropValue(self, dic, key):
+        if (dic.has_key(key)):
+            return dic[key]
+        else:
+            return ''
+
+
     def getXMLNode(self, doc, nodeName) :
         if (doc == None):
             return ''
