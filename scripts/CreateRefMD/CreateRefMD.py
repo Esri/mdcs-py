@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: To create referenced Mosaic datasets
 # Created	    	: 14-08-2012
-# LastUpdated  		: 27-03-2013
+# LastUpdated  		: 28-03-2013
 # Required Argument 	:
 # Optional Argument 	:
 # Usage         	: c:\Python27\ArcGIS10.1\python.exe CreateRefMD.py.py CreateMD.xml
@@ -68,8 +68,14 @@ class CreateReferencedMD(Base.Base):
                     if not arcpy.Exists(mdPath):
                         try:
                             if (len(self.dic_ref_info) > 0):
+
+                                in_dataset = self.m_base.getInternalPropValue(self.dic_ref_info, 'in_dataset')
+                                _p, _f = os.path.split(in_dataset)
+                                if (_p == '' and _f != ''):
+                                    in_dataset = os.path.join(self.gdbPath, _f)
+
                                 arcpy.CreateReferencedMosaicDataset_management(\
-                                self.m_base.getInternalPropValue(self.dic_ref_info, 'in_dataset'),\
+                                in_dataset,\
                                 refMosaic,\
                                 self.srs,\
                                 self.m_numBands,\
