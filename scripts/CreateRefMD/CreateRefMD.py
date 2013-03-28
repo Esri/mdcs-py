@@ -165,6 +165,7 @@ class CreateReferencedMD(Base.Base):
 
         dListEmpty = len(self.dic_derive_lst) == 0
         refMD = self.m_MD
+        dName = ''
 
         try:
             for node in Nodelist[0].childNodes:
@@ -180,11 +181,19 @@ class CreateReferencedMD(Base.Base):
 
 
                         elif (node.nodeName == 'CreateReferencedMosaicDataset'):
+
                             for node in node.childNodes:
                                 if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
                                     nodeName = node.nodeName.lower()
                                     if (node.childNodes.length > 0):
                                         if (self.dic_ref_info.has_key(nodeName) == False):
+                                            if (nodeName.lower() == 'in_dataset'):
+                                                in_dataset = node.firstChild.nodeValue
+                                                self.dic_derive_lst[in_dataset] = { 'ref' : {}}
+                                                functions = []
+                                                self.dic_derive_lst[in_dataset]['ref'][refMD] = functions
+                                                self.dic_derive_lst[in_dataset]['key']  = in_dataset
+
                                             self.dic_ref_info[nodeName] = node.firstChild.nodeValue
 
 
@@ -244,7 +253,7 @@ class CreateReferencedMD(Base.Base):
 
 
                         elif(node.nodeName == 'Functions'):
-                            if (refMD == '' or dName == ''):
+                            if (refMD == '' and dName == ''):
                                 self.log("Warning/Internal: refMD/dName empty!", self.const_warning_text)
                                 break;
 
