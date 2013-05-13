@@ -152,10 +152,10 @@ class Solutions(Base.Base):
 
         elif (com == 'BPS'):
             try:
-                self.m_log.Message("\tRecomputing footprint for the mosaic dataset : " + self.processInfo.mdName, self.m_log.const_general_text)
+                self.m_log.Message("\tBuilding Pyramid and Statistics for the Mosaic dataset : " + self.processInfo.mdName, self.m_log.const_general_text)
                 fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
                 processKey = 'buildpyramidsandstatistics'
-                arcpy.BuildPyramidsAndStatistics_management(fullPath,
+                arcpy.BuildPyramidsandStatistics_management(fullPath,
                 self.getProcessInfoValue(processKey,'include_subdirectories'),
                 self.getProcessInfoValue(processKey,'build_pyramids'),
                 self.getProcessInfoValue(processKey,'calculate_statistics'),
