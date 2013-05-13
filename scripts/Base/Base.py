@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: Base call used by all Raster Solutions components.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 17-09-2012
+# LastUpdated  		: 13-05-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -77,6 +77,14 @@ class Base(object):
         print 'log-' + errorTypeText + ': ' + msg
 
         return True
+
+
+    def getAbsPath(self, input):
+        absPath = input
+        if (os.path.exists(absPath) == True):
+            absPath = os.path.abspath(input)
+
+        return absPath
 
 
     def prefixFolderPath(self, input, prefix):
