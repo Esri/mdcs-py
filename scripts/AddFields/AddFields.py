@@ -7,9 +7,9 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: A component to create custom fields in mosaic datasets.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 17-09-2012
-# Required Argument 	: Not applicable.
-# Optional Argument 	: Not applicable.
+# LastUpdated  		: 13-05-2013
+# Required Argument 	: Not applicable
+# Optional Argument 	: Not applicable
 # Usage         	: Object of this class should be instantiated.
 # Copyright	    	: (c) ESRI 2012
 # License	    	: <your license>
@@ -94,7 +94,7 @@ class AddFields(Base.Base):
         # Step (1)
         #workspace/location on filesystem where the .gdb is created.
         if (self.workspace == ''):
-            self.workspace = self.prefixFolderPath(self.getXMLNodeValue(self.doc, "WorkspacePath"), self.const_workspace_path_)
+            self.workspace = self.prefixFolderPath(self.m_base.getAbsPath(self.getXMLNodeValue(self.doc, "WorkspacePath")), self.const_workspace_path_)
 
         if (self.gdbNameExt == ''):
             self.gdbNameExt =  self.getXMLNodeValue(self.doc, "Geodatabase")
