@@ -345,7 +345,7 @@ class Solutions(Base.Base):
                 fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
                 processKey = 'setstatistics'
                 self.log("Setting MD statistics for:" + fullPath, self.m_log.const_general_text)
-                stats_file_ss = self.getProcessInfoValue(processKey, 'stats_file')
+                stats_file_ss = self.m_base.getAbsPath(self.getProcessInfoValue(processKey, 'stats_file'))
                 if stats_file_ss != '#' and stats_file_ss != '' :
                     stats_file_ss = self.prefixFolderPath(self.getProcessInfoValue(processKey, 'stats_file'), self.const_statistics_path_)
 

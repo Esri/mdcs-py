@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: A component to Add rasters/data to existing mosaic datasets.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 06-03-2013
+# LastUpdated  		: 13-05-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	: Object of this class should be instantiated.
@@ -143,7 +143,7 @@ class AddRasters(Base.Base):
 
         #workspace/location on filesystem where the .gdb is created.
         if (self.workspace == ''):
-            self.workspace = self.prefixFolderPath(self.getXMLNodeValue(self.doc, "WorkspacePath"), self.const_workspace_path_)
+            self.workspace = self.prefixFolderPath(self.m_base.getAbsPath(self.getXMLNodeValue(self.doc, "WorkspacePath")), self.const_workspace_path_)
         if (self.gdbNameExt == ''):
             self.gdbNameExt =  self.getXMLNodeValue(self.doc, "Geodatabase")
         const_len_ext = 4

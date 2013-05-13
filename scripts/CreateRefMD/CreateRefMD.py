@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: To create referenced Mosaic datasets
 # Created	    	: 14-08-2012
-# LastUpdated  		: 28-03-2013
+# LastUpdated  		: 13-05-2013
 # Required Argument 	:
 # Optional Argument 	:
 # Usage         	: c:\Python27\ArcGIS10.1\python.exe CreateRefMD.py.py CreateMD.xml
@@ -141,7 +141,7 @@ class CreateReferencedMD(Base.Base):
 
         #workspace/location on filesystem where the .gdb is created.
         if (self.workspace == ''):
-            self.workspace = self.prefixFolderPath(self.getXMLNodeValue(self.doc, "WorkspacePath"), self.const_workspace_path_)
+            self.workspace = self.m_base.getAbsPath(self.prefixFolderPath(self.getXMLNodeValue(self.doc, "WorkspacePath"), self.const_workspace_path_))
         if (self.gdbNameExt == ''):
             self.gdbNameExt =  self.getXMLNodeValue(self.doc, "Geodatabase")
         const_len_ext = 4
@@ -220,7 +220,7 @@ class CreateReferencedMD(Base.Base):
                                                     for node in node.childNodes:
                                                         if (node.nodeName.lower() == 'data_path'):
                                                             try:
-                                                                dNameVal = node.firstChild.nodeValue
+                                                                dNameVal = self.m_base.getAbsPath(node.firstChild.nodeValue)
                                                                 dName = dNameVal.upper()
 
                                                                 arydNameVal = dNameVal.split(';')
@@ -260,7 +260,7 @@ class CreateReferencedMD(Base.Base):
                             for node in node.childNodes:
                                 if (node.nodeName == 'function_path'):
                                     if (node.childNodes.length > 0):
-                                        rftNode = node.firstChild.nodeValue.strip()
+                                        rftNode = self.m_base.getAbsPath(node.firstChild.nodeValue.strip())
                                         if (len(rftNode) != 0):
                                             rft =  self.prefixFolderPath(rftNode, self.const_raster_function_templates_path_)
                                             if (os.path.exists(rft) == False):
