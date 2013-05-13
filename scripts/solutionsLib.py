@@ -116,12 +116,16 @@ class Solutions(Base.Base):
         elif (com == 'ERF'):
             try:
                 self.m_log.Message("\tEditing Raster function : " + self.processInfo.mdName, self.m_log.const_general_text)
-                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
                 processKey = 'editrasterfunction'
+                rfunction_path = self.getProcessInfoValue(processKey,'function_chain_definition')
+                if (rfunction_path.find('.rft') >-1 and rfunction_path.find('/') == -1):
+                    rfunction_path = self.const_raster_function_templates_path_ + "/" + rfunction_path
+                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+
                 arcpy.EditRasterFunction_management(fullPath,
                 self.getProcessInfoValue(processKey,'edit_mosaic_dataset_item'),
                 self.getProcessInfoValue(processKey,'edit_options'),
-                self.getProcessInfoValue(processKey,'function_chain_definition'),
+                rfunction_path,
                 self.getProcessInfoValue(processKey,'location_function_name'),
                 )
                 return True
