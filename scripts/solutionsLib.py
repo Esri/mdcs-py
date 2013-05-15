@@ -155,7 +155,7 @@ class Solutions(Base.Base):
                 self.m_log.Message("\tRecomputing footprint for the mosaic dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'buildpyramidsandstatistics'
-                arcpy.BuildPyramidsAndStatistics_management(fullPath,
+                arcpy.BuildPyramidsandStatistics_management(fullPath,
                 self.getProcessInfoValue(processKey,'include_subdirectories'),
                 self.getProcessInfoValue(processKey,'build_pyramids'),
                 self.getProcessInfoValue(processKey,'calculate_statistics'),
