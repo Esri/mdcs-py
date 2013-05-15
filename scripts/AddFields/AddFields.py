@@ -21,26 +21,13 @@ from xml.dom import minidom
 import Base
 
 class AddFields(Base.Base):
-    geodatabase_ext = '.gdb'
 
-    gdbName = ''
-    gdbNameExt = ''
-    doc = None
-    workspace = ''
-    gdbPath =  ''
-    m_MD = ''
     fieldNameList = []
     fieldTypeList = []
     fieldLengthList = []
-    m_base = None
 
-    def __init__(self, base=None):
-        if (base != None):
-            self.setLog(base.m_log)
-            self.workspace = base.m_workspace
-            self.gdbNameExt = base.m_geodatabase
-            self.m_MD = base.m_md
-
+    def __init__(self, base):
+        self.setLog(base.m_log)
         self.m_base = base
 
 
@@ -48,9 +35,9 @@ class AddFields(Base.Base):
 
         self.log("Adding custom fields:", self.const_general_text)
 
-        self.log("Using mosaic dataset:" + self.m_MD, self.const_general_text)
+        self.log("Using mosaic dataset:" + self.m_base.m_mdName, self.const_general_text)
         try:
-            mdPath = os.path.join(self.gdbPath, self.m_MD)
+            mdPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             if not arcpy.Exists(mdPath):
                 self.log("Mosaic dataset is not found.", self.const_warning_text)
                 return False
@@ -84,30 +71,7 @@ class AddFields(Base.Base):
 
     def init(self, config):
 
-        try:
-            self.doc = minidom.parse(config)
-        except:
-            self.log("Error: reading input config file:" + sys.argv[1] + "\nQuitting...", self.const_critical_text)
-            return False
-
-
-        # Step (1)
-        #workspace/location on filesystem where the .gdb is created.
-        if (self.workspace == ''):
-            self.workspace = self.prefixFolderPath(self.m_base.getAbsPath(self.getXMLNodeValue(self.doc, "WorkspacePath")), self.const_workspace_path_)
-
-        if (self.gdbNameExt == ''):
-            self.gdbNameExt =  self.getXMLNodeValue(self.doc, "Geodatabase")
-
-        const_len_ext = 4
-        if (self.gdbNameExt[-const_len_ext:].lower() != self.geodatabase_ext):
-            self.gdbNameExt += '.gdb'
-
-
-        self.gdbName = self.gdbNameExt[:len(self.gdbNameExt) - const_len_ext]       #.gdb
-
-
-        Nodelist = self.doc.getElementsByTagName("MosaicDataset")
+        Nodelist = self.m_base.m_doc.getElementsByTagName("MosaicDataset")
         if (Nodelist.length == 0):
             self.log("\nError: MosaicDataset node not found! Invalid schema.", self.const_critical_text)
             return False
@@ -118,8 +82,8 @@ class AddFields(Base.Base):
                   if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
                     if (node.nodeName == 'Name'):
                         try:
-                            if (self.m_MD == ''):
-                                self.m_MD = node.firstChild.nodeValue
+                            if (self.m_base.m_mdName == ''):
+                                self.m_base.m_mdName = node.firstChild.nodeValue
                             break
                         except:
                             Error = True
@@ -128,7 +92,7 @@ class AddFields(Base.Base):
             return False
 
 
-        Nodelist = self.doc.getElementsByTagName("Fields")
+        Nodelist = self.m_base.m_doc.getElementsByTagName("Fields")
         if (Nodelist.length == 0):
             self.log("Error: Fields node not found! Invalid schema.", self.const_critical_text)
             return False
@@ -158,9 +122,6 @@ class AddFields(Base.Base):
         if (len(self.fieldTypeList) != fields_len or len(self.fieldLengthList) != fields_len):
             self.log("\nError: Number of Field(Name, Type, Len) do not match!", self.const_critical_text)
             return False
-
-
-        self.gdbPath = os.path.join(self.workspace, self.gdbNameExt)
 
         return True
 

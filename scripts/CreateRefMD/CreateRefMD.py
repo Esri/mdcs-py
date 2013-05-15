@@ -25,30 +25,16 @@ from xml.dom import minidom
 
 class CreateReferencedMD(Base.Base):
 
-    geodatabase_ext = '.gdb'
     srs = ''
     pixel_type = ''
 
-    gdbName = ''
-    gdbNameExt = ''
     dic_derive_lst = {}
     dic_ref_info = {}
-    rftLocation = ''
-    doc = None
-    workspace = ''
-    gdbPath = ''
     m_numBands = ''
-    m_base = None
 
-    def __init__(self, base=None):
-        if (base != None):
-            self.setLog(base.m_log)
-            self.workspace = base.m_workspace
-            self.gdbNameExt = base.m_geodatabase
-            self.m_MD = base.m_md
-
+    def __init__(self, base):
+        self.setLog(base.m_log)
         self.m_base = base
-
 
     def createReferencedMD(self):
         self.log("Creating reference mosaic datasets:", self.const_general_text)
@@ -58,10 +44,10 @@ class CreateReferencedMD(Base.Base):
             for r in self.dic_derive_lst[k]['ref'].keys():
 
                 try:
-                    mdPath = os.path.join(self.gdbPath, r)
+                    mdPath = os.path.join(self.m_base.m_geoPath, r)
 
-                    inMosaic = os.path.join(self.gdbPath, self.dic_derive_lst[k]['key'])
-                    refMosaic = os.path.join(self.gdbPath, r)
+                    inMosaic = os.path.join(self.m_base.m_geoPath, self.dic_derive_lst[k]['key'])
+                    refMosaic = os.path.join(self.m_base.m_geoPath, r)
 
                     self.log("Creating MD:" + r, self.const_general_text)
 
@@ -72,7 +58,7 @@ class CreateReferencedMD(Base.Base):
                                 in_dataset = self.m_base.getInternalPropValue(self.dic_ref_info, 'in_dataset')
                                 _p, _f = os.path.split(in_dataset)
                                 if (_p == '' and _f != ''):
-                                    in_dataset = os.path.join(self.gdbPath, _f)
+                                    in_dataset = os.path.join(self.m_base.m_geoPath, _f)
 
                                 arcpy.CreateReferencedMosaicDataset_management(\
                                 in_dataset,\
@@ -107,7 +93,7 @@ class CreateReferencedMD(Base.Base):
                             except:
                                 self.log("\t\t\tFailed to add raster function  " + fnc, self.const_warning_text)
                                 self.log(arcpy.GetMessages(), self.const_warning_text)
-                except:
+                except Exception as inst:
                     self.log("Failed to create/edit raster function reference mosaic dataset: " + r, self.const_critical_text)
                     self.log(arcpy.GetMessages(), self.const_critical_text)
                     return False
@@ -123,8 +109,8 @@ class CreateReferencedMD(Base.Base):
 
         for k in self.dic_derive_lst.keys():
             for r in self.dic_derive_lst[k]['ref'].keys():
-                    mdPath = os.path.join(self.gdbPath, r)
-                    refMosaic = os.path.join(self.gdbPath, r)
+                    mdPath = os.path.join(self.m_base.m_geoPath, r)
+                    refMosaic = os.path.join(self.m_base.m_geoPath, r)
                     setMDProps.setMDProperties(refMosaic)
 
         return True
@@ -132,39 +118,18 @@ class CreateReferencedMD(Base.Base):
 
     def init(self, config):
 
-        try:
-            self.doc = minidom.parse(config)
-        except:
-            self.log("Error: reading input config file:" + config + "\nQuitting...", self.const_critical_text)
-            return False
+        self.srs = self.getXMLNodeValue(self.m_base.m_doc, "SRS")         #workspace/location on filesystem where the .gdb is created.
+        self.pixel_type =  self.getXMLNodeValue(self.m_base.m_doc, "pixel_type")
 
+        self.m_numBands  = self.getXMLNodeValue(self.m_base.m_doc, "num_bands")
 
-        #workspace/location on filesystem where the .gdb is created.
-        if (self.workspace == ''):
-            self.workspace = self.m_base.getAbsPath(self.prefixFolderPath(self.getXMLNodeValue(self.doc, "WorkspacePath"), self.const_workspace_path_))
-        if (self.gdbNameExt == ''):
-            self.gdbNameExt =  self.getXMLNodeValue(self.doc, "Geodatabase")
-        const_len_ext = 4
-        if (self.gdbNameExt[-const_len_ext:].lower() != self.geodatabase_ext):
-            self.gdbNameExt += '.gdb'
-
-
-        self.gdbName = self.gdbNameExt[:len(self.gdbNameExt) - const_len_ext]       #.gdb
-
-        self.gdbPath = os.path.join(self.workspace, self.gdbNameExt)
-
-        self.srs = self.getXMLNodeValue(self.doc, "SRS")         #workspace/location on filesystem where the .gdb is created.
-        self.pixel_type =  self.getXMLNodeValue(self.doc, "pixel_type")
-
-        self.m_numBands  = self.getXMLNodeValue(self.doc, "num_bands")
-
-        Nodelist = self.doc.getElementsByTagName("MosaicDataset")
+        Nodelist = self.m_base.m_doc.getElementsByTagName("MosaicDataset")
         if (Nodelist.length == 0):
             self.log("Error: MosaicDatasets node not found! Invalid schema.", self.const_critical_text)
             return False
 
         dListEmpty = len(self.dic_derive_lst) == 0
-        refMD = self.m_MD
+        refMD = self.m_base.m_mdName
         dName = ''
 
         try:
@@ -172,15 +137,7 @@ class CreateReferencedMD(Base.Base):
                   node =  node.nextSibling
                   if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
 
-                        if (node.nodeName == 'Name'):
-                            try:
-                                if (refMD == ''):
-                                    refMD = node.firstChild.nodeValue
-                            except:
-                                Error = True
-
-
-                        elif (node.nodeName == 'CreateReferencedMosaicDataset'):
+                        if (node.nodeName == 'CreateReferencedMosaicDataset'):
 
                             for node in node.childNodes:
                                 if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
@@ -188,18 +145,24 @@ class CreateReferencedMD(Base.Base):
                                     if (node.childNodes.length > 0):
                                         if (self.dic_ref_info.has_key(nodeName) == False):
                                             if (nodeName.lower() == 'in_dataset'):
-                                                in_dataset = node.firstChild.nodeValue
+                                                if (self.m_base.m_sources == ''):
+                                                    in_dataset = node.firstChild.nodeValue
+                                                else:
+                                                    in_dataset = self.m_base.m_sources
                                                 self.dic_derive_lst[in_dataset] = { 'ref' : {}}
                                                 functions = []
                                                 self.dic_derive_lst[in_dataset]['ref'][refMD] = functions
                                                 self.dic_derive_lst[in_dataset]['key']  = in_dataset
+                                                self.dic_ref_info[nodeName] = in_dataset
+                                                continue
 
                                             self.dic_ref_info[nodeName] = node.firstChild.nodeValue
 
 
                         elif(node.nodeName == 'AddRasters'):
 
-                            rasterType = rasterTypeEnabled  = False
+                            if (len(self.dic_derive_lst) > 0):  #if CreateReferencedMosaicDataset is found, addRaster info gets ignored.
+                                continue
 
                             if (len(refMD) == 0):
                                 self.log("Error: <MosaicDataset/Name> should be defined first.", self.const_critical_text)
@@ -207,7 +170,6 @@ class CreateReferencedMD(Base.Base):
 
                             for node in node.childNodes:
                                 if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
-                                #keyFound = False
                                     nodeName = node.nodeName.lower()
 
                                     if (nodeName == 'addraster'):
@@ -217,39 +179,42 @@ class CreateReferencedMD(Base.Base):
 
                                                 if (nodeName == 'sources'):
 
-                                                    for node in node.childNodes:
-                                                        if (node.nodeName.lower() == 'data_path'):
-                                                            try:
-                                                                dNameVal = self.m_base.getAbsPath(node.firstChild.nodeValue)
-                                                                dName = dNameVal.upper()
+                                                    #if (self.m_base.m_sources != ''):
+                                                        for node in node.childNodes:
+                                                            if (node.nodeName.lower() == 'data_path'):
+                                                                try:
+                                                                    dNameVal = self.m_base.m_sources
+                                                                    if (dNameVal == ''):
+                                                                        dNameVal = node.firstChild.nodeValue
+                                                                    dName = dNameVal.upper()
 
-                                                                arydNameVal = dNameVal.split(';')
-                                                                arydName = dName.split(';')
+                                                                    arydNameVal = dNameVal.split(';')
+                                                                    arydName = dName.split(';')
 
-                                                                maxRange = len(arydName)
-                                                                for indx in range(0, maxRange):
-                                                                    _file = arydName[indx].strip()
-                                                                    if (_file == ''):
-                                                                        continue
+                                                                    maxRange = len(arydName)
+                                                                    for indx in range(0, maxRange):
+                                                                        _file = arydName[indx].strip()
+                                                                        if (_file == ''):
+                                                                            continue
 
-                                                                    _p, _f = os.path.split(_file)
-                                                                    if (_p == ''):
-                                                                        arydNameVal[indx] = os.path.join(self.gdbPath, _f)
-                                                                        _file = arydNameVal[indx].upper()
+                                                                        _p, _f = os.path.split(_file)
+                                                                        if (_p == ''):
+                                                                            arydNameVal[indx] = os.path.join(self.m_base.m_geoPath, _f)
+                                                                            _file = arydNameVal[indx].upper()
 
-                                                                    if (dListEmpty or self.dic_derive_lst.has_key(_file) == False):
-                                                                            self.dic_derive_lst[_file] = { 'ref' : {}}
-                                                                            dListEmpty = False
+                                                                        if (dListEmpty or self.dic_derive_lst.has_key(_file) == False):
+                                                                                self.dic_derive_lst[_file] = { 'ref' : {}}
+                                                                                dListEmpty = False
 
-                                                                    prev_indx  = self.dic_derive_lst[_file]['ref'].has_key(refMD)
+                                                                        prev_indx  = self.dic_derive_lst[_file]['ref'].has_key(refMD)
 
-                                                                    if (prev_indx == False):
-                                                                        functions = []
-                                                                        self.dic_derive_lst[_file]['ref'][refMD] = functions
+                                                                        if (prev_indx == False):
+                                                                            functions = []
+                                                                            self.dic_derive_lst[_file]['ref'][refMD] = functions
 
-                                                                    self.dic_derive_lst[_file]['key'] = arydNameVal[indx]
-                                                            except:
-                                                                    Error = True
+                                                                        self.dic_derive_lst[_file]['key'] = arydNameVal[indx]
+                                                                except:
+                                                                        Error = True
 
 
                         elif(node.nodeName == 'Functions'):

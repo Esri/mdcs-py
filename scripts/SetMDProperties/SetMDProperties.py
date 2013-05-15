@@ -23,21 +23,9 @@ class SetMDProperties(Base.Base):
 
     dic_properties_lst = {}
     dicMDs = {}
-    doc = None
-    gdbPath = ''
-    workspace = ''
-    gdbNameExt = ''
-    geodatabase_ext = '.gdb'
-    mosaicDataset = ''
 
-    m_base = None
-
-    def __init__(self, base=None):
-        if (base != None):
-            self.setLog(base.m_log)
-            self.workspace = base.m_workspace
-            self.gdbNameExt = base.m_geodatabase
-            self.mosaicDataset = base.m_md
+    def __init__(self, base):
+        self.setLog(base.m_log)
 
         self.m_base = base
 
@@ -164,28 +152,7 @@ class SetMDProperties(Base.Base):
 
     def init(self, config):
 
-        try:
-            self.doc = minidom.parse(config)
-        except:
-            self.log("Error: reading input config file:" + config + "\nQuitting...", self.const_critical_text)
-            return False
-
-
-        #workspace/location on filesystem where the .gdb is created.
-        if (self.workspace == ''):
-            self.workspace = self.prefixFolderPath(self.m_base.getAbsPath(self.getXMLNodeValue(self.doc, "WorkspacePath")), self.const_workspace_path_)
-
-        if (self.gdbNameExt == ''):
-            self.gdbNameExt =  self.getXMLNodeValue(self.doc, "Geodatabase")
-
-        const_len_ext = 4
-        if (self.gdbNameExt[-const_len_ext:].lower() != self.geodatabase_ext):
-            self.gdbNameExt += '.gdb'
-
-
-        self.gdbPath = os.path.join(self.workspace, self.gdbNameExt)
-
-        Nodelist = self.doc.getElementsByTagName("MosaicDataset")
+        Nodelist = self.m_base.m_doc.getElementsByTagName("MosaicDataset")
         if (Nodelist.length == 0):
             self.log("Error: MosaicDataset node not found! Invalid schema.", self.const_critical_text)
             return False
@@ -194,24 +161,12 @@ class SetMDProperties(Base.Base):
             for node in Nodelist[0].childNodes:
                   node =  node.nextSibling
                   if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
-
-                        if (node.nodeName == 'Name'):
-                            try:
-                                if(self.mosaicDataset == ''):
-                                    self.mosaicDataset = node.firstChild.nodeValue
-                            except:
-                                Error = True
-
-                        elif (node.nodeName == 'DefaultProperties'):
+                        if (node.nodeName == 'DefaultProperties'):
                             for node in node.childNodes:
                                 if (node.nodeType == minidom.Node.ELEMENT_NODE):
                                     self.dic_properties_lst[node.nodeName] = node.firstChild.nodeValue
 
         except:
             Error = True
-
-        if (len(self.mosaicDataset) == 0):
-            self.log("Error: Mosaic dataset name is undefined!", self.const_critical_text)
-            return False
 
         return True

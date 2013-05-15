@@ -36,52 +36,25 @@ class ProcessInfo(Base.Base):
 
     hasProcessInfo = False
     userProcessInfoValues  = False
-    const_geodatabase_ext = '.GDB'
 
-    doc = None
     processInfo = {}
     userProcessInfo = {}
 
-    gdbName = ''
-    gdbNameExt = ''
-    geoPath = ''
-    workspace = ''
-    mdName = ''
-    config = ''
-    commands = ''
-
-    m_base = None
-
     def __init__(self, base=None):
 
-        self.gdbName = ''
-        self.gdbNameExt = ''
-        self.geoPath = ''
-        self.workspace = ''
-        self.mdName = ''
-        self.config = ''
-        self.commands = ''
-
-        self.m_base = None
-
-        if (base != None):
-            self.setLog(base.m_log)
-            self.workspace = base.m_workspace
-            self.gdbNameExt = base.m_geodatabase
-            self.mdName = base.m_md
-            self.processInfo = {}
-            self.userProcessInfo = {}
-
-            self.doc = None
-            self.hasProcessInfo = False
-            self.userProcessInfoValues  = False
-
         self.m_base = base
+        self.setLog(base.m_log)
+        self.processInfo = {}
+        self.userProcessInfo = {}
+
+        self.hasProcessInfo = False
+        self.userProcessInfoValues  = False
+
 
     def getXML(self):
-        if (self.doc != None
+        if (self.m_base.m_doc != None
         and self.config != ''):
-            return self.doc.toxml()
+            return self.m_base.m_doc.toxml()
 
 
     def updateProcessInfo(self, pInfo):
@@ -91,35 +64,11 @@ class ProcessInfo(Base.Base):
 
     def init(self, config):
 
-        try:
-            self.doc = minidom.parse(config)
-        except:
-            self.log("Error: reading input config file:" + config + "\nQuitting...",
-            self.const_critical_text)
-            return False
-
         self.config = config
         self.processInfo = {}
         self.hasProcessInfo = False
 
-        #workspace/location on filesystem where the .gdb is created.
-        if (self.workspace == ''):
-            self.workspace = self.prefixFolderPath(self.m_base.getAbsPath(self.getXMLNodeValue(self.doc, "WorkspacePath")), self.const_workspace_path_)
-
-        if (self.gdbNameExt == ''):
-            self.gdbNameExt =  self.getXMLNodeValue(self.doc, "Geodatabase")
-
-        const_len_ext = len(self.const_geodatabase_ext)
-        if (self.gdbNameExt[-const_len_ext:].upper() != self.const_geodatabase_ext):
-            self.gdbNameExt += self.const_geodatabase_ext.lower()
-
-
-        self.gdbName = self.gdbNameExt[:len(self.gdbNameExt) - const_len_ext]       #.gdb
-        self.geoPath = os.path.join(self.workspace, self.gdbNameExt)
-
-        self.commands = self.getXMLNodeValue(self.doc, "Command")
-
-        Nodelist = self.doc.getElementsByTagName("MosaicDataset")
+        Nodelist = self.m_base.m_doc.getElementsByTagName("MosaicDataset")
         if (Nodelist.length == 0):
             self.log ("Error: <MosaicDataset> node is not found! Invalid schema.",
             self.const_critical_text)
@@ -130,11 +79,7 @@ class ProcessInfo(Base.Base):
                   node =  node.nextSibling
                   if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
 
-                                if (node.nodeName == 'Name'):
-                                    if (self.mdName == ''):
-                                        self.mdName = node.firstChild.nodeValue.strip()
-
-                                elif(node.nodeName == 'Processes'):
+                                if(node.nodeName == 'Processes'):
 
                                     for node in node.childNodes:
                                         if (node != None and
@@ -184,7 +129,7 @@ class ProcessInfo(Base.Base):
                                                             if (value == '#'):
                                                                 value = ''
                                                             if (node.childNodes.length == 0):
-                                                                node.appendChild(self.doc.createTextNode(value))
+                                                                node.appendChild(self.m_base.m_doc.createTextNode(value))
                                                             node.firstChild.nodeValue = value
 
                                                         value = node.firstChild.nodeValue
@@ -193,7 +138,7 @@ class ProcessInfo(Base.Base):
 
                                                     self.processInfo[procesName][key] = value
 
-        except:
+        except Exception as inst:
             self.log ("Error: Reading <MosaicDataset> node.",
             self.const_critical_text)
             return False

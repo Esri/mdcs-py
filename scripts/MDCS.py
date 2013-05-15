@@ -131,7 +131,15 @@ def main(argc, argv):
             base.m_sources = value
         elif(subCode == 'l'):
             log_folder =  value
+        elif(subCode == 'p'):
+            (v, dynamic_var) = value.split('@')
+            dynamic_var = dynamic_var.upper()
+            if (dynamic_var.strip() != ''):
+                if (base.m_dynamic_params.has_key(dynamic_var) == False):
+                    base.m_dynamic_params[dynamic_var] = v
+
         argIndx += 1
+
 
     if (md_path_ != ''):
         (p, f) = os.path.split(md_path_)
@@ -147,8 +155,8 @@ def main(argc, argv):
 
             gdb_ = w[len(w) -1]
             base.m_workspace = workspace_
-            base.m_geodatabase = w[len(w) - 1][:len(gdb_) - const_gdb_ext_len_]
-            base.m_md = f
+            base.m_geodatabase = w[len(w) - 1]  #[:len(gdb_) - const_gdb_ext_len_]
+            base.m_mdName = f
 
 
     if (os.path.isfile(config) == False):

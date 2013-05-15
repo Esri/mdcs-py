@@ -90,14 +90,14 @@ class Solutions(Base.Base):
             setProps = self.SetMDProperties.SetMDProperties(self.m_base)
             bSuccess = setProps.init(self.config)
             if (bSuccess):
-                path = os.path.join(setProps.gdbPath, setProps.mosaicDataset)
+                path = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 return setProps.setMDProperties(path)
             return False
 
         elif (com == 'CBMD'):
             try:
-                self.m_log.Message("\tColor Balancing mosaic dataset : " + self.processInfo.mdName, self.m_log.const_general_text)
-                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                self.m_log.Message("\tColor Balancing mosaic dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'colorbalancemosaicdataset'
                 arcpy.ColorBalanceMosaicDataset_management(fullPath,
                 self.getProcessInfoValue(processKey,'balancing_method'),
@@ -115,12 +115,12 @@ class Solutions(Base.Base):
 
         elif (com == 'ERF'):
             try:
-                self.m_log.Message("\tEditing Raster function : " + self.processInfo.mdName, self.m_log.const_general_text)
+                self.m_log.Message("\tEditing Raster function : " + self.m_base.m_mdName, self.m_log.const_general_text)
                 processKey = 'editrasterfunction'
                 rfunction_path = self.getProcessInfoValue(processKey,'function_chain_definition')
                 if (rfunction_path.find('.rft') >-1 and rfunction_path.find('/') == -1):
                     rfunction_path = self.const_raster_function_templates_path_ + "/" + rfunction_path
-                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
 
                 arcpy.EditRasterFunction_management(fullPath,
                 self.getProcessInfoValue(processKey,'edit_mosaic_dataset_item'),
@@ -135,8 +135,8 @@ class Solutions(Base.Base):
 
         elif (com == 'CS'):
             try:
-                self.m_log.Message("\tCalculate statistic for the mosaic dataset : " + self.processInfo.mdName, self.m_log.const_general_text)
-                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                self.m_log.Message("\tCalculate statistic for the mosaic dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'calculatestatistics'
                 arcpy.CalculateStatistics_management(fullPath,
                 self.getProcessInfoValue(processKey,'x_skip_factor'),
@@ -152,8 +152,8 @@ class Solutions(Base.Base):
 
         elif (com == 'BPS'):
             try:
-                self.m_log.Message("\tRecomputing footprint for the mosaic dataset : " + self.processInfo.mdName, self.m_log.const_general_text)
-                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                self.m_log.Message("\tRecomputing footprint for the mosaic dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'buildpyramidsandstatistics'
                 arcpy.BuildPyramidsAndStatistics_management(fullPath,
                 self.getProcessInfoValue(processKey,'include_subdirectories'),
@@ -179,8 +179,8 @@ class Solutions(Base.Base):
 
         elif(com == 'BP'):
             try:
-                self.m_log.Message("\tBuilding Pyramid for the mosaic dataset/raster dataset : " + self.processInfo.mdName, self.m_log.const_general_text)
-                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                self.m_log.Message("\tBuilding Pyramid for the mosaic dataset/raster dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'buildpyramids'
                 arcpy.BuildPyramids_management(fullPath,
                 self.getProcessInfoValue(processKey,'pyramid_level'),
@@ -196,8 +196,8 @@ class Solutions(Base.Base):
 
         elif(com == 'BF'):
           try:
-                self.m_log.Message("\tRecomputing footprint for the mosaic dataset : " + self.processInfo.mdName, self.m_log.const_general_text)
-                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                self.m_log.Message("\tRecomputing footprint for the mosaic dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
 
                 processKey = 'buildfootprint'
                 arcpy.BuildFootprints_management(
@@ -223,8 +223,8 @@ class Solutions(Base.Base):
 
         elif (com == 'BS'):
             try:
-                self.m_log.Message("\tBuild Seamline for the mosaic dataset : " + self.processInfo.mdName, self.m_log.const_general_text)
-                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                self.m_log.Message("\tBuild Seamline for the mosaic dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'buildseamlines'
                 arcpy.BuildSeamlines_management(fullPath,
                 self.getProcessInfoValue(processKey,'cell_size'),
@@ -246,7 +246,7 @@ class Solutions(Base.Base):
 
 
         elif(com == 'DN'):
-                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 try:
                     processKey = 'definemosaicdatasetnodata'
                     arcpy.DefineMosaicDatasetNoData_management(
@@ -263,7 +263,7 @@ class Solutions(Base.Base):
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
 
         elif(com == 'IG'):
-                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 try:
                     processKey = 'importgeometry'
                     importPath = self.getProcessInfoValue(processKey, 'input_featureclass')
@@ -286,7 +286,7 @@ class Solutions(Base.Base):
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
 
         elif(com == 'IF'):
-                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'importfieldvalues'
 
     # Step (11) : for the all the Dervied Mosaic Dataset importing the fields from the Attribute Lookup Table
@@ -326,7 +326,7 @@ class Solutions(Base.Base):
 
 
         elif(com == 'BB'):
-                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'buildboundary'
                 self.log ("Building the boundary "+ self.getProcessInfoValue(processKey, 'simplification_method'))
                 try:
@@ -342,7 +342,7 @@ class Solutions(Base.Base):
 
 
         elif(com == 'SS'):
-                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'setstatistics'
                 self.log("Setting MD statistics for:" + fullPath, self.m_log.const_general_text)
                 stats_file_ss = self.m_base.getAbsPath(self.getProcessInfoValue(processKey, 'stats_file'))
@@ -362,7 +362,7 @@ class Solutions(Base.Base):
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
 
         elif(com == 'CC'):
-                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'calculatecellsizeranges'
                 self.log("Calculating cell ranges for:" + fullPath, self.m_log.const_general_text)
 
@@ -381,7 +381,7 @@ class Solutions(Base.Base):
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
 
         elif(com == 'BO'):
-                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'buildoverviews'
                 self.log("Building overviews for:" + fullPath, self.m_log.const_general_text)
 
@@ -399,7 +399,7 @@ class Solutions(Base.Base):
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
 
         elif(com == 'DO'):
-                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'defineoverviews'
                 self.log("Define overviews for:" + fullPath, self.m_log.const_general_text)
 
@@ -424,7 +424,7 @@ class Solutions(Base.Base):
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
 
         elif(com == 'AI'):
-                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'addindex'
                 self.log("Adding Index:" + fullPath, self.m_log.const_general_text)
 
@@ -447,7 +447,7 @@ class Solutions(Base.Base):
 
 
         elif(com == 'CV'):
-                    fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                    fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                     processKey = 'calculatevalues'
                     maxValues = len(self.processInfo.processInfo[processKey])
 
@@ -457,7 +457,7 @@ class Solutions(Base.Base):
                     for indx in range(0, maxValues):
                         layername = fullPath
                         if not self.getProcessInfoValue(processKey, 'query', indx) == '#':
-                            layername = self.processInfo.mdName + "_layer"
+                            layername = self.m_base.m_mdName + "_layer"
                             arcpy.MakeMosaicLayer_management(fullPath,layername, self.getProcessInfoValue(processKey,'query', indx))
                         try:
                             arcpy.CalculateField_management(layername,
@@ -479,17 +479,17 @@ class Solutions(Base.Base):
                     return not isError
 
         elif(com == 'CP'):
-                self.log("Compacting file geodatabase:" + self.processInfo.geoPath, self.m_log.const_general_text)
+                self.log("Compacting file geodatabase:" + self.m_base.m_geoPath, self.m_log.const_general_text)
 
                 try:
-                    arcpy.Compact_management(self.processInfo.geoPath)
+                    arcpy.Compact_management(self.m_base.m_geoPath)
                     return True
                 except:
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
 
 
         elif(com == 'SY'):
-                fullPath = os.path.join(self.processInfo.geoPath, self.processInfo.mdName)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'synchronizemosaicdataset'
                 self.log("Synchronize mosaic dataset:" + fullPath, self.m_log.const_general_text)
 
@@ -698,6 +698,14 @@ class Solutions(Base.Base):
         self.config = conf       #configuration/XML template
         self.userInfo = info     #callback information for commands /e.t.c.
 
+        try:
+            self.m_base.m_doc = minidom.parse(self.config)
+            if (self.m_base.init() == False):
+                raise
+        except:
+            self.log("Error: reading input config file:" + self.config + "\nQuitting...",
+            self.const_critical_text)
+            return False
 
         self.processInfo = self.ProcessInfo.ProcessInfo(self.m_base)
         bSuccess = self.processInfo.init(self.config)
@@ -712,8 +720,8 @@ class Solutions(Base.Base):
         com_ = com
         if (com_.upper() == self.const_cmd_default_text.upper()):
             try:
-                doc = minidom.parse(self.config)
-                com_ = self.getXMLNodeValue(doc, "Command")         #gets command defaults.
+                #doc = minidom.parse(self.config)
+                com_ = self.getXMLNodeValue(self.m_base.m_doc, "Command")         #gets command defaults.
                 self.log('Using default command(s):' + com_)
 
             except:
@@ -721,7 +729,7 @@ class Solutions(Base.Base):
                 self.const_critical_text)
                 return False
 
-            doc = None          # no longer necessary.
+            #doc = None          # no longer necessary.
 
             if (len(com_.strip()) == 0):
                 self.log('Error: Empty command.',

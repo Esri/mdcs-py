@@ -37,25 +37,75 @@ class Base(object):
     const_import_geometry_features_path_ = os.path.join(scriptPath, '..\\..\\parameter')
 
     const_cmd_default_text = "#defaults"
-#ends
-
-#the follwoing variables could be overridden by the command-line to replace respective values in XML config file.
-    m_workspace = ''
-    m_geodatabase = ''
-    m_md = ''       #mosaic dataset name.
-    m_sources = ''  #source data paths for adding new rasters.
+    const_geodatabase_ext = '.GDB'
 
 #ends
-
-    m_log = None
 
     def __init__(self):
         self.m_log = None
+        self.m_doc = None
 
+#the follwoing variables could be overridden by the command-line to replace respective values in XML config file.
         self.m_workspace = ''
         self.m_geodatabase = ''
-        self.m_md = ''
+        self.m_mdName = ''  #mosaic dataset name.
+#ends
+
         self.m_sources = ''
+
+        self.m_gdbName = ''
+        self.m_geoPath = ''
+        self.m_config = ''
+        self.m_commands = ''
+
+        self.m_sources = ''  #source data paths for adding new rasters.
+
+        self.m_dynamic_params = {}
+
+    def init(self):
+
+        if (self.m_doc == None):
+            return False
+
+        self.setUserDefinedValues()         #replace user defined dynamic variables in config file with values provided at the command-line.
+
+        if (self.m_workspace == ''):
+            self.m_workspace = self.prefixFolderPath(self.getAbsPath(self.getXMLNodeValue(self.m_doc, "WorkspacePath")), self.const_workspace_path_)
+
+        if (self.m_geodatabase == ''):
+            self.m_geodatabase =  self.getXMLNodeValue(self.m_doc, "Geodatabase")
+
+        if (self.m_mdName == ''):
+            self.m_mdName =  self.getXMLXPathValue("Application/Workspace/MosaicDataset/Name", "Name")
+
+
+        const_len_ext = len(self.const_geodatabase_ext)
+        if (self.m_geodatabase[-const_len_ext:].upper() != self.const_geodatabase_ext):
+            self.m_geodatabase += self.const_geodatabase_ext.lower()
+
+
+        self.m_gdbName = self.m_geodatabase[:len(self.m_geodatabase) - const_len_ext]       #.gdb
+        self.m_geoPath = os.path.join(self.m_workspace, self.m_geodatabase)
+
+        self.m_commands = self.getXMLNodeValue(self.m_doc, "Command")
+
+        return True
+
+
+    def getXMLXPathValue(self, xPath, key):
+
+        nodes = self.m_doc.getElementsByTagName(key)
+        for node in nodes:
+            parents = []
+            c = node
+            while(c.parentNode != None):
+                parents.insert(0, c.nodeName)
+                c = c.parentNode
+            p = '/'.join(parents)
+            if (p == xPath):
+                return str(node.firstChild.data).strip()
+
+        return ''
 
     def setLog(self, log):
         self.m_log = log
@@ -116,6 +166,23 @@ class Base(object):
             return dic[key]
         else:
             return ''
+
+
+    def setUserDefinedValues(self):
+
+        nodes = self.m_doc.getElementsByTagName('*')
+        for node in nodes:
+            if (node.firstChild != None):
+                v = node.firstChild.data.strip()
+                if (v.find('@') > 0):
+                    d = v.split(';@')
+                    if (len(d) > 1):
+                         usr_key  = d[1].upper()        #user_value
+                         def_val = d[0]                 #default value
+                         if (self.m_dynamic_params.has_key(usr_key)):
+                            def_val = self.m_dynamic_params[usr_key]
+
+                         node.firstChild.data = str(def_val)
 
 
     def getXMLNode(self, doc, nodeName) :

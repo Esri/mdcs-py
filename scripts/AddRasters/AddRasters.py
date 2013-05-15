@@ -21,27 +21,12 @@ from xml.dom import minidom
 import Base
 class AddRasters(Base.Base):
 
-    geodatabase_ext = '.gdb'
-
-    gdbName = ''
-    gdbNameExt = ''
-    doc = None
     sMdNameList = {}
-    geoPath = ''
-    workspace = ''
     callback_functions = []
-    m_MD = ''
-    m_sources = ''
-    m_base = None
 
-
-    def __init__(self, base=None):
-        if (base != None):
-            self.setLog(base.m_log)
-            self.workspace = base.m_workspace
-            self.gdbNameExt = base.m_geodatabase
-            self.m_MD = base.m_md
-            self.m_sources = base.m_sources
+    def __init__(self, base):
+        self.setLog(base.m_log)
+        self.m_sources = base.m_sources
 
         self.m_base = base
 
@@ -71,7 +56,7 @@ class AddRasters(Base.Base):
                     self.log("\tUsing mosaic dataset/ID:" + MDName + '/' + \
                     hshAddRaster['dataset_id'], self.const_general_text)
 
-                    fullPath = self.geoPath + '/' + MDName
+                    fullPath = self.m_base.m_geoPath + '/' + MDName
                     if arcpy.Exists(fullPath):
 
                         rasterType = 'Raster Dataset'
@@ -119,7 +104,7 @@ class AddRasters(Base.Base):
                             self.log(arcpy.GetMessages(), self.const_warning_text)
 
                         for callback_fn in self.callback_functions:
-                            callback_fn(self.geoPath, sourceID, self.sMdNameList[sourceID])
+                            callback_fn(self.m_base.m_geoPath, sourceID, self.sMdNameList[sourceID])
 
                     else:
                         self.log("Error: Path doesn't exist:" + fullPath, self.const_warning_text)
@@ -134,36 +119,14 @@ class AddRasters(Base.Base):
 
     def init(self, config):
 
-        try:
-            self.doc = minidom.parse(config)
-        except:
-            self.log("Error: reading input config file:" + config + "\nQuitting...", self.const_critical_text)
-            return False
-
-
-        #workspace/location on filesystem where the .gdb is created.
-        if (self.workspace == ''):
-            self.workspace = self.prefixFolderPath(self.m_base.getAbsPath(self.getXMLNodeValue(self.doc, "WorkspacePath")), self.const_workspace_path_)
-        if (self.gdbNameExt == ''):
-            self.gdbNameExt =  self.getXMLNodeValue(self.doc, "Geodatabase")
-        const_len_ext = 4
-        if (self.gdbNameExt[-const_len_ext:].lower() != self.geodatabase_ext):
-            self.gdbNameExt += '.gdb'
-
-
-        sources_ = self.m_sources.split(',')
+        sources_ = self.m_base.m_sources.split(',')
         sources_max_ = len(sources_)
         sources_indx_ = 0
 
-
-        self.gdbName = self.gdbNameExt[:len(self.gdbNameExt) - const_len_ext]       #.gdb
-
-        self.geoPath = os.path.join(self.workspace, self.gdbNameExt)
-
-        mdType = self.getXMLNodeValue(self.doc, 'MosaicDatasetType').lower()
+        mdType = self.getXMLNodeValue(self.m_base.m_doc, 'MosaicDatasetType').lower()
         isDerived = mdType == 'derived'
 
-        Nodelist = self.doc.getElementsByTagName("MosaicDataset")
+        Nodelist = self.m_base.m_doc.getElementsByTagName("MosaicDataset")
         if (Nodelist.length == 0):
             self.log("Error: <MosaicDataset> node is not found! Invalid schema.", self.const_critical_text)
             return False
@@ -174,7 +137,7 @@ class AddRasters(Base.Base):
                   if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
 
                                 if (node.nodeName == 'Name'):
-                                        mosasicDataset = self.m_MD
+                                        mosasicDataset = self.m_base.m_mdName
                                         if (mosasicDataset == ''):
                                             mosasicDataset = node.firstChild.nodeValue
                                         mosasicDataset = mosasicDataset.strip()
@@ -182,7 +145,7 @@ class AddRasters(Base.Base):
                                         self.sMdNameList[mosasicDataset] = {'md' : mosasicDataset}
                                         self.sMdNameList[mosasicDataset]['addraster'] = []
 
-                                        self.sMdNameList[mosasicDataset]['type'] = self.getXMLNodeValue(self.doc, "MosaicDatasetType")
+                                        self.sMdNameList[mosasicDataset]['type'] = self.getXMLNodeValue(self.m_base.m_doc, "MosaicDatasetType")
 
                                 elif(node.nodeName == 'dataset_id'):
                                     if (self.sMdNameList.has_key(mosasicDataset)):
@@ -213,7 +176,6 @@ class AddRasters(Base.Base):
                                                         nodeName = node.nodeName.lower()
 
                                                         nodeValue = ''
-#                                                        spatial_reference = ''
                                                         if (node.childNodes.length > 0):
                                                             nodeValue = node.firstChild.nodeValue
 
@@ -223,7 +185,7 @@ class AddRasters(Base.Base):
                                                             keyFound = False
                                                             nodeName = 'data_path'       #only <DataPath> nodes can exist under <Sources>
 
-                                                            if (self.m_sources == ''):
+                                                            if (self.m_base.m_sources == ''):
                                                                 for cNode in node.childNodes:
                                                                     if (cNode != None and cNode.nodeType == minidom.Node.ELEMENT_NODE):
                                                                         name_ = cNode.nodeName
@@ -238,12 +200,11 @@ class AddRasters(Base.Base):
                                                                                         _flist = _f.split(';')
                                                                                         indata = ''
                                                                                         for _fl in range(len(_flist)):
-                                                                                            indata =  indata + ";" + (os.path.join(self.geoPath,_flist[_fl]))
+                                                                                            indata =  indata + ";" + (os.path.join(self.m_base.m_geoPath,_flist[_fl]))
                                                                                         if indata[0] == ';':
                                                                                             _file = indata[1:len(indata)]
                                                                                         else:
                                                                                             _file = indata
-#                                                                                        _file = os.path.join(self.geoPath, _f)
 
                                                                                 dataPaths = dataPaths + _file + ';'
                                                                                 keyFound = True
@@ -265,10 +226,6 @@ class AddRasters(Base.Base):
                                                             if (nodeValue.lower().find('.art') >= 0):
                                                                 nodeValue = self.prefixFolderPath(nodeValue, self.const_raster_type_path_)
 
-                                                        elif (nodeName == 'spatial_reference'):
-#                                                            nodeValue = spatial_reference
-                                                            dd= 'f'
-
                                                         hshAddRasters[nodeName] = nodeValue
 
                                                 if (self.sMdNameList.has_key(mosasicDataset)):
@@ -278,13 +235,14 @@ class AddRasters(Base.Base):
                                                         Warning_ = True
                                                         #print "Warning: empty value for: MosaicDataset/" + nodeName
 
-        except:
+        except Exception as inst:
             self.log("Error: reading MosaicDataset nodes.", self.const_critical_text)
+            self.log(str(inst), self.const_critical_text)
             return False
 
 
-        if not arcpy.Exists(self.workspace):
-                self.log("Error: workspace not found!:" + self.workspace, self.const_critical_text)
+        if not arcpy.Exists(self.m_base.m_workspace):
+                self.log("Error: workspace not found!:" + self.m_base.m_workspace, self.const_critical_text)
                 self.log(arcpy.GetMessages(), self.const_critical_text)
                 return False
 
