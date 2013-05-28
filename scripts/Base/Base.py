@@ -186,25 +186,29 @@ class Base(object):
                     default = d[0].strip()
                     usr_key = d[1].strip()
 
-                 usr_key = usr_key.upper()
                  revalue = []
 
-                 first = 1
+                 first = usr_key.find('$')
+                 first += 1
+
                  second =  first + usr_key[first+1:].find('$') + 1
 
+                 if (first > 1):
+                    revalue.append(usr_key[0:first - 1])
+
                  while(second >= 0):
+
                     while(usr_key[second - 1: second] == '\\'):
                         indx = usr_key[second+1:].find('$')
                         if (indx == -1):
                             indx = len(usr_key) - 1
 
-                        second = second + indx
-                        second += 1
+                        second = second + indx + 1
 
                     uValue = usr_key[first:second]
 
-                    if (self.m_dynamic_params.has_key(uValue)):
-                        revalue.append(self.m_dynamic_params[uValue])
+                    if (self.m_dynamic_params.has_key(uValue.upper())):
+                        revalue.append(self.m_dynamic_params[uValue.upper()])
                     else:
                         if (uValue.find('\$') >= 0):
                             uValue = uValue.replace('\$', '$')
@@ -212,19 +216,22 @@ class Base(object):
                             if (default == ''):
                                 default = uValue
 
-                            uValue = default
+                            if (first == 1
+                            and second == (len(usr_key) - 1)):
+                                uValue = default
 
                         revalue.append(uValue)
 
                     first = second + 1
                     indx = usr_key[first+1:].find('$')
                     if (indx == -1):
+                        if (first != len(usr_key)):
+                            revalue.append(usr_key[first:len(usr_key)])
                         break
 
-                    second = first + indx
-                    second += 1
+                    second = first + indx + 1
 
-                 updateVal = '$'.join(revalue)
+                 updateVal = ''.join(revalue)
                  node.firstChild.data = updateVal
 
 
