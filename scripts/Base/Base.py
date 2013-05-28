@@ -1,13 +1,12 @@
 #-------------------------------------------------------------------------------
 # Name  	    	: Base.py
 # ArcGIS Version	: ArcGIS 10.1 sp1
-# Script Version	: 20130225
+# Script Version	: 20130528
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
-# Date          	: 16-09-2012
 # Purpose 	    	: Base call used by all Raster Solutions components.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 13-05-2013
+# LastUpdated  		: 28-05-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -173,16 +172,61 @@ class Base(object):
         nodes = self.m_doc.getElementsByTagName('*')
         for node in nodes:
             if (node.firstChild != None):
-                v = node.firstChild.data.strip()
-                if (v.find('@') > 0):
-                    d = v.split(';@')
-                    if (len(d) > 1):
-                         usr_key  = d[1].upper()        #user_value
-                         def_val = d[0]                 #default value
-                         if (self.m_dynamic_params.has_key(usr_key)):
-                            def_val = self.m_dynamic_params[usr_key]
+                 v = node.firstChild.data.strip()
 
-                         node.firstChild.data = str(def_val)
+                 if (v.find('$') == -1):
+                    continue
+
+                 usr_key = v
+                 default = ''
+
+                 d = v.split(';')
+
+                 if (len(d) > 1):
+                    default = d[0].strip()
+                    usr_key = d[1].strip()
+
+                 usr_key = usr_key.upper()
+                 revalue = []
+
+                 first = 1
+                 second =  first + usr_key[first+1:].find('$') + 1
+
+                 while(second >= 0):
+                    while(usr_key[second - 1: second] == '\\'):
+                        indx = usr_key[second+1:].find('$')
+                        if (indx == -1):
+                            indx = len(usr_key) - 1
+
+                        second = second + indx
+                        second += 1
+
+                    uValue = usr_key[first:second]
+
+                    if (self.m_dynamic_params.has_key(uValue)):
+                        revalue.append(self.m_dynamic_params[uValue])
+                    else:
+                        if (uValue.find('\$') >= 0):
+                            uValue = uValue.replace('\$', '$')
+                        else:
+                            if (default == ''):
+                                default = uValue
+
+                            uValue = default
+
+                        revalue.append(uValue)
+
+                    first = second + 1
+                    indx = usr_key[first+1:].find('$')
+                    if (indx == -1):
+                        break
+
+                    second = first + indx
+                    second += 1
+
+                 updateVal = '$'.join(revalue)
+                 node.firstChild.data = updateVal
+
 
 
     def getXMLNode(self, doc, nodeName) :

@@ -1,13 +1,12 @@
 #-------------------------------------------------------------------------------
 # Name  	    	: MDCS.py
 # ArcGIS Version	: ArcGIS 10.1 sp1
-# Script Version	: 20130321
+# Script Version	: 20130528
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
-# Date          	: 16-09-2012
+# Date          	: 28-05-2013
 # Purpose 	    	: This is the main program entry point to MDCS.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 26-03-2013
 # Required Argument : Not applicable.
 # Optional Argument : Not applicable.
 # Usage         	: Object of this class should be instantiated.
@@ -132,8 +131,16 @@ def main(argc, argv):
         elif(subCode == 'l'):
             log_folder =  value
         elif(subCode == 'p'):
-            (v, dynamic_var) = value.split('@')
-            dynamic_var = dynamic_var.upper()
+            aryP = value.split('$')
+            pMax = len(aryP) - 1
+            if (pMax == 0):
+                argIndx += 1
+                continue
+
+            dynamic_var = aryP[pMax].upper()
+
+            del aryP[pMax]
+            v = ''.join(aryP)
             if (dynamic_var.strip() != ''):
                 if (base.m_dynamic_params.has_key(dynamic_var) == False):
                     base.m_dynamic_params[dynamic_var] = v
@@ -144,8 +151,8 @@ def main(argc, argv):
     if (md_path_ != ''):
         (p, f) = os.path.split(md_path_)
         f = f.strip()
-        const_gdb_ext_len_ = 4
-        if (p[-const_gdb_ext_len_:].lower() == '.gdb'
+        const_gdb_ext_len_ = len(base.const_geodatabase_ext)
+        if (p[-const_gdb_ext_len_:].lower() == base.const_geodatabase_ext.lower()
             and f != ''):
             p = p.replace('\\', '/')
             w = p.split('/')
@@ -155,7 +162,7 @@ def main(argc, argv):
 
             gdb_ = w[len(w) -1]
             base.m_workspace = workspace_
-            base.m_geodatabase = w[len(w) - 1]  #[:len(gdb_) - const_gdb_ext_len_]
+            base.m_geodatabase = w[len(w) - 1]
             base.m_mdName = f
 
 
