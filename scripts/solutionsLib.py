@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: To have a library of python modules to facilitate code to reuse for Raster Solutions projects.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 06-03-2013
+# LastUpdated  		: 10-06-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -19,7 +19,7 @@
 import arcpy
 import sys, os
 from xml.dom import minidom
-
+from string import ascii_letters, digits
 
 scriptPath = os.path.dirname(__file__)
 sys.path.append(os.path.join(scriptPath, 'Base'))
@@ -48,7 +48,7 @@ class Solutions(Base.Base):
         return self.commands
 
     #mapping commands to functions
-    def executeCommand(self, com):
+    def executeCommand(self, com, index = 0):
 
     #create the geodatabse to hold all relevant mosaic datasets.
         if (com == 'CM'):
@@ -100,13 +100,13 @@ class Solutions(Base.Base):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'colorbalancemosaicdataset'
                 arcpy.ColorBalanceMosaicDataset_management(fullPath,
-                self.getProcessInfoValue(processKey,'balancing_method'),
-                self.getProcessInfoValue(processKey,'color_surface_type'),
-                self.getProcessInfoValue(processKey,'target_raster'),
-                self.getProcessInfoValue(processKey,'gamma'),
-                self.getProcessInfoValue(processKey,'exclude_raster'),
-                self.getProcessInfoValue(processKey,'stretch_type'),
-                self.getProcessInfoValue(processKey,'block_field')
+                self.getProcessInfoValue(processKey,'balancing_method', index),
+                self.getProcessInfoValue(processKey,'color_surface_type', index),
+                self.getProcessInfoValue(processKey,'target_raster', index),
+                self.getProcessInfoValue(processKey,'gamma', index),
+                self.getProcessInfoValue(processKey,'exclude_raster', index),
+                self.getProcessInfoValue(processKey,'stretch_type', index),
+                self.getProcessInfoValue(processKey,'block_field', index)
                 )
                 return True
             except:
@@ -117,16 +117,16 @@ class Solutions(Base.Base):
             try:
                 self.m_log.Message("\tEditing Raster function : " + self.m_base.m_mdName, self.m_log.const_general_text)
                 processKey = 'editrasterfunction'
-                rfunction_path = self.getProcessInfoValue(processKey,'function_chain_definition')
+                rfunction_path = self.getProcessInfoValue(processKey,'function_chain_definition', index)
                 if (rfunction_path.find('.rft') >-1 and rfunction_path.find('/') == -1):
                     rfunction_path = self.const_raster_function_templates_path_ + "/" + rfunction_path
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
 
                 arcpy.EditRasterFunction_management(fullPath,
-                self.getProcessInfoValue(processKey,'edit_mosaic_dataset_item'),
-                self.getProcessInfoValue(processKey,'edit_options'),
+                self.getProcessInfoValue(processKey,'edit_mosaic_dataset_item', index),
+                self.getProcessInfoValue(processKey,'edit_options', index),
                 rfunction_path,
-                self.getProcessInfoValue(processKey,'location_function_name'),
+                self.getProcessInfoValue(processKey,'location_function_name', index),
                 )
                 return True
             except:
@@ -139,11 +139,11 @@ class Solutions(Base.Base):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'calculatestatistics'
                 arcpy.CalculateStatistics_management(fullPath,
-                self.getProcessInfoValue(processKey,'x_skip_factor'),
-                self.getProcessInfoValue(processKey,'y_skip_factor'),
-                self.getProcessInfoValue(processKey,'ignore_values'),
-                self.getProcessInfoValue(processKey,'skip_existing'),
-                self.getProcessInfoValue(processKey,'area_of_interest')
+                self.getProcessInfoValue(processKey,'x_skip_factor', index),
+                self.getProcessInfoValue(processKey,'y_skip_factor', index),
+                self.getProcessInfoValue(processKey,'ignore_values', index),
+                self.getProcessInfoValue(processKey,'skip_existing', index),
+                self.getProcessInfoValue(processKey,'area_of_interest', index)
                 )
                 return True
             except:
@@ -156,21 +156,21 @@ class Solutions(Base.Base):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'buildpyramidsandstatistics'
                 arcpy.BuildPyramidsandStatistics_management(fullPath,
-                self.getProcessInfoValue(processKey,'include_subdirectories'),
-                self.getProcessInfoValue(processKey,'build_pyramids'),
-                self.getProcessInfoValue(processKey,'calculate_statistics'),
-                self.getProcessInfoValue(processKey,'BUILD_ON_SOURCE'),
-                self.getProcessInfoValue(processKey,'block_field'),
-                self.getProcessInfoValue(processKey,'estimate_statistics'),
-                self.getProcessInfoValue(processKey,'x_skip_factor'),
-                self.getProcessInfoValue(processKey,'y_skip_factor'),
-                self.getProcessInfoValue(processKey,'ignore_values'),
-                self.getProcessInfoValue(processKey,'pyramid_level'),
-                self.getProcessInfoValue(processKey,'SKIP_FIRST'),
-                self.getProcessInfoValue(processKey,'resample_technique'),
-                self.getProcessInfoValue(processKey,'compression_type'),
-                self.getProcessInfoValue(processKey,'compression_quality'),
-                self.getProcessInfoValue(processKey,'skip_existing')
+                self.getProcessInfoValue(processKey,'include_subdirectories', index),
+                self.getProcessInfoValue(processKey,'build_pyramids', index),
+                self.getProcessInfoValue(processKey,'calculate_statistics', index),
+                self.getProcessInfoValue(processKey,'BUILD_ON_SOURCE', index),
+                self.getProcessInfoValue(processKey,'block_field', index),
+                self.getProcessInfoValue(processKey,'estimate_statistics', index),
+                self.getProcessInfoValue(processKey,'x_skip_factor', index),
+                self.getProcessInfoValue(processKey,'y_skip_factor', index),
+                self.getProcessInfoValue(processKey,'ignore_values', index),
+                self.getProcessInfoValue(processKey,'pyramid_level', index),
+                self.getProcessInfoValue(processKey,'SKIP_FIRST', index),
+                self.getProcessInfoValue(processKey,'resample_technique', index),
+                self.getProcessInfoValue(processKey,'compression_type', index),
+                self.getProcessInfoValue(processKey,'compression_quality', index),
+                self.getProcessInfoValue(processKey,'skip_existing', index)
                 )
                 return True
             except:
@@ -183,12 +183,12 @@ class Solutions(Base.Base):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'buildpyramids'
                 arcpy.BuildPyramids_management(fullPath,
-                self.getProcessInfoValue(processKey,'pyramid_level'),
-                self.getProcessInfoValue(processKey,'SKIP_FIRST'),
-                self.getProcessInfoValue(processKey,'resample_technique'),
-                self.getProcessInfoValue(processKey,'compression_type'),
-                self.getProcessInfoValue(processKey,'compression_quality'),
-                self.getProcessInfoValue(processKey,'skip_existing'))
+                self.getProcessInfoValue(processKey,'pyramid_level', index),
+                self.getProcessInfoValue(processKey,'SKIP_FIRST', index),
+                self.getProcessInfoValue(processKey,'resample_technique', index),
+                self.getProcessInfoValue(processKey,'compression_type', index),
+                self.getProcessInfoValue(processKey,'compression_quality', index),
+                self.getProcessInfoValue(processKey,'skip_existing', index))
                 return True
             except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
@@ -202,22 +202,22 @@ class Solutions(Base.Base):
                 processKey = 'buildfootprint'
                 arcpy.BuildFootprints_management(
                 fullPath,
-                self.getProcessInfoValue(processKey, 'where_clause'),
-                self.getProcessInfoValue(processKey, 'reset_footprint'),
-                self.getProcessInfoValue(processKey, 'min_data_value'),
-                self.getProcessInfoValue(processKey, 'max_data_value'),
-                self.getProcessInfoValue(processKey, 'approx_num_vertices'),
-                self.getProcessInfoValue(processKey, 'shrink_distance'),
-                self.getProcessInfoValue(processKey, 'maintain_edges'),
-                self.getProcessInfoValue(processKey, 'skip_derived_images'),
-                self.getProcessInfoValue(processKey, 'update_boundary'),
-                self.getProcessInfoValue(processKey, 'request_size'),
-                self.getProcessInfoValue(processKey, 'min_region_size'),
-                self.getProcessInfoValue(processKey, 'simplification_method')
+                self.getProcessInfoValue(processKey, 'where_clause', index),
+                self.getProcessInfoValue(processKey, 'reset_footprint', index),
+                self.getProcessInfoValue(processKey, 'min_data_value', index),
+                self.getProcessInfoValue(processKey, 'max_data_value', index),
+                self.getProcessInfoValue(processKey, 'approx_num_vertices', index),
+                self.getProcessInfoValue(processKey, 'shrink_distance', index),
+                self.getProcessInfoValue(processKey, 'maintain_edges', index),
+                self.getProcessInfoValue(processKey, 'skip_derived_images', index),
+                self.getProcessInfoValue(processKey, 'update_boundary', index),
+                self.getProcessInfoValue(processKey, 'request_size', index),
+                self.getProcessInfoValue(processKey, 'min_region_size', index),
+                self.getProcessInfoValue(processKey, 'simplification_method', index)
                 )
 
                 return True
-          except:
+          except Exception as inf:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -227,17 +227,17 @@ class Solutions(Base.Base):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'buildseamlines'
                 arcpy.BuildSeamlines_management(fullPath,
-                self.getProcessInfoValue(processKey,'cell_size'),
-                self.getProcessInfoValue(processKey,'sort_method'),
-                self.getProcessInfoValue(processKey,'sort_order'),
-                self.getProcessInfoValue(processKey,'order_by_attribute'),
-                self.getProcessInfoValue(processKey,'order_by_base_value'),
-                self.getProcessInfoValue(processKey,'view_point'),
-                self.getProcessInfoValue(processKey,'computation_method'),
-                self.getProcessInfoValue(processKey,'blend_width'),
-                self.getProcessInfoValue(processKey,'blend_type'),
-                self.getProcessInfoValue(processKey,'request_size'),
-                self.getProcessInfoValue(processKey,'request_size_type')
+                self.getProcessInfoValue(processKey,'cell_size', index),
+                self.getProcessInfoValue(processKey,'sort_method', index),
+                self.getProcessInfoValue(processKey,'sort_order', index),
+                self.getProcessInfoValue(processKey,'order_by_attribute', index),
+                self.getProcessInfoValue(processKey,'order_by_base_value', index),
+                self.getProcessInfoValue(processKey,'view_point', index),
+                self.getProcessInfoValue(processKey,'computation_method', index),
+                self.getProcessInfoValue(processKey,'blend_width', index),
+                self.getProcessInfoValue(processKey,'blend_type', index),
+                self.getProcessInfoValue(processKey,'request_size', index),
+                self.getProcessInfoValue(processKey,'request_size_type', index)
                 )
                 return True
             except:
@@ -251,11 +251,11 @@ class Solutions(Base.Base):
                     processKey = 'definemosaicdatasetnodata'
                     arcpy.DefineMosaicDatasetNoData_management(
                     fullPath,
-                    self.getProcessInfoValue(processKey, 'num_bands'),
-                    self.getProcessInfoValue(processKey, 'bands_for_nodata_value'),
-                    self.getProcessInfoValue(processKey, 'bands_for_valid_data_range'),
-                    self.getProcessInfoValue(processKey, 'where_clause'),
-                    self.getProcessInfoValue(processKey, 'composite_nodata_value')
+                    self.getProcessInfoValue(processKey, 'num_bands', index),
+                    self.getProcessInfoValue(processKey, 'bands_for_nodata_value', index),
+                    self.getProcessInfoValue(processKey, 'bands_for_valid_data_range', index),
+                    self.getProcessInfoValue(processKey, 'where_clause', index),
+                    self.getProcessInfoValue(processKey, 'composite_nodata_value', index)
                     )
                     return True
 
@@ -266,7 +266,7 @@ class Solutions(Base.Base):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 try:
                     processKey = 'importgeometry'
-                    importPath = self.getProcessInfoValue(processKey, 'input_featureclass')
+                    importPath = self.getProcessInfoValue(processKey, 'input_featureclass', index)
                     const_ig_search_ = '.gdb\\'
                     igIndx = importPath.lower().find(const_ig_search_)
                     igIndxSep = importPath.find('\\')
@@ -276,10 +276,10 @@ class Solutions(Base.Base):
 
                     arcpy.ImportMosaicDatasetGeometry_management(
                     fullPath,
-                    self.getProcessInfoValue(processKey, 'target_featureclass_type'),
-                    self.getProcessInfoValue(processKey, 'target_join_field'),
+                    self.getProcessInfoValue(processKey, 'target_featureclass_type', index),
+                    self.getProcessInfoValue(processKey, 'target_join_field', index),
                     importPath,
-                    self.getProcessInfoValue(processKey, 'input_join_field')
+                    self.getProcessInfoValue(processKey, 'input_join_field', index)
                     )
                     return True
                 except:
@@ -292,7 +292,7 @@ class Solutions(Base.Base):
     # Step (11) : for the all the Dervied Mosaic Dataset importing the fields from the Attribute Lookup Table
                 try:
                     j = 0
-                    joinTable = self.getProcessInfoValue(processKey, 'input_featureclass')
+                    joinTable = self.getProcessInfoValue(processKey, 'input_featureclass', index)
                     confTableName = os.path.basename(joinTable)
 
                     joinFeildList = [f.name for f in arcpy.ListFields(joinTable)]
@@ -303,9 +303,9 @@ class Solutions(Base.Base):
                     self.log("Joining the mosaic dataset layer with the configuration table", self.m_log.const_general_text)
                     mlayerJoin = arcpy.AddJoin_management(
                     mlayer + "/Footprint",
-                    self.getProcessInfoValue(processKey, 'input_join_field'),
+                    self.getProcessInfoValue(processKey, 'input_join_field', index),
                     joinTable,
-                    self.getProcessInfoValue(processKey, 'target_join_field'),
+                    self.getProcessInfoValue(processKey, 'target_join_field', index),
                     "KEEP_ALL"
                     )
                     for jfl in joinFeildList:
@@ -328,13 +328,13 @@ class Solutions(Base.Base):
         elif(com == 'BB'):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'buildboundary'
-                self.log ("Building the boundary "+ self.getProcessInfoValue(processKey, 'simplification_method'))
+                self.log ("Building the boundary "+ self.getProcessInfoValue(processKey, 'simplification_method', index))
                 try:
                     arcpy.BuildBoundary_management(
                     fullPath,
-                    self.getProcessInfoValue(processKey, 'where_clause'),
-                    self.getProcessInfoValue(processKey, 'append_to_existing'),
-                    self.getProcessInfoValue(processKey, 'simplification_method')
+                    self.getProcessInfoValue(processKey, 'where_clause', index),
+                    self.getProcessInfoValue(processKey, 'append_to_existing', index),
+                    self.getProcessInfoValue(processKey, 'simplification_method', index)
                     )
                     return True
                 except:
@@ -345,17 +345,17 @@ class Solutions(Base.Base):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'setstatistics'
                 self.log("Setting MD statistics for:" + fullPath, self.m_log.const_general_text)
-                stats_file_ss = self.m_base.getAbsPath(self.getProcessInfoValue(processKey, 'stats_file'))
+                stats_file_ss = self.m_base.getAbsPath(self.getProcessInfoValue(processKey, 'stats_file', index))
                 if stats_file_ss != '#' and stats_file_ss != '' :
-                    stats_file_ss = self.prefixFolderPath(self.getProcessInfoValue(processKey, 'stats_file'), self.const_statistics_path_)
+                    stats_file_ss = self.prefixFolderPath(self.getProcessInfoValue(processKey, 'stats_file', index), self.const_statistics_path_)
 
                 try:
                     arcpy.SetRasterProperties_management(
                     fullPath,
-                    self.getProcessInfoValue(processKey, 'data_type'),
-                    self.getProcessInfoValue(processKey, 'statistics'),
+                    self.getProcessInfoValue(processKey, 'data_type', index),
+                    self.getProcessInfoValue(processKey, 'statistics', index),
                     stats_file_ss,
-                    self.getProcessInfoValue(processKey, 'nodata')
+                    self.getProcessInfoValue(processKey, 'nodata', index)
                      )
                     return True
                 except:
@@ -369,12 +369,12 @@ class Solutions(Base.Base):
                 try:
                     arcpy.CalculateCellSizeRanges_management(
                     fullPath,
-                    self.getProcessInfoValue(processKey, 'where_clause'),
-                    self.getProcessInfoValue(processKey, 'do_compute_min'),
-                    self.getProcessInfoValue(processKey, 'do_compute_max'),
-                    self.getProcessInfoValue(processKey, 'max_range_factor'),
-                    self.getProcessInfoValue(processKey, 'cell_size_tolerance_factor'),
-                    self.getProcessInfoValue(processKey, 'update_missing_only'),
+                    self.getProcessInfoValue(processKey, 'where_clause', index),
+                    self.getProcessInfoValue(processKey, 'do_compute_min', index),
+                    self.getProcessInfoValue(processKey, 'do_compute_max', index),
+                    self.getProcessInfoValue(processKey, 'max_range_factor', index),
+                    self.getProcessInfoValue(processKey, 'cell_size_tolerance_factor', index),
+                    self.getProcessInfoValue(processKey, 'update_missing_only', index),
                      )
                     return True
                 except:
@@ -388,11 +388,11 @@ class Solutions(Base.Base):
                 try:
                     arcpy.BuildOverviews_management(
                     fullPath,
-                    self.getProcessInfoValue(processKey, 'where_clause'),
-                    self.getProcessInfoValue(processKey, 'define_missing_tiles'),
-                    self.getProcessInfoValue(processKey, 'generate_overviews'),
-                    self.getProcessInfoValue(processKey, 'generate_missing_images'),
-                    self.getProcessInfoValue(processKey, 'regenerate_stale_images')
+                    self.getProcessInfoValue(processKey, 'where_clause', index),
+                    self.getProcessInfoValue(processKey, 'define_missing_tiles', index),
+                    self.getProcessInfoValue(processKey, 'generate_overviews', index),
+                    self.getProcessInfoValue(processKey, 'generate_missing_images', index),
+                    self.getProcessInfoValue(processKey, 'regenerate_stale_images', index)
                      )
                     return True
                 except:
@@ -406,18 +406,18 @@ class Solutions(Base.Base):
                 try:
                     arcpy.DefineOverviews_management(
                     fullPath,
-                    self.getProcessInfoValue(processKey, 'overview_image_folder'),
-                    self.getProcessInfoValue(processKey, 'in_template_dataset'),
-                    self.getProcessInfoValue(processKey, 'extent'),
-                    self.getProcessInfoValue(processKey, 'pixel_size'),
-                    self.getProcessInfoValue(processKey, 'number_of_levels'),
-                    self.getProcessInfoValue(processKey, 'tile_rows'),
-                    self.getProcessInfoValue(processKey, 'tile_cols'),
-                    self.getProcessInfoValue(processKey, 'overview_factor'),
-                    self.getProcessInfoValue(processKey, 'force_overview_tiles'),
-                    self.getProcessInfoValue(processKey, 'resampling_method'),
-                    self.getProcessInfoValue(processKey, 'compression_method'),
-                    self.getProcessInfoValue(processKey, 'compression_quality')
+                    self.getProcessInfoValue(processKey, 'overview_image_folder', index),
+                    self.getProcessInfoValue(processKey, 'in_template_dataset', index),
+                    self.getProcessInfoValue(processKey, 'extent', index),
+                    self.getProcessInfoValue(processKey, 'pixel_size', index),
+                    self.getProcessInfoValue(processKey, 'number_of_levels', index),
+                    self.getProcessInfoValue(processKey, 'tile_rows', index),
+                    self.getProcessInfoValue(processKey, 'tile_cols', index),
+                    self.getProcessInfoValue(processKey, 'overview_factor', index),
+                    self.getProcessInfoValue(processKey, 'force_overview_tiles', index),
+                    self.getProcessInfoValue(processKey, 'resampling_method', index),
+                    self.getProcessInfoValue(processKey, 'compression_method', index),
+                    self.getProcessInfoValue(processKey, 'compression_quality', index)
                      )
                     return True
                 except:
@@ -496,21 +496,21 @@ class Solutions(Base.Base):
                 try:
                     arcpy.SynchronizeMosaicDataset_management(
                     fullPath,
-                    self.getProcessInfoValue(processKey, 'where_clause'),
-                    self.getProcessInfoValue(processKey, 'new_items'),
-                    self.getProcessInfoValue(processKey, 'sync_only_stale'),
-                    self.getProcessInfoValue(processKey, 'update_cellsize_ranges'),
-                    self.getProcessInfoValue(processKey, 'update_boundary'),
-                    self.getProcessInfoValue(processKey, 'update_overviews'),
-                    self.getProcessInfoValue(processKey, 'build_pyramids'),
-                    self.getProcessInfoValue(processKey, 'calculate_statistics'),
-                    self.getProcessInfoValue(processKey, 'build_thumbnails'),
-                    self.getProcessInfoValue(processKey, 'build_item_cache'),
-                    self.getProcessInfoValue(processKey, 'rebuild_raster'),
-                    self.getProcessInfoValue(processKey, 'update_fields'),
-                    self.getProcessInfoValue(processKey, 'fields_to_update'),
-                    self.getProcessInfoValue(processKey, 'existing_items'),
-                    self.getProcessInfoValue(processKey, 'broken_items')
+                    self.getProcessInfoValue(processKey, 'where_clause', index),
+                    self.getProcessInfoValue(processKey, 'new_items', index),
+                    self.getProcessInfoValue(processKey, 'sync_only_stale', index),
+                    self.getProcessInfoValue(processKey, 'update_cellsize_ranges', index),
+                    self.getProcessInfoValue(processKey, 'update_boundary', index),
+                    self.getProcessInfoValue(processKey, 'update_overviews', index),
+                    self.getProcessInfoValue(processKey, 'build_pyramids', index),
+                    self.getProcessInfoValue(processKey, 'calculate_statistics', index),
+                    self.getProcessInfoValue(processKey, 'build_thumbnails', index),
+                    self.getProcessInfoValue(processKey, 'build_item_cache', index),
+                    self.getProcessInfoValue(processKey, 'rebuild_raster', index),
+                    self.getProcessInfoValue(processKey, 'update_fields', index),
+                    self.getProcessInfoValue(processKey, 'fields_to_update', index),
+                    self.getProcessInfoValue(processKey, 'existing_items', index),
+                    self.getProcessInfoValue(processKey, 'broken_items', index)
                      )
                     return True
                 except:
@@ -679,17 +679,14 @@ class Solutions(Base.Base):
     import ProcessInfo
 
 
+    def getProcessInfoValue(self, process, key, index = 0):
+        if (index > len(self.processInfo.processInfo[process]) - 1):
+            self.log('Error: Invalid command index.',
+            self.const_critical_text)
+            raise
 
-    def getProcessInfoValue(self, process, key, index = -1):
-
-        if (index > -1):
-            if (self.processInfo.processInfo[process][index].has_key(key)):
-                    return self.processInfo.processInfo[process][index][key]
-            return '#'
-
-        if (self.processInfo.processInfo[process].has_key(key)):
-                return self.processInfo.processInfo[process][key]
-
+        if (self.processInfo.processInfo[process][index].has_key(key)):
+                return self.processInfo.processInfo[process][index][key]
         return '#'
 
 
@@ -702,8 +699,8 @@ class Solutions(Base.Base):
             self.m_base.m_doc = minidom.parse(self.config)
             if (self.m_base.init() == False):
                 raise
-        except:
-            self.log("Error: reading input config file:" + self.config + "\nQuitting...",
+        except Exception as inf:
+            self.log("Error: reading input config file:" + self.config + "\n" + str(inf) + "\nQuitting...",
             self.const_critical_text)
             return False
 
@@ -720,7 +717,6 @@ class Solutions(Base.Base):
         com_ = com
         if (com_.upper() == self.const_cmd_default_text.upper()):
             try:
-                #doc = minidom.parse(self.config)
                 com_ = self.getXMLNodeValue(self.m_base.m_doc, "Command")         #gets command defaults.
                 self.log('Using default command(s):' + com_)
 
@@ -728,8 +724,6 @@ class Solutions(Base.Base):
                 self.log("Error: Reading input config file:" + self.config + "\nQuitting...",
                 self.const_critical_text)
                 return False
-
-            #doc = None          # no longer necessary.
 
             if (len(com_.strip()) == 0):
                 self.log('Error: Empty command.',
@@ -739,8 +733,19 @@ class Solutions(Base.Base):
         self.log('Processing command(s):' + com_.upper(), self.const_general_text)
 
         aryCmds = com_.split('+')
-        for cmd in aryCmds:
-            cmd = cmd.upper()
+        for command in aryCmds:
+
+            command = command.upper()
+
+            cmd = ''.join(ch for ch in command if ch in (ascii_letters))
+            index = 0
+            if (len(command) > len(cmd)):
+                    try:
+                        index = int(command[len(cmd):])
+                    except:
+                        self.log("Command/Err: Invalid command index:" + command, self.const_warning_text)
+                        # catch any float values entered, e.t.c
+
             if (self.commands.has_key(cmd) == False):
                 self.log("Command/Err: Unknown command:" + cmd, self.const_general_text)
                 continue
@@ -750,7 +755,7 @@ class Solutions(Base.Base):
 
             self.log("Command:" + cmd + '->' + self.commands[cmd]['desc'], self.const_general_text)
             success = 'OK'
-            if (self.commands[cmd]['fnc'](self, cmd) == False):
+            if (self.commands[cmd]['fnc'](self, cmd, index) == False):
                 success = 'Failed!'
             self.log(success, self.const_status_text)
 

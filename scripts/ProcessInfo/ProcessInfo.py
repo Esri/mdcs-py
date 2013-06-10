@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: Class to Read in process info values from config XML files.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 13-05-2013
+# LastUpdated  		: 10-06-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -114,8 +114,10 @@ class ProcessInfo(Base.Base):
 
                                                     continue
 
-                                                self.processInfo[procesName] = {}
+                                            if (self.processInfo.has_key(procesName) == False):
+                                                self.processInfo[procesName] = []
 
+                                            hashCV = {}
                                             for node in node.childNodes:
                                                 if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
 
@@ -136,7 +138,8 @@ class ProcessInfo(Base.Base):
                                                     except:
                                                         Warning_ = True
 
-                                                    self.processInfo[procesName][key] = value
+                                                    hashCV[key] = value
+                                            self.processInfo[procesName].append(hashCV)
 
         except Exception as inst:
             self.log ("Error: Reading <MosaicDataset> node.",
