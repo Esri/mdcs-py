@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: Class to Read in process info values from config XML files.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 10-06-2013
+# LastUpdated  		: 11-06-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -88,31 +88,35 @@ class ProcessInfo(Base.Base):
                                             procesName = node.nodeName
                                             procesName = procesName.lower()
 
-                                            if (self.processInfo.has_key(procesName) == False):
+                                            if (self.m_hsh_parent_child_nodes.has_key(procesName)):
+                                                parentNode  = self.m_hsh_parent_child_nodes[procesName]['parent']
+                                                childNode = self.m_hsh_parent_child_nodes[procesName]['child']
 
-                                                if (self.m_hsh_parent_child_nodes.has_key(procesName)):
-                                                    parentNode  = self.m_hsh_parent_child_nodes[procesName]['parent']
-                                                    childNode = self.m_hsh_parent_child_nodes[procesName]['child']
-
+                                                if (self.processInfo.has_key(parentNode) == False):
                                                     self.processInfo[parentNode] = []
-                                                    for node in node.childNodes:
-                                                        if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
 
-                                                            key = node.nodeName.lower()
-                                                            if (key == childNode):
-                                                                hashCV = {}
-                                                                for node in node.childNodes:
-                                                                    if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
-                                                                        keyName = node.nodeName.lower()
-                                                                        value = '#'     #set GP tool default value for argument.
-                                                                        try:
-                                                                            value = node.firstChild.nodeValue
-                                                                        except:
-                                                                            Warning_ = True
-                                                                        hashCV[keyName] = value
-                                                                self.processInfo[parentNode].append(hashCV)
+                                                aryCV = []
 
-                                                    continue
+                                                for node in node.childNodes:
+                                                    if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
+
+                                                        key = node.nodeName.lower()
+                                                        if (key == childNode):
+                                                            hashCV = {}
+
+                                                            for node in node.childNodes:
+                                                                if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
+                                                                    keyName = node.nodeName.lower()
+                                                                    value = '#'     #set GP tool default value for argument.
+                                                                    try:
+                                                                        value = node.firstChild.nodeValue
+                                                                    except:
+                                                                        Warning_ = True
+                                                                    hashCV[keyName] = value
+                                                            aryCV.append (hashCV)
+                                                self.processInfo[parentNode].append(aryCV)
+                                                continue
+
 
                                             if (self.processInfo.has_key(procesName) == False):
                                                 self.processInfo[procesName] = []

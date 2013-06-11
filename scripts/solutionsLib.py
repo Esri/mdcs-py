@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: To have a library of python modules to facilitate code to reuse for Raster Solutions projects.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 10-06-2013
+# LastUpdated  		: 11-06-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -428,16 +428,16 @@ class Solutions(Base.Base):
                 processKey = 'addindex'
                 self.log("Adding Index:" + fullPath, self.m_log.const_general_text)
 
-                maxValues = len(self.processInfo.processInfo[processKey])
+                maxValues = len(self.processInfo.processInfo[processKey][index])
                 isError = False
                 for indx in range(0, maxValues):
 
                     try:
                         arcpy.AddIndex_management(fullPath,
-                        self.getProcessInfoValue(processKey, 'fields', indx),
-                        self.getProcessInfoValue(processKey, 'index_name', indx),
-                        self.getProcessInfoValue(processKey, 'unique', indx),
-                        self.getProcessInfoValue(processKey, 'ascending', indx)
+                        self.getProcessInfoValue(processKey, 'fields', index, indx),
+                        self.getProcessInfoValue(processKey, 'index_name', index, indx),
+                        self.getProcessInfoValue(processKey, 'unique', index, indx),
+                        self.getProcessInfoValue(processKey, 'ascending', index, indx)
                         )
                     except:
                         self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
@@ -449,22 +449,22 @@ class Solutions(Base.Base):
         elif(com == 'CV'):
                     fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                     processKey = 'calculatevalues'
-                    maxValues = len(self.processInfo.processInfo[processKey])
+                    maxValues = len(self.processInfo.processInfo[processKey][index])
 
                     self.log("Calculate values:" + fullPath, self.m_log.const_general_text)
                     isError = False
 
                     for indx in range(0, maxValues):
                         layername = fullPath
-                        if not self.getProcessInfoValue(processKey, 'query', indx) == '#':
+                        if not self.getProcessInfoValue(processKey, 'query', index, indx) == '#':
                             layername = self.m_base.m_mdName + "_layer"
-                            arcpy.MakeMosaicLayer_management(fullPath,layername, self.getProcessInfoValue(processKey,'query', indx))
+                            arcpy.MakeMosaicLayer_management(fullPath,layername, self.getProcessInfoValue(processKey,'query', index, indx))
                         try:
                             arcpy.CalculateField_management(layername,
-                            self.getProcessInfoValue(processKey, 'fieldname', indx),
-                            self.getProcessInfoValue(processKey, 'expression', indx),
-                            self.getProcessInfoValue(processKey, 'expression_type', indx),
-                            self.getProcessInfoValue(processKey, 'code_block', indx)
+                            self.getProcessInfoValue(processKey, 'fieldname', index, indx),
+                            self.getProcessInfoValue(processKey, 'expression', index, indx),
+                            self.getProcessInfoValue(processKey, 'expression_type', index, indx),
+                            self.getProcessInfoValue(processKey, 'code_block', index, indx)
                             )
                         except:
                             self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
@@ -679,11 +679,16 @@ class Solutions(Base.Base):
     import ProcessInfo
 
 
-    def getProcessInfoValue(self, process, key, index = 0):
+    def getProcessInfoValue(self, process, key, index = 0, indx = -1):
         if (index > len(self.processInfo.processInfo[process]) - 1):
             self.log('Error: Invalid command index.',
             self.const_critical_text)
             raise
+
+        if (indx > -1):     # handle process info on keys [addindex, calculatevalues]
+            if (self.processInfo.processInfo[process][index][indx].has_key(key)):
+                    return self.processInfo.processInfo[process][index][indx][key]
+            return '#'
 
         if (self.processInfo.processInfo[process][index].has_key(key)):
                 return self.processInfo.processInfo[process][index][key]
