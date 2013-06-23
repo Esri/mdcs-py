@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: To have a library of python modules to facilitate code to reuse for Raster Solutions projects.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 11-06-2013
+# LastUpdated  		: 23-06-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -152,7 +152,7 @@ class Solutions(Base.Base):
 
         elif (com == 'BPS'):
             try:
-                self.m_log.Message("\tRecomputing footprint for the mosaic dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
+                self.m_log.Message("\tBuilding Pyramids and Calculating Statistic for the mosaic dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'buildpyramidsandstatistics'
                 arcpy.BuildPyramidsandStatistics_management(fullPath,
@@ -244,6 +244,19 @@ class Solutions(Base.Base):
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
+        elif(com =='JF'):
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                try:
+                    processKey ='joinfield'
+                    arcpy.JoinField_management(self.getProcessInfoValue(processKey, 'in_data', index),
+                    self.getProcessInfoValue(processKey, 'in_field', index),
+                    self.getProcessInfoValue(processKey, 'join_table', index),
+                    self.getProcessInfoValue(processKey, 'join_field', index),
+                    self.getProcessInfoValue(processKey, 'fields', index))
+                    return True
+                except:
+                    self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                    return False
 
         elif(com == 'DN'):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
@@ -541,6 +554,10 @@ class Solutions(Base.Base):
         },
     'BF' :
         {   'desc' : 'Build footprint.',
+            'fnc' : executeCommand
+        },
+    'JF' :
+        {   'desc' : 'Join the content of two tables based on a common attribute field.',
             'fnc' : executeCommand
         },
     'BS' :
