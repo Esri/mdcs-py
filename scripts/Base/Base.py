@@ -6,7 +6,7 @@
 # Author        	: ESRI raster solution team
 # Purpose 	    	: Base call used by all Raster Solutions components.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 28-05-2013
+# LastUpdated  		: 26-06-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -124,6 +124,34 @@ class Base(object):
              errorTypeText = 'critical'
 
         print 'log-' + errorTypeText + ': ' + msg
+
+        return True
+
+
+    def processEnv(self, node, pos, json):                #support fnc for 'SE' command.
+
+        while(node.nextSibling != None):
+            if(node.nodeType != minidom.Node.TEXT_NODE):
+
+                k = str(pos)
+                if (json.has_key(k) == False):
+                        json[k] = {'key' : [], 'val' : [], 'type' : [] }
+
+                json[k]['key'].append(node.nodeName)
+                v = ''
+                if (node.firstChild != None):
+                    v  = node.firstChild.nodeValue.strip()
+                json[k]['val'].append(v)
+                json[k]['parent'] = node.parentNode.nodeName
+                json[k]['type'].append('c')
+
+                if (node.firstChild != None):
+                    if (node.firstChild.nextSibling != None):
+                        pos = len(json)
+                        json[k]['type'][len(json[k]['type']) - 1] = 'p'
+                        self.processEnv(node.firstChild.nextSibling, pos, json)
+                        pos = 0     # defaults to root always, assuming only 1 level deep xml.
+            node = node.nextSibling
 
         return True
 

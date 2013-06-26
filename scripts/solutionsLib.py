@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: To have a library of python modules to facilitate code to reuse for Raster Solutions projects.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 23-06-2013
+# LastUpdated  		: 26-06-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -529,6 +529,63 @@ class Solutions(Base.Base):
                 except:
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
 
+        elif(com == 'SE'):
+                self.log("Set environment variables on index: %s" % (index), self.m_log.const_general_text)
+
+                node = self.m_base.m_doc.getElementsByTagName('Environment')
+                if (len(node) == 0 or
+                    index > len(node) - 1):
+                    self.log('No environment variables could be found/at index (%s)' % (index), self.m_log.const_warning_text)
+                    return False
+
+                json = {}
+                self.processEnv (node[index].firstChild, 0, json)
+
+                for l in range(0, len(json)):
+                    p = str(l)
+                    pIndx = -1
+                    parent = json[p]['parent'].lower()
+                    if (parent == 'environment'):
+                        pIndx = 0
+
+                    key_ = val_ = ''
+                    key_len_ = len(json[p]['key'])
+                    for i in range(0, key_len_):
+                        typ = json[p]['type'][i]
+                        if (typ != 'p'):
+                            try:
+                                k = json[p]['key'][i]
+                                v =  json[p]['val'][i]
+
+                                if (k == 'ClearEnvironment' or      # no use for these yet.
+                                    k ==  'ResetEnvironments'):
+                                        continue
+
+                                if (pIndx == 0):
+                                    key_  =  k
+                                    val_ =  v.strip()
+
+                                    if (val_ != ''):
+                                        arcpy.env[key_] = val_
+                                        self.log('Env[%s]=%s' % (key_, val_), self.m_log.const_general_text)
+                                    continue
+                                else:
+                                    key_ = json[p]['parent']
+
+                                val_ += json[p]['val'][i]
+                                if (i < key_len_ - 1):
+                                    val_ += ' '
+                                else:
+                                    if (val_.strip() != ''):
+                                        arcpy.env[key_] = val_
+                                        self.log('Env[%s]=%s' % (key_, val_), self.m_log.const_general_text)
+
+                            except Exception as inst:
+                                self.log(str(inst), self.m_log.const_warning_text)
+                                continue
+
+                return True     #should unable to set environment variables return False?
+
 
         return False            #main function body return, no matching command found!
 
@@ -634,6 +691,10 @@ class Solutions(Base.Base):
         },
     'SY' :
         {   'desc' : 'Rebuilds or updates each raster item in the mosaic dataset.',
+            'fnc' : executeCommand
+        },
+    'SE' :
+        {   'desc' : 'Set environment variables.',
             'fnc' : executeCommand
         }
     }
