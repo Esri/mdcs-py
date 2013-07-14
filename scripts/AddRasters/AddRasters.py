@@ -66,6 +66,14 @@ class AddRasters(Base.Base):
                             rasterType = hshAddRaster['art']
                             self.log("\tUsing ART for " + name_toupper + ': ' + rasterType, self.const_general_text)
 
+                            if (self.m_base.m_art_apply_changes == True):
+                                art_doc = minidom.parse(rasterType)
+                                if (self.m_base.updateART(art_doc, self.m_base.m_art_ws, self.m_base.m_art_ds) == True):
+                                        self.log("\tUpdating ART (Workspace, RasterDataset) values with (%s, %s) respectively." % (self.m_base.m_art_ws, self.m_base.m_art_ds), self.const_general_text)
+                                        c = open(rasterType, "w")
+                                        c.write(art_doc.toxml())
+                                        c.close()
+
                         set_filter = ''
 
                         if (hshAddRaster.has_key('filter')):

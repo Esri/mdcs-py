@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 # Name  	    	: MDCS.py
 # ArcGIS Version	: ArcGIS 10.1 sp1
-# Script Version	: 20130528
+# Script Version	: 20130714
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
 # Date          	: 28-05-2013
@@ -117,7 +117,9 @@ def main(argc, argv):
             argIndx += 1
             continue
 
+        exSubCode = values[0][1:len(values[0])].lower()
         subCode = values.pop(0)[1].lower()
+
         value = ':'.join(values).strip()
 
         if (subCode == 'c'):
@@ -130,6 +132,10 @@ def main(argc, argv):
             base.m_sources = value
         elif(subCode == 'l'):
             log_folder =  value
+        elif(exSubCode == 'artws'):
+            base.m_art_ws =  value
+        elif(exSubCode == 'artds'):
+            base.m_art_ds =  value
         elif(subCode == 'p'):
             aryP = value.split('$')
             pMax = len(aryP) - 1
@@ -170,6 +176,11 @@ def main(argc, argv):
         errMessage = u"Error: Input config file is not specified/not found!"
         arcpy.AddMessage(errMessage)
         return False
+
+
+    if (base.m_art_ws != ''
+    or  base.m_art_ds != ''):
+        base.m_art_apply_changes = True
 
 
     comInfo = {

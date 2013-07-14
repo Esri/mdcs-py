@@ -1,14 +1,14 @@
 #-------------------------------------------------------------------------------
 # Name  	    	: Base.py
 # ArcGIS Version	: ArcGIS 10.1 sp1
-# Script Version	: 20130528
+# Script Version	: 20130714
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
 # Purpose 	    	: Base call used by all Raster Solutions components.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 26-06-2013
+# LastUpdated  		: 14-07-2013
 # Required Argument 	: Not applicable
-# Optional Argument 	: Not applicable.
+# Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
 # Copyright	    	: (c) ESRI 2012
 # License	    	: <your license>
@@ -60,6 +60,12 @@ class Base(object):
         self.m_sources = ''  #source data paths for adding new rasters.
 
         self.m_dynamic_params = {}
+
+        # art file update specific variables
+        self.m_art_apply_changes = ''
+        self.m_art_ws = ''
+        self.m_art_ds = ''
+        # ends
 
     def init(self):
 
@@ -186,6 +192,73 @@ class Base(object):
             return ''
 
         return node[0].firstChild.data
+
+
+    def updateART(self, doc, workspace, dataset):
+
+        if (doc == None):
+            return False
+
+        if (workspace.strip() == ''
+        and dataset.strip() == ''):
+            return False        # nothing to do.
+
+        try:
+            nodeName = 'NameString'
+            node_list = doc.getElementsByTagName(nodeName)
+
+            for node in node_list:
+                if (node.hasChildNodes() == True):
+                    vals = node.firstChild.nodeValue.split(';')
+                    upd_buff = []
+                    for v in vals:
+                        vs = v.split('=')
+                        for vs_ in vs:
+                            vs_ = vs_.lower()
+                            if (vs_.find('workspace') > 0):
+                                if (workspace != ''):
+                                    vs[1] = ' ' + workspace
+                                    if (node.nextSibling != None):
+                                        if (node.nextSibling.nodeName == 'PathName'):
+                                            node.nextSibling.firstChild.nodeValue = workspace
+
+                            elif (vs_.find('rasterdataset') > 0):
+                                if (dataset != ''):
+                                    vs[1] = ' ' + dataset
+                                    if (node.previousSibling != None):
+                                        if (node.previousSibling.nodeName == 'Name'):
+                                            node.previousSibling.firstChild.nodeValue = dataset
+                        upd_buff.append('='.join(vs))
+
+                    if (len(upd_buff) > 0):
+                        upd_nodeValue = ';'.join(upd_buff)
+                        node.firstChild.nodeValue = upd_nodeValue
+
+
+            nodeName = 'ConnectionProperties'
+            node_list = doc.getElementsByTagName(nodeName)
+            found = False
+            for node in node_list:      # only one node should exist.
+                for n in node.firstChild.childNodes:
+                    if (n.firstChild != None):
+                        if (n.firstChild.firstChild != None):
+                            if (n.firstChild.nodeName.lower() == 'key'):
+                                if (n.firstChild.firstChild.nodeValue.lower() == 'database'):
+                                    n.firstChild.nextSibling.firstChild.nodeValue  = workspace
+                                    found = True
+                                    break;
+
+                if (found == True):
+                    break
+
+
+        except Exception as inst:
+            self.log(str(inst), self.const_critical_text)
+            return False
+
+        return True
+
+
 
 
     def getInternalPropValue(self, dic, key):
