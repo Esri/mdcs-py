@@ -84,7 +84,7 @@ def main(argc, argv):
         "-l: Log file to write to disk [path+file name]"
         ]
 
-        print "\nMDCS.py v5.2\nUsage: MDCS.py -c:<Optional:command> -i:<config_file>" \
+        print "\nMDCS.py v5.3\nUsage: MDCS.py -c:<Optional:command> -i:<config_file>" \
         "\n\nFlags to override configuration values," \
 
         for arg in user_args:

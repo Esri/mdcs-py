@@ -7,8 +7,8 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: To have a library of python modules to facilitate code to reuse for Raster Solutions projects.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 26-06-2013
-# Required Argument 	: Not applicable.
+# LastUpdated  		: 15-07-2013
+# Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
 # Copyright	    	: (c) ESRI 2012
@@ -780,7 +780,10 @@ class Solutions(Base.Base):
 
         try:
             self.m_base.m_doc = minidom.parse(self.config)
-            if (self.m_base.init() == False):
+            (ret, msg) = self.m_base.init()
+            if (ret == False):
+                if (msg == 'version'):
+                    return False
                 raise
         except Exception as inf:
             self.log("Error: reading input config file:" + self.config + "\n" + str(inf) + "\nQuitting...",

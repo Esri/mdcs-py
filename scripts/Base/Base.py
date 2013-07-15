@@ -6,7 +6,7 @@
 # Author        	: ESRI raster solution team
 # Purpose 	    	: Base call used by all Raster Solutions components.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 14-07-2013
+# LastUpdated  		: 15-07-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -16,6 +16,7 @@
 #!/usr/bin/env python
 
 import os
+import arcpy
 from datetime import datetime
 
 from xml.dom import minidom
@@ -67,10 +68,54 @@ class Base(object):
         self.m_art_ds = ''
         # ends
 
-    def init(self):
+    def init(self):         #return (status [true|false], reason)
 
         if (self.m_doc == None):
             return False
+
+
+        #version check.
+        try:
+            min = [
+                self.getXMLXPathValue("Application/Version/Desktop/Min/Major", "Major"),
+                self.getXMLXPathValue("Application/Version/Desktop/Min/Minor", "Minor"),
+                self.getXMLXPathValue("Application/Version/Desktop/Min/Build", "Build")
+            ]
+
+            max = [
+                self.getXMLXPathValue("Application/Version/Desktop/Max/Major", "Major"),
+                self.getXMLXPathValue("Application/Version/Desktop/Max/Minor", "Minor"),
+                self.getXMLXPathValue("Application/Version/Desktop/Max/Build", "Build")
+            ]
+
+            CMAJOR = 0
+            CMINOR = 1
+            CBUILD = 2 + 1
+
+            min_tot = max_tot = 0
+
+            for n in range(CMAJOR, CBUILD):
+                if (min[n] == ''):
+                    min[n] = 0
+                min[n] = int(min[n])
+                min_tot += min[n]
+
+            for n in range(CMAJOR, CBUILD):
+                if (max[n] == ''):
+                    max[n] = 0
+                max[n] = int(max[n])
+                max_tot += max[n]
+
+            if (min_tot > 0):           #version check is disabled if no values have been defined in the MDCS for min and max.
+                if (self.CheckMDCSVersion(min, max) == False):
+                    return (False, 'version')        #version check failed.
+
+
+        except Exception as inst:
+            self.log(str(inst), self.const_critical_text)
+            return False
+        #ends
+
 
         self.setUserDefinedValues()         #replace user defined dynamic variables in config file with values provided at the command-line.
 
@@ -94,7 +139,7 @@ class Base(object):
 
         self.m_commands = self.getXMLNodeValue(self.m_doc, "Command")
 
-        return True
+        return (True, 'OK')
 
 
     def getXMLXPathValue(self, xPath, key):
@@ -108,6 +153,8 @@ class Base(object):
                 c = c.parentNode
             p = '/'.join(parents)
             if (p == xPath):
+                if (node.hasChildNodes() == False):
+                    return ''
                 return str(node.firstChild.data).strip()
 
         return ''
@@ -181,6 +228,100 @@ class Base(object):
             _file = os.path.join(prefix, _f)
 
         return _file
+
+
+    def getDesktopVersion(self):    #returns major, minor and the build number.
+
+        d = arcpy.GetInstallInfo('desktop')
+
+        version = []
+        buildNumber = 0
+
+        CVERSION = 'version'
+        CBUILDNUMBER = 'buildnumber'
+
+        ValError = False
+
+        for k in d:
+            key = k.lower()
+            if (key == CVERSION or
+                key == CBUILDNUMBER):
+                try:
+                    if (key == CVERSION):
+                        [version.append(int(x)) for x in d[k].split(".")]
+                    elif (key == CBUILDNUMBER):
+                        buildNumber = int(d[k])
+                except:
+                    ValError = True
+                    raise
+
+        version.append(buildNumber)
+        return version
+
+
+
+    def CheckMDCSVersion(self, min, max, print_err_msg = True):
+
+        CMMBLEN = 3
+
+        if (len(min) != CMMBLEN or
+            len(max) != CMMBLEN):
+                return False
+
+        CMAJOR = 0
+        CMINOR = 1
+        CBUILD = 2
+
+        min_major = min[CMAJOR]
+        min_minor = min[CMINOR]
+        min_build = min[CBUILD]
+
+        max_major = max[CMAJOR]
+        max_minor = max[CMINOR]
+        max_build = max[CBUILD]
+
+        try:
+            version = self.getDesktopVersion()
+            if (len(version) >= CMMBLEN): # major, minor, build
+
+                inst_major = version[CMAJOR]
+                inst_minor = version[CMINOR]
+                inst_build = version[CBUILD]
+
+                ver_failed = False
+
+                if (max_major > 0 and
+                    inst_major > max_major):
+                        ver_failed = True
+                elif (max_minor > 0 and
+                    inst_minor > max_minor):
+                        ver_failed = True
+                elif (max_build > 0 and
+                      inst_build > max_build):
+                        ver_failed = True
+                elif (inst_major < min_major):
+                        ver_failed = True
+                elif (inst_minor < min_minor):
+                        ver_failed = True
+                elif (min_build > 0 and
+                      inst_build < min_build):
+                        ver_failed = True
+
+                if (ver_failed):
+                    if (print_err_msg == True):
+                        self.log('MDCS can\'t proceed due to ArcGIS version incompatiblity.', self.const_critical_text)
+                        self.log('ArcGIS Desktop version is (%s.%s.%s). MDCS min and max versions are (%s.%s.%s) and (%s.%s.%s) respectively.' % \
+                        (inst_major, inst_minor, inst_build, min_major, min_minor, min_build, max_major, max_minor, max_build), self.const_critical_text)
+
+                    return False
+
+        except Exception as inst:
+            self.log('Version check failed: (%s)' % (str(inst)), self.const_critical_text)
+            return False
+
+        return True
+
+
 
     def getXMLNodeValue(self, doc, nodeName) :
         if (doc == None):
