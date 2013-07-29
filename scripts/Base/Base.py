@@ -38,6 +38,19 @@ class Base(object):
 
     const_cmd_default_text = "#defaults"
     const_geodatabase_ext = '.GDB'
+    const_geodatabase_SDE_ext = '.SDE'
+
+    # base init codes. (const_strings)
+    const_init_ret_version = 'version'
+    const_init_ret_sde = 'sde'
+    # ends
+
+
+    #version specific
+    const_ver_len = 4
+
+    # ends
+
 
 #ends
 
@@ -68,6 +81,16 @@ class Base(object):
         self.m_art_ds = ''
         # ends
 
+        # To keep track of the last objectID before any new data items could be added.
+        self.m_last_AT_ObjectID = 0     #by default, take in all the previous records for any operation.
+
+
+        # SDE specific variables
+        self.m_IsSDE = False
+        self.m_SDE_database_user = ''
+        # ends
+
+
     def init(self):         #return (status [true|false], reason)
 
         if (self.m_doc == None):
@@ -76,43 +99,32 @@ class Base(object):
 
         #version check.
         try:
-            min = [
-                self.getXMLXPathValue("Application/Version/Desktop/Min/Major", "Major"),
-                self.getXMLXPathValue("Application/Version/Desktop/Min/Minor", "Minor"),
-                self.getXMLXPathValue("Application/Version/Desktop/Min/Build", "Build")
-            ]
 
-            max = [
-                self.getXMLXPathValue("Application/Version/Desktop/Max/Major", "Major"),
-                self.getXMLXPathValue("Application/Version/Desktop/Max/Minor", "Minor"),
-                self.getXMLXPathValue("Application/Version/Desktop/Max/Build", "Build")
-            ]
+            min = self.getXMLXPathValue("Application/ArcGISVersion/Product/Min", "Min").split('.')
+            max = self.getXMLXPathValue("Application/ArcGISVersion/Product/Max", "Max").split('.')
 
-            CMAJOR = 0
-            CMINOR = 1
-            CBUILD = 2 + 1
+            if (len(min) == self.const_ver_len): #version check is disabled if no values have been defined in the MDCS for min and max.
 
-            min_tot = max_tot = 0
+                CMAJOR = 0
+                CBUILD = self.const_ver_len
 
-            for n in range(CMAJOR, CBUILD):
-                if (min[n] == ''):
-                    min[n] = 0
-                min[n] = int(min[n])
-                min_tot += min[n]
+                if (len(max) != self.const_ver_len):
+                    max = min               # set max to same as min version if max version isn't defined / has errors.
 
-            for n in range(CMAJOR, CBUILD):
-                if (max[n] == ''):
-                    max[n] = 0
-                max[n] = int(max[n])
-                max_tot += max[n]
+                for n in range(CMAJOR, CBUILD):
+                    if (min[n] == ''):
+                        min[n] = 0
+                    if (max[n] == ''):
+                        max[n] = 0
 
-            if (min_tot > 0):           #version check is disabled if no values have been defined in the MDCS for min and max.
+                    min[n] = int(min[n])
+                    max[n] = int(max[n])
+
                 if (self.CheckMDCSVersion(min, max) == False):
-                    return (False, 'version')        #version check failed.
-
+                    return (False, self.const_init_ret_version)        #version check failed.
 
         except Exception as inst:
-            self.log(str(inst), self.const_critical_text)
+            self.log('Version check failure/' + str(inst), self.const_critical_text)
             return False
         #ends
 
@@ -130,14 +142,26 @@ class Base(object):
 
 
         const_len_ext = len(self.const_geodatabase_ext)
-        if (self.m_geodatabase[-const_len_ext:].upper() != self.const_geodatabase_ext):
-            self.m_geodatabase += self.const_geodatabase_ext.lower()
-
+        ext = self.m_geodatabase[-const_len_ext:].upper()
+        if (ext != self.const_geodatabase_ext and
+            ext != self.const_geodatabase_SDE_ext):
+            self.m_geodatabase += self.const_geodatabase_ext.lower()        #if no extension specified, defaults to '.gdb'
 
         self.m_gdbName = self.m_geodatabase[:len(self.m_geodatabase) - const_len_ext]       #.gdb
         self.m_geoPath = os.path.join(self.m_workspace, self.m_geodatabase)
 
         self.m_commands = self.getXMLNodeValue(self.m_doc, "Command")
+
+        if (ext == self.const_geodatabase_SDE_ext):
+            self.m_IsSDE = True
+            try:
+                self.log('Reading SDE connection properties from (%s)' % (self.m_geoPath))
+                conProperties  = arcpy.Describe(self.m_geoPath).connectionProperties
+                self.m_SDE_database_user = ('%s.%s.') % (conProperties.database, conProperties.user)
+
+            except Exception as inst:
+                self.log(str(inst), self.const_critical_text)
+                return (False, self.const_init_ret_sde)
 
         return (True, 'OK')
 
@@ -230,78 +254,89 @@ class Base(object):
         return _file
 
 
-    def getDesktopVersion(self):    #returns major, minor and the build number.
+    def getDesktopVersion(self):    #returns major, minor, sp and the build number.
 
-        d = arcpy.GetInstallInfo('desktop')
+        d = arcpy.GetInstallInfo()
 
         version = []
+
         buildNumber = 0
+        spNumber = 0
 
         CVERSION = 'version'
         CBUILDNUMBER = 'buildnumber'
+        CSPNUMBER = 'spnumber'
 
         ValError = False
 
         for k in d:
             key = k.lower()
             if (key == CVERSION or
-                key == CBUILDNUMBER):
+                key == CBUILDNUMBER or
+                key == CSPNUMBER):
                 try:
                     if (key == CVERSION):
                         [version.append(int(x)) for x in d[k].split(".")]
                     elif (key == CBUILDNUMBER):
                         buildNumber = int(d[k])
+                    elif (key == CSPNUMBER):
+                        spNumber = int(d[k])        # could be N/A
                 except:
                     ValError = True
-                    raise
 
+        version.append(spNumber)
         version.append(buildNumber)
+
         return version
 
 
 
     def CheckMDCSVersion(self, min, max, print_err_msg = True):
 
-        CMMBLEN = 3
-
-        if (len(min) != CMMBLEN or
-            len(max) != CMMBLEN):
+        if (len(min) != self.const_ver_len or
+            len(max) != self.const_ver_len):
                 return False
 
         CMAJOR = 0
         CMINOR = 1
-        CBUILD = 2
+        CSP = 2
+        CBUILD = 3
 
         min_major = min[CMAJOR]
         min_minor = min[CMINOR]
+        min_sp = min[CSP]
         min_build = min[CBUILD]
 
         max_major = max[CMAJOR]
         max_minor = max[CMINOR]
+        max_cp = max[CSP]
         max_build = max[CBUILD]
 
         try:
             version = self.getDesktopVersion()
-            if (len(version) >= CMMBLEN): # major, minor, build
+            if (len(version) >= self.const_ver_len): # major, minor, sp, build
 
                 inst_major = version[CMAJOR]
                 inst_minor = version[CMINOR]
+                inst_sp = version[CSP]
                 inst_build = version[CBUILD]
 
                 ver_failed = False
 
-                if (max_major > 0 and
-                    inst_major > max_major):
+                if (inst_major > max_major):
+                    ver_failed = True
+                elif (inst_minor > max_minor):
                         ver_failed = True
-                elif (max_minor > 0 and
-                    inst_minor > max_minor):
+                elif (inst_sp > max_cp):
                         ver_failed = True
                 elif (max_build > 0 and
                       inst_build > max_build):
-                        ver_failed = True
+                            ver_failed = True
                 elif (inst_major < min_major):
-                        ver_failed = True
+                    ver_failed = True
                 elif (inst_minor < min_minor):
+                        ver_failed = True
+                elif (inst_sp < min_sp):
                         ver_failed = True
                 elif (min_build > 0 and
                       inst_build < min_build):
@@ -310,8 +345,8 @@ class Base(object):
                 if (ver_failed):
                     if (print_err_msg == True):
                         self.log('MDCS can\'t proceed due to ArcGIS version incompatiblity.', self.const_critical_text)
-                        self.log('ArcGIS Desktop version is (%s.%s.%s). MDCS min and max versions are (%s.%s.%s) and (%s.%s.%s) respectively.' % \
-                        (inst_major, inst_minor, inst_build, min_major, min_minor, min_build, max_major, max_minor, max_build), self.const_critical_text)
+                        self.log('ArcGIS Desktop version is (%s.%s.%s.%s). MDCS min and max versions are (%s.%s.%s.%s) and (%s.%s.%s.%s) respectively.' % \
+                        (inst_major, inst_minor, inst_sp, inst_build, min_major, min_minor, min_sp, min_build, max_major, max_minor, max_cp, max_build), self.const_critical_text)
 
                     return False
 

@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: To create referenced Mosaic datasets
 # Created	    	: 14-08-2012
-# LastUpdated  		: 13-05-2013
+# LastUpdated  		: 29-07-2013
 # Required Argument 	:
 # Optional Argument 	:
 # Usage         	: c:\Python27\ArcGIS10.1\python.exe CreateRefMD.py.py CreateMD.xml
@@ -46,7 +46,7 @@ class CreateReferencedMD(Base.Base):
                 try:
                     mdPath = os.path.join(self.m_base.m_geoPath, r)
 
-                    inMosaic = os.path.join(self.m_base.m_geoPath, self.dic_derive_lst[k]['key'])
+                    inMosaic = self.dic_derive_lst[k]['key']
                     refMosaic = os.path.join(self.m_base.m_geoPath, r)
 
                     self.log("Creating MD:" + r, self.const_general_text)

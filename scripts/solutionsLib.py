@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: To have a library of python modules to facilitate code to reuse for Raster Solutions projects.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 15-07-2013
+# LastUpdated  		: 29-07-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -120,14 +120,22 @@ class Solutions(Base.Base):
                 rfunction_path = self.getProcessInfoValue(processKey,'function_chain_definition', index)
                 if (rfunction_path.find('.rft') >-1 and rfunction_path.find('/') == -1):
                     rfunction_path = self.const_raster_function_templates_path_ + "/" + rfunction_path
+
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
 
-                arcpy.EditRasterFunction_management(fullPath,
+                lyrName = 'lyr_%s' % str(self.m_base.m_last_AT_ObjectID)
+                expression = "OBJECTID >%s" % (str(self.m_base.m_last_AT_ObjectID))
+                arcpy.MakeMosaicLayer_management(fullPath, lyrName, expression)
+
+                arcpy.EditRasterFunction_management(lyrName,
                 self.getProcessInfoValue(processKey,'edit_mosaic_dataset_item', index),
                 self.getProcessInfoValue(processKey,'edit_options', index),
                 rfunction_path,
                 self.getProcessInfoValue(processKey,'location_function_name', index),
                 )
+
+                arcpy.Delete_management(lyrName)
+
                 return True
             except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
@@ -155,7 +163,12 @@ class Solutions(Base.Base):
                 self.m_log.Message("\tBuilding Pyramids and Calculating Statistic for the mosaic dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'buildpyramidsandstatistics'
-                arcpy.BuildPyramidsandStatistics_management(fullPath,
+
+                lyrName = 'lyr_%s' % str(self.m_base.m_last_AT_ObjectID)
+                expression = "OBJECTID >%s" % (str(self.m_base.m_last_AT_ObjectID))
+                arcpy.MakeMosaicLayer_management(fullPath, lyrName, expression)
+
+                arcpy.BuildPyramidsandStatistics_management(lyrName,
                 self.getProcessInfoValue(processKey,'include_subdirectories', index),
                 self.getProcessInfoValue(processKey,'build_pyramids', index),
                 self.getProcessInfoValue(processKey,'calculate_statistics', index),
@@ -172,6 +185,9 @@ class Solutions(Base.Base):
                 self.getProcessInfoValue(processKey,'compression_quality', index),
                 self.getProcessInfoValue(processKey,'skip_existing', index)
                 )
+
+                arcpy.Delete_management(lyrName)
+
                 return True
             except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
@@ -200,9 +216,20 @@ class Solutions(Base.Base):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
 
                 processKey = 'buildfootprint'
+
+                isQuery = False
+                query = self.getProcessInfoValue(processKey, 'where_clause', index)
+                if (len(query) > 0 and
+                    query != '#'):
+                        isQuery = True
+
+                expression = "OBJECTID >%s" % (str(self.m_base.m_last_AT_ObjectID))
+                if (isQuery == True):
+                    expression += ' AND %s' % (query)
+
                 arcpy.BuildFootprints_management(
                 fullPath,
-                self.getProcessInfoValue(processKey, 'where_clause', index),
+                expression,
                 self.getProcessInfoValue(processKey, 'reset_footprint', index),
                 self.getProcessInfoValue(processKey, 'min_data_value', index),
                 self.getProcessInfoValue(processKey, 'max_data_value', index),
@@ -262,14 +289,22 @@ class Solutions(Base.Base):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 try:
                     processKey = 'definemosaicdatasetnodata'
+
+                    lyrName = 'lyr_%s' % str(self.m_base.m_last_AT_ObjectID)
+                    expression = "OBJECTID >%s" % (str(self.m_base.m_last_AT_ObjectID))
+                    arcpy.MakeMosaicLayer_management(fullPath, lyrName, expression)
+
                     arcpy.DefineMosaicDatasetNoData_management(
-                    fullPath,
+                    lyrName,
                     self.getProcessInfoValue(processKey, 'num_bands', index),
                     self.getProcessInfoValue(processKey, 'bands_for_nodata_value', index),
                     self.getProcessInfoValue(processKey, 'bands_for_valid_data_range', index),
                     self.getProcessInfoValue(processKey, 'where_clause', index),
                     self.getProcessInfoValue(processKey, 'composite_nodata_value', index)
                     )
+
+                    arcpy.Delete_management(lyrName)
+
                     return True
 
                 except:
@@ -302,7 +337,6 @@ class Solutions(Base.Base):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'importfieldvalues'
 
-    # Step (11) : for the all the Dervied Mosaic Dataset importing the fields from the Attribute Lookup Table
                 try:
                     j = 0
                     joinTable = self.getProcessInfoValue(processKey, 'input_featureclass', index)
@@ -468,12 +502,22 @@ class Solutions(Base.Base):
                     isError = False
 
                     for indx in range(0, maxValues):
-                        layername = fullPath
-                        if not self.getProcessInfoValue(processKey, 'query', index, indx) == '#':
-                            layername = self.m_base.m_mdName + "_layer"
-                            arcpy.MakeMosaicLayer_management(fullPath,layername, self.getProcessInfoValue(processKey,'query', index, indx))
+
+                        isQuery = False
+                        query = self.getProcessInfoValue(processKey, 'query', index, indx)
+                        lyrName = 'lyr_%s' % str(self.m_base.m_last_AT_ObjectID)
+
+                        if (query != '#'):
+                            isQuery = True
+
+                        expression = "OBJECTID >%s" % (str(self.m_base.m_last_AT_ObjectID))
+                        if (isQuery == True):
+                            expression += ' AND %s' % (query)
+
+                        arcpy.MakeMosaicLayer_management(fullPath, lyrName, expression)
+
                         try:
-                            arcpy.CalculateField_management(layername,
+                            arcpy.CalculateField_management(lyrName,
                             self.getProcessInfoValue(processKey, 'fieldname', index, indx),
                             self.getProcessInfoValue(processKey, 'expression', index, indx),
                             self.getProcessInfoValue(processKey, 'expression_type', index, indx),
@@ -483,8 +527,7 @@ class Solutions(Base.Base):
                             self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                             isError = True
                         try:
-                            if (layername != fullPath):
-                                arcpy.Delete_management(layername)
+                            arcpy.Delete_management(lyrName)
                         except:
                             log.Message(arcpy.GetMessages(), log.const_warning_text)
                             isError = True
@@ -782,7 +825,8 @@ class Solutions(Base.Base):
             self.m_base.m_doc = minidom.parse(self.config)
             (ret, msg) = self.m_base.init()
             if (ret == False):
-                if (msg == 'version'):
+                if (msg == self.m_base.const_init_ret_version or
+                    msg == self.m_base.const_init_ret_sde):
                     return False
                 raise
         except Exception as inf:
@@ -841,11 +885,17 @@ class Solutions(Base.Base):
 
             self.log("Command:" + cmd + '->' + self.commands[cmd]['desc'], self.const_general_text)
             success = 'OK'
-            if (self.commands[cmd]['fnc'](self, cmd, index) == False):
+
+            status = self.commands[cmd]['fnc'](self, cmd, index)
+            if (status == False):
                 success = 'Failed!'
             self.log(success, self.const_status_text)
 
             if (self.isLog() == True):
                 self.m_log.CloseCategory()
+
+            if (status == False and     # do not continue with any following commands if AR command fails.
+                cmd == 'AR'):
+                    return False
 
         return True

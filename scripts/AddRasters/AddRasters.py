@@ -1,13 +1,13 @@
 #-------------------------------------------------------------------------------
 # Name  	    	: AddRasters.py
 # ArcGIS Version	: ArcGIS 10.1 sp1
-# Script Version	: 20130225
+# Script Version	: 20130714
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
 # Date          	: 16-09-2012
 # Purpose 	    	: A component to Add rasters/data to existing mosaic datasets.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 13-05-2013
+# LastUpdated  		: 17-07-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	: Object of this class should be instantiated.
@@ -35,6 +35,20 @@ class AddRasters(Base.Base):
         return True
 
 
+    def getLastObjectID (self, gdb, md):
+
+        path = os.path.join(gdb, md)
+        rows = arcpy.SearchCursor(path, "objectid = (SELECT MAX(\"objectid\") FROM %sAMD_%s_CAT)" % (self.m_base.m_SDE_database_user, md), None, 'objectid')
+        if (rows == None):
+            return 0        #new table
+
+        objID = 0
+        for row in rows:
+            objID = row.objectid
+            break
+        return objID
+
+
     def GetValue(self, dic_values, key):
         try:
             if (dic_values.has_key(key)):
@@ -46,81 +60,75 @@ class AddRasters(Base.Base):
     def AddRasters(self):
 
         self.log("Adding rasters:", self.const_general_text)
-        ml =0
         for sourceID in self.sMdNameList:
 
             MDName = self.sMdNameList[sourceID]['md']
+
+            fullPath = os.path.join(self.m_base.m_geoPath, MDName)
+            if (arcpy.Exists(fullPath) == False):
+                self.log("Path doesn't exist: %s" % (fullPath), self.const_critical_text)
+                return False
+
+            self.m_base.m_last_AT_ObjectID = self.getLastObjectID (self.m_base.m_geoPath, MDName)
 
             for hshAddRaster in self.sMdNameList[sourceID]['addraster']:
                 try:
                     self.log("\tUsing mosaic dataset/ID:" + MDName + '/' + \
                     hshAddRaster['dataset_id'], self.const_general_text)
 
-                    fullPath = self.m_base.m_geoPath + '/' + MDName
-                    if arcpy.Exists(fullPath):
+                    rasterType = 'Raster Dataset'
 
-                        rasterType = 'Raster Dataset'
+                    name_toupper = MDName.upper()
+                    if (hshAddRaster.has_key('art')):
+                        rasterType = hshAddRaster['art']
+                        self.log("\tUsing ART for " + name_toupper + ': ' + rasterType, self.const_general_text)
 
-                        name_toupper = MDName.upper()
-                        if (hshAddRaster.has_key('art')):
-                            rasterType = hshAddRaster['art']
-                            self.log("\tUsing ART for " + name_toupper + ': ' + rasterType, self.const_general_text)
+                        if (self.m_base.m_art_apply_changes == True):
+                            art_doc = minidom.parse(rasterType)
+                            if (self.m_base.updateART(art_doc, self.m_base.m_art_ws, self.m_base.m_art_ds) == True):
+                                    self.log("\tUpdating ART (Workspace, RasterDataset) values with (%s, %s) respectively." % (self.m_base.m_art_ws, self.m_base.m_art_ds), self.const_general_text)
+                                    c = open(rasterType, "w")
+                                    c.write(art_doc.toxml())
+                                    c.close()
 
-                            if (self.m_base.m_art_apply_changes == True):
-                                art_doc = minidom.parse(rasterType)
-                                if (self.m_base.updateART(art_doc, self.m_base.m_art_ws, self.m_base.m_art_ds) == True):
-                                        self.log("\tUpdating ART (Workspace, RasterDataset) values with (%s, %s) respectively." % (self.m_base.m_art_ws, self.m_base.m_art_ds), self.const_general_text)
-                                        c = open(rasterType, "w")
-                                        c.write(art_doc.toxml())
-                                        c.close()
+                    set_filter = ''
 
-                        set_filter = ''
+                    if (hshAddRaster.has_key('filter')):
+                        set_filter = hshAddRaster['filter']
+                        if (set_filter == '*'):
+                            set_filter = ''
+                    set_spatial_reference = ''
+                    if (hshAddRaster.has_key('spatial_reference')):
+                        set_spatial_reference = hshAddRaster['spatial_reference']
 
-                        if (hshAddRaster.has_key('filter')):
-                            set_filter = hshAddRaster['filter']
-                            if (set_filter == '*'):
-                                set_filter = ''
-                        set_spatial_reference = ''
-                        if (hshAddRaster.has_key('spatial_reference')):
-                            set_spatial_reference = hshAddRaster['spatial_reference']
 
-                        try:
-                            t_view = "table_view" + str(ml)
-                            ml = ml+1
-                            arcpy.MakeTableView_management(fullPath,t_view)
-                            rows = arcpy.SearchCursor(t_view,"","","OBJECTID")
-                            obvalue = 0
-                            if rows != None :
-                                for row in rows:
-                                    obvalue =  row.ObjectID
+                    objID = self.getLastObjectID (self.m_base.m_geoPath, MDName)
 
-                            self.sMdNameList[sourceID]['pre_AddRasters_record_count'] = obvalue
-                            self.sMdNameList[sourceID]['Dataset_ID'] = hshAddRaster['dataset_id']
-                        except:
-                            self.log('Failed to make Table View Layer', self.const_warning_text)
-                            self.log(arcpy.GetMessages(), self.const_warning_text)
-                        try:
-                            arcpy.Delete_management(t_view)
-                        except:
-                            self.log("failed to Delete the layer " + t_view, self.const_warning_text)
-                            self.log(arcpy.GetMessages(), self.const_warning_text)
+                    self.sMdNameList[sourceID]['pre_AddRasters_record_count'] = objID
+                    self.sMdNameList[sourceID]['Dataset_ID'] = hshAddRaster['dataset_id']
 
-                        try:
-                            arcpy.AddRastersToMosaicDataset_management(fullPath, rasterType, hshAddRaster['data_path'],self.GetValue(hshAddRaster, 'update_cellsize_ranges'),self.GetValue(hshAddRaster, 'update_boundary'),self.GetValue(hshAddRaster,'update_overviews'),self.GetValue(hshAddRaster,'maximum_pyramid_levels'),self.GetValue(hshAddRaster,'maximum_cell_size'),self.GetValue(hshAddRaster,'minimum_dimension'),self.GetValue(hshAddRaster,'spatial_reference'), set_filter, self.GetValue(hshAddRaster,'sub_folder'), self.GetValue(hshAddRaster,'duplicate_items_action'), self.GetValue(hshAddRaster,'build_pyramids'), self.GetValue(hshAddRaster,'calculate_statistics'), self.GetValue(hshAddRaster,'build_thumbnails'), self.GetValue(hshAddRaster,'operation_description'), self.GetValue(hshAddRaster,'force_spatial_reference'))
-                        except:
-                            self.log("Failed to add rasters to mosaic dataset : " + fullPath, self.const_warning_text)
-                            self.log(arcpy.GetMessages(), self.const_warning_text)
+                    self.log('Adding items..')
+                    arcpy.AddRastersToMosaicDataset_management(fullPath, rasterType, hshAddRaster['data_path'],self.GetValue(hshAddRaster, 'update_cellsize_ranges'),self.GetValue(hshAddRaster, 'update_boundary'),self.GetValue(hshAddRaster,'update_overviews'),self.GetValue(hshAddRaster,'maximum_pyramid_levels'),self.GetValue(hshAddRaster,'maximum_cell_size'),self.GetValue(hshAddRaster,'minimum_dimension'),self.GetValue(hshAddRaster,'spatial_reference'), set_filter, self.GetValue(hshAddRaster,'sub_folder'), self.GetValue(hshAddRaster,'duplicate_items_action'), self.GetValue(hshAddRaster,'build_pyramids'), self.GetValue(hshAddRaster,'calculate_statistics'), self.GetValue(hshAddRaster,'build_thumbnails'), self.GetValue(hshAddRaster,'operation_description'), self.GetValue(hshAddRaster,'force_spatial_reference'))
 
-                        for callback_fn in self.callback_functions:
-                            callback_fn(self.m_base.m_geoPath, sourceID, self.sMdNameList[sourceID])
+                    newObjID = self.getLastObjectID (self.m_base.m_geoPath, MDName)
 
-                    else:
-                        self.log("Error: Path doesn't exist:" + fullPath, self.const_warning_text)
-                except:
-                    self.log("Failed!", self.const_critical_text)
-                    self.log(arcpy.GetMessages(), self.const_critical_text)
-                    return False
+                    if (newObjID <= objID):
+                        self.log('No new mosaic dataset item was added for Dataset ID (%s)' % (hshAddRaster['dataset_id']))
+                        continue
 
+                    for callback_fn in self.callback_functions:
+                        if (callback_fn(self.m_base.m_geoPath, sourceID, self.sMdNameList[sourceID]) == False):
+                            return False
+
+                except Exception as inst:
+                    self.log(str(inst), self.const_warning_text)
+                    Warning = True
+
+
+            newObjID = self.getLastObjectID (self.m_base.m_geoPath, MDName)
+            if (newObjID <= self.m_base.m_last_AT_ObjectID):
+                self.log('No new mosaic dataset items added to dataset (%s). Verify the input data path/raster type is correct' % (MDName), self.const_critical_text)
+                return  False
 
         return True
 

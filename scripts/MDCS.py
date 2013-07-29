@@ -4,7 +4,7 @@
 # Script Version	: 20130714
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
-# Date          	: 28-05-2013
+# Date          	: 29-07-2013
 # Purpose 	    	: This is the main program entry point to MDCS.
 # Created	    	: 14-08-2012
 # Required Argument : Not applicable.
@@ -45,24 +45,33 @@ def postAddData(gdbPath, mdName, info):
         try:
             arcpy.MakeMosaicLayer_management(fullPath,lyrName,expression)
         except:
-            log.Message("Failed to make mosaic layer ", log.const_warning_text)
-            log.Message(arcpy.GetMessages(), log.const_warning_text)
+            log.Message("Failed to make mosaic layer (%s)" % (lyrName), log.const_critical_text)
+            log.Message(arcpy.GetMessages(), log.const_critical_text)
+
+            return False
 
         try:
-            fieldExist = arcpy.ListFields(fullPath,"dataset_id")
+            fieldName = 'dataset_id'
+            fieldExist = arcpy.ListFields(fullPath, fieldName)
             if len(fieldExist) == 0:
-                arcpy.AddField_management(fullPath,"dataset_id","TEXT","","","50")
-            log.Message("Calculating Dataset ID for the mosaic dataset : " + mdName, log.const_general_text)
-            arcpy.CalculateField_management(lyrName, "dataset_id", "\"" + info['Dataset_ID'] + "\"","PYTHON")
+                arcpy.AddField_management(fullPath, fieldName, "TEXT", "", "", "50")
+            log.Message("Calculating \'Dataset ID\' for the mosaic dataset (%s) with value (%s)" % (mdName, info['Dataset_ID']), log.const_general_text)
+            arcpy.CalculateField_management(lyrName, fieldName, "\"" + info['Dataset_ID'] + "\"", "PYTHON")
         except :
-            log.Message("Failed to calculate Dataset_ID : " + fullPath, log.const_warning_text)
-            log.Message(arcpy.GetMessages(), log.const_warning_text)
+            log.Message('Failed to calculate \'Dataset_ID\'', log.const_critical_text)
+            log.Message(arcpy.GetMessages(), log.const_critical_text)
+
+            return False
+
         try:
             arcpy.Delete_management(lyrName)
         except:
-            log.Message("Failed to delete the layer " + lyrName, log.const_warning_text)
-            log.Message(arcpy.GetMessages(), log.const_warning_text)
+            log.Message("Failed to delete the layer", log.const_critical_text)
+            log.Message(arcpy.GetMessages(), log.const_critical_text)
 
+            return False
+
+    return True
 
 def main(argc, argv):
     pass
@@ -84,7 +93,7 @@ def main(argc, argv):
         "-l: Log file to write to disk [path+file name]"
         ]
 
-        print "\nMDCS.py v5.3\nUsage: MDCS.py -c:<Optional:command> -i:<config_file>" \
+        print "\nMDCS.py v5.5\nUsage: MDCS.py -c:<Optional:command> -i:<config_file>" \
         "\n\nFlags to override configuration values," \
 
         for arg in user_args:
@@ -158,8 +167,10 @@ def main(argc, argv):
         (p, f) = os.path.split(md_path_)
         f = f.strip()
         const_gdb_ext_len_ = len(base.const_geodatabase_ext)
-        if (p[-const_gdb_ext_len_:].lower() == base.const_geodatabase_ext.lower()
-            and f != ''):
+        ext = p[-const_gdb_ext_len_:].lower()
+        if ((ext == base.const_geodatabase_ext.lower() or
+            ext == base.const_geodatabase_SDE_ext.lower()) and
+            f != ''):
             p = p.replace('\\', '/')
             w = p.split('/')
             workspace_ = ''

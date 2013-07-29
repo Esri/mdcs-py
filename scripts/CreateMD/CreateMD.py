@@ -7,7 +7,7 @@
 # Date          	: 16-09-2012
 # Purpose 	    	: A component to create source mosaic datasets.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 13-05-2013
+# LastUpdated  		: 28-07-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	: Object of this class should be instantiated.
@@ -36,6 +36,9 @@ class CreateMD(Base.Base):
 
 
     def createGeodataBase(self):
+
+        if (self.m_base.m_IsSDE == True):       # MDCS doesn't create new SDE connections and assumes .SDE connection passed on exists @ the server
+            return True                         # to create new Mosaic Datasets.
 
         # create output workspace if missing.
         if (os.path.exists(self.m_base.m_workspace) == False):
