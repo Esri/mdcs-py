@@ -7,6 +7,7 @@
 # Date          	: 29-07-2013
 # Purpose 	    	: This is the main program entry point to MDCS.
 # Created	    	: 14-08-2012
+# LastUpdated  		: 01-08-2013
 # Required Argument : Not applicable.
 # Optional Argument : Not applicable.
 # Usage         	: Object of this class should be instantiated.
@@ -117,7 +118,7 @@ def main(argc, argv):
 
 
     argIndx = 1
-    md_path_ = config = com = log_folder = ''
+    md_path_ = artdem = config = com = log_folder = ''
 
     while(argIndx < argc):
         (values) = argv[argIndx].split(':')
@@ -141,10 +142,8 @@ def main(argc, argv):
             base.m_sources = value
         elif(subCode == 'l'):
             log_folder =  value
-        elif(exSubCode == 'artws'):
-            base.m_art_ws =  value
-        elif(exSubCode == 'artds'):
-            base.m_art_ds =  value
+        elif(exSubCode == 'artdem'):
+            artdem =  value
         elif(subCode == 'p'):
             aryP = value.split('$')
             pMax = len(aryP) - 1
@@ -189,8 +188,8 @@ def main(argc, argv):
         return False
 
 
-    if (base.m_art_ws != ''
-    or  base.m_art_ds != ''):
+    if (artdem != ''):
+        (base.m_art_ws, base.m_art_ds) = os.path.split(artdem)
         base.m_art_apply_changes = True
 
 
