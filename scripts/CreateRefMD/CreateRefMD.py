@@ -1,10 +1,9 @@
 #-------------------------------------------------------------------------------
 # Name  	    	: CreateRefMD.py
 # ArcGIS Version	: ArcGIS 10.1 sp1
-# Script Version	: 20130225
+# Script Version	: 20130801
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
-# Date          	: 16-09-2012
 # Purpose 	    	: To create referenced Mosaic datasets
 # Created	    	: 14-08-2012
 # LastUpdated  		: 29-07-2013

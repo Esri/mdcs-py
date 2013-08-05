@@ -1,16 +1,16 @@
 #-------------------------------------------------------------------------------
 # Name  	    	: MDCS.py
 # ArcGIS Version	: ArcGIS 10.1 sp1
-# Script Version	: 20130714
+# Script Version	: 20130801
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
-# Date          	: 29-07-2013
 # Purpose 	    	: This is the main program entry point to MDCS.
 # Created	    	: 14-08-2012
 # LastUpdated  		: 01-08-2013
-# Required Argument : Not applicable.
-# Optional Argument : Not applicable.
-# Usage         	: Object of this class should be instantiated.
+# Required Argument : -i:<config_file>
+# Optional Argument : -c|-m|-s|-l
+# Usage         : python.exe MDCS.py -c:<Optional:command(s)> -i:<config_file>
+# Type 'python.exe mdcs.py' to display the usage and a list of valid commands.
 # Copyright	    : (c) ESRI 2012
 # License	    : <your license>
 #-------------------------------------------------------------------------------
@@ -91,10 +91,11 @@ def main(argc, argv):
         [
         "-m: Mosaic dataset path including GDB and MD name [e.g. c:\WorldElevation.gdb\Portland]",
         "-s: Source data paths. (As inputs to command (AR)",
-        "-l: Log file to write to disk [path+file name]"
+        "-l: Log file output path [path+file name]",
+        "-artdem: Update DEM path in ART file"
         ]
 
-        print "\nMDCS.py v5.5\nUsage: MDCS.py -c:<Optional:command> -i:<config_file>" \
+        print "\nMDCS.py v5.6 [20130801]\nUsage: MDCS.py -c:<Optional:command> -i:<config_file>" \
         "\n\nFlags to override configuration values," \
 
         for arg in user_args:

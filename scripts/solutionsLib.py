@@ -1,10 +1,9 @@
 #-------------------------------------------------------------------------------
 # Name  	    	: SolutionsLib
 # ArcGIS Version	: ArcGIS 10.1 sp1
-# Script Version	: 20130225
+# Script Version	: 20130801
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
-# Date          	: 16-09-2012
 # Purpose 	    	: To have a library of python modules to facilitate code to reuse for Raster Solutions projects.
 # Created	    	: 14-08-2012
 # LastUpdated  		: 29-07-2013
@@ -637,7 +636,7 @@ class Solutions(Base.Base):
     commands = \
     {
     'CM' :
-        {   'desc' : 'Create new mosaic dataset.',
+        {   'desc' : 'Create a new mosaic dataset.',
             'fnc' : executeCommand
         },
     'CR' :
@@ -669,19 +668,19 @@ class Solutions(Base.Base):
             'fnc' : executeCommand
         },
     'CS' :
-        {   'desc' : 'Calculate Statistic.',
+        {   'desc' : 'Calculate Statistics.',
             'fnc' : executeCommand
         },
     'CBMD' :
-        {   'desc' : 'Color Balance Mosaic Dataset.',
+        {   'desc' : 'Color balance Mosaic Dataset.',
             'fnc' : executeCommand
         },
     'BPS' :
-        {   'desc' : 'Build Pyramid and Statistic.',
+        {   'desc' : 'Build pyramid and Statistics.',
             'fnc' : executeCommand
         },
     'ERF' :
-        {   'desc' : 'Edit Raster Function.',
+        {   'desc' : 'Edit raster function.',
             'fnc' : executeCommand
         },
     'DN' :
@@ -721,11 +720,11 @@ class Solutions(Base.Base):
             'fnc' : executeCommand
         },
     'AI' :
-        {   'desc' : 'Adds attribute index on the Mosaic Dataset.',
+        {   'desc' : 'Adds attribute index on the mosaic dataset.',
             'fnc' : executeCommand
         },
     'CV' :
-        {   'desc' : 'Calculate values on the Mosaic Dataset.',
+        {   'desc' : 'Calculate values on the mosaic dataset.',
             'fnc' : executeCommand
         },
     'CP' :

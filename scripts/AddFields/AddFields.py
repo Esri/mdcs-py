@@ -1,10 +1,9 @@
 #-------------------------------------------------------------------------------
 # Name  	    	: AddFields.py
 # ArcGIS Version	: ArcGIS 10.1 sp1
-# Script Version	: 20130225
+# Script Version	: 20130801
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
-# Date          	: 16-09-2012
 # Purpose 	    	: A component to create custom fields in mosaic datasets.
 # Created	    	: 14-08-2012
 # LastUpdated  		: 13-05-2013

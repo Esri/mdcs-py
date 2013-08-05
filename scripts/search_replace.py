@@ -1,10 +1,9 @@
 #-------------------------------------------------------------------------------
 # Name  	        : searchReplace.py
 # ArcGIS Version	: ArcGIS 10.1 sp1
-# Script Version	: 20130224
+# Script Version	: 20130801
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
-# Date          	: 16-09-2012
 # Purpose 	    	: This script is to search
 # Created	    	: 14-08-2012
 # LastUpdated  		: 17-09-2012

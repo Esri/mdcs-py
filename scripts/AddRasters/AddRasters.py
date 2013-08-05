@@ -1,10 +1,9 @@
 #-------------------------------------------------------------------------------
 # Name  	    	: AddRasters.py
 # ArcGIS Version	: ArcGIS 10.1 sp1
-# Script Version	: 20130714
+# Script Version	: 20130801
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
-# Date          	: 16-09-2012
 # Purpose 	    	: A component to Add rasters/data to existing mosaic datasets.
 # Created	    	: 14-08-2012
 # LastUpdated  		: 17-07-2013
