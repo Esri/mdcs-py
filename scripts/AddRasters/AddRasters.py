@@ -121,7 +121,7 @@ class AddRasters(Base.Base):
 
                 except Exception as inst:
                     self.log(str(inst), self.const_warning_text)
-                    self.log(arcpy.GetMessages(), self.const_critical_text)
+                    self.log(arcpy.GetMessages(), self.const_warning_text)
                     Warning = True
 
 
