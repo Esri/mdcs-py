@@ -121,12 +121,14 @@ class AddRasters(Base.Base):
 
                 except Exception as inst:
                     self.log(str(inst), self.const_warning_text)
+                    self.log(arcpy.GetMessages(), self.const_critical_text)
                     Warning = True
 
 
             newObjID = self.getLastObjectID (self.m_base.m_geoPath, MDName)
             if (newObjID <= self.m_base.m_last_AT_ObjectID):
                 self.log('No new mosaic dataset items added to dataset (%s). Verify the input data path/raster type is correct' % (MDName), self.const_critical_text)
+                self.log(arcpy.GetMessages(), self.const_critical_text)
                 return  False
 
         return True
