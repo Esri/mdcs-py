@@ -12,7 +12,7 @@
     </Product>
   </ArcGISVersion>
   <Workspace>
-    <!-- CM  Create Mosaic Dataset-->
+    <!-- CM Create Mosaic Dataset-->
     <!-- http://resources.arcgis.com/en/help/main/10.2/index.html#/Create_Mosaic_Dataset/00170000008n000000/ -->
     <WorkspacePath>Path_to_folder_where_GDB_Will_be_stored</WorkspacePath>
     <Geodatabase>Name_of_Geodatabase</Geodatabase>
