@@ -4,6 +4,7 @@
   <Name>Name_of_Project</Name>
   <Command>DefaultCommand</Command>
   <!-- Commands avaiable CM,CR,AR,BF,BS,BP,JF,CS,CBMD,BPS,ERF,DN,SP,IG,BB,SS,CC,BO,DO,AI,CV,CP,SE,SY -->
+  <!-- Commands can be combined using the + sign and some commands can be called multiple times, refer to MDCS document for more help -->
   <ArcGISVersion>
     <!-- Defines Min Max version required. Eg due to know issue in previsous versions -->
     <Product>
@@ -87,7 +88,7 @@
         </AddRaster>
       </AddRasters>
       <!-- SP    Set Properties -->
-      <!-- http://resources.arcgis.com/en/help/main/10.3/index.html#/Set_Mosaic_Dataset_Properties/001700000161000000/-->
+      <!-- http://resources.arcgis.com/en/help/main/10.2/index.html#/Set_Mosaic_Dataset_Properties/001700000161000000/-->
       <DefaultProperties>
         <max_num_per_mosaic>50</max_num_per_mosaic>
         <rows_maximum_imagesize>4000</rows_maximum_imagesize>
