@@ -6,7 +6,7 @@
 # Author        	: ESRI raster solution team
 # Purpose 	    	: Base call used by all Raster Solutions components.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 15-07-2013
+# LastUpdated  		: 11-09-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -17,6 +17,7 @@
 
 import os
 import arcpy
+import _winreg
 from datetime import datetime
 
 from xml.dom import minidom
@@ -43,11 +44,18 @@ class Base(object):
     # base init codes. (const_strings)
     const_init_ret_version = 'version'
     const_init_ret_sde = 'sde'
+    const_init_ret_patch = 'patch'
     # ends
 
 
     #version specific
     const_ver_len = 4
+
+    CMAJOR = 0
+    CMINOR = 1
+    CSP = 2
+    CBUILD = 3
+    CVERSION_ATTRIB = 'version'
 
     # ends
 
@@ -109,7 +117,7 @@ class Base(object):
                 CBUILD = self.const_ver_len
 
                 if (len(max) != self.const_ver_len):
-                    max = min               # set max to same as min version if max version isn't defined / has errors.
+                    max = [0, 0, 0, 0]               # zero up max if max version isn't defined / has errors.
 
                 for n in range(CMAJOR, CBUILD):
                     if (min[n] == ''):
@@ -127,6 +135,13 @@ class Base(object):
             self.log('Version check failure/' + str(inst), self.const_critical_text)
             return False
         #ends
+
+
+        # ArcGIS patch test.
+        if (self.isArcGISPatched() == False):
+            self.log('An ArcGIS patch required to run MDCS is not yet installed. Unable to proceed.', self.const_critical_text)
+            return (False, self.const_init_ret_patch)
+        # ends
 
 
         self.setUserDefinedValues()         #replace user defined dynamic variables in config file with values provided at the command-line.
@@ -254,6 +269,97 @@ class Base(object):
         return _file
 
 
+
+    def isArcGISPatched(self):      # return values [true | false]
+
+        # if the patch XML node is not properly formatted in structure/with values, MDCS returns an error and will abort the operation.
+
+        patch_node = self.getXMLNode(self.m_doc, "Patch")
+        if (patch_node ==''):
+            return False
+
+        if (patch_node.attributes.length == 0):
+            return False
+
+        if (patch_node.attributes.has_key(self.CVERSION_ATTRIB) == False):
+            return False
+        target_ver = patch_node.attributes.getNamedItem(self.CVERSION_ATTRIB).nodeValue.strip()
+        if (len(target_ver) == 0):
+            return False
+
+        search_key = ''
+        patch_desc_node = patch_node.firstChild.nextSibling
+        while (patch_desc_node != None):
+            node_name = patch_desc_node.nodeName
+            if (node_name == 'Name'):
+                if (patch_desc_node.hasChildNodes() == True):
+                    search_key = patch_desc_node.firstChild.nodeValue
+                    break
+            patch_desc_node = patch_desc_node.nextSibling.nextSibling
+
+
+        if (len(search_key) == 0):      # if no patch description could be found, return False
+            return False
+
+        ver = (target_ver + '.0.0.0.0').split('.')
+        for n in range(self.CMAJOR, self.CBUILD + 1):
+            if (ver[n] == ''):
+                ver[n] = 0
+            ver[n] = int(ver[n])
+        ver = ver[:4]       # accept only the first 4 digits.
+
+        target_v_str = installed_v_str = ''
+        for i in range (self.CMAJOR, self.CBUILD + 1):
+            target_v_str += "%04d" % ver[i]
+
+        installed_ver = self.getDesktopVersion()
+        for i in range (self.CMAJOR, self.CBUILD + 1):
+            installed_v_str += "%04d" % installed_ver[i]
+
+        tVersion = int(target_v_str)
+        iVersion = int(installed_v_str)
+
+        if (iVersion > tVersion):           # if the installed ArcGIS version is greater than the patch's, it's OK to proceed.
+            return True
+
+        # if the installed ArcGIS version is lower than the intended target patch version, continue with the registry key check for the
+        # possible patches installed.
+        #HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\ESRI\Desktop10.2\Updates
+
+        CPRODUCT_NAME = 'ProductName'
+        CVERSION = 'Version'
+
+        setupInfo = arcpy.GetInstallInfo()
+        if (CVERSION in setupInfo.keys() == False or
+            CPRODUCT_NAME in setupInfo.keys() == False):
+            return False
+
+        key = setupInfo[CPRODUCT_NAME] + setupInfo[CVERSION]
+
+        try:
+            reg_path = "Software\\Wow6432Node\\ESRI\\%s\\Updates" % (key)
+            arcgis = _winreg.OpenKey(
+                _winreg.HKEY_LOCAL_MACHINE, reg_path)
+
+            i = 0
+            while 1:
+                name = _winreg.EnumKey(arcgis, i)
+                arcgis_sub = _winreg.OpenKey(
+                    _winreg.HKEY_LOCAL_MACHINE, reg_path + '\\' + name)
+                try:
+                    value, type = _winreg.QueryValueEx(arcgis_sub, "Name")
+                    if (type == 1):   # reg_sz
+                        if (value.lower().find(search_key.lower()) >= 0):
+                            return True     # return true if the value is found!
+                except:
+                    pass
+                i += 1
+        except:
+            pass
+
+        return False
+
+
     def getDesktopVersion(self):    #returns major, minor, sp and the build number.
 
         d = arcpy.GetInstallInfo()
@@ -323,11 +429,14 @@ class Base(object):
 
                 ver_failed = False
 
-                if (inst_major > max_major):
+                if (max_major > 0 and
+                    inst_major > max_major):
                     ver_failed = True
-                elif (inst_minor > max_minor):
+                elif (max_minor > 0 and
+                    inst_minor > max_minor):
                         ver_failed = True
-                elif (inst_sp > max_cp):
+                elif (max_cp > 0 and
+                    inst_sp > max_cp):
                         ver_failed = True
                 elif (max_build > 0 and
                       inst_build > max_build):
@@ -519,6 +628,7 @@ class Base(object):
         node = doc.getElementsByTagName(nodeName)
         if (node == None or
             node.length == 0 or
+            node[0].hasChildNodes() == False or
             node[0].firstChild.nodeType != minidom.Node.TEXT_NODE):
             return ''
 

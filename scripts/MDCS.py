@@ -6,7 +6,7 @@
 # Author        	: ESRI raster solution team
 # Purpose 	    	: This is the main program entry point to MDCS.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 01-08-2013
+# LastUpdated  		: 11-09-2013
 # Required Argument : -i:<config_file>
 # Optional Argument : -c|-m|-s|-l
 # Usage         : python.exe MDCS.py -c:<Optional:command(s)> -i:<config_file>
@@ -184,7 +184,7 @@ def main(argc, argv):
 
 
     if (os.path.isfile(config) == False):
-        errMessage = u"Error: Input config file is not specified/not found!"
+        errMessage = u"Error: Input config file is not specified/not found! " + config 
         arcpy.AddMessage(errMessage)
         return False
 

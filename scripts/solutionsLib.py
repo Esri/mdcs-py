@@ -6,7 +6,7 @@
 # Author        	: ESRI raster solution team
 # Purpose 	    	: To have a library of python modules to facilitate code to reuse for Raster Solutions projects.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 29-07-2013
+# LastUpdated  		: 11-09-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -386,6 +386,19 @@ class Solutions(Base.Base):
                 except:
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
 
+        elif(com == 'RP'):
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                processKey = 'repairmosaicdatasetpaths'
+                self.log ("Repairing mosaic dataset paths ")
+                try:
+                    arcpy.RepairMosaicDatasetPaths_management(
+                    fullPath,
+                    self.getProcessInfoValue(processKey, 'paths_list', index),
+                    self.getProcessInfoValue(processKey, 'where_clause', index)
+                    )
+                    return True
+                except:
+                    self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
 
         elif(com == 'SS'):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
@@ -671,8 +684,12 @@ class Solutions(Base.Base):
         {   'desc' : 'Calculate Statistics.',
             'fnc' : executeCommand
         },
+    'RP' :
+        {   'desc' : 'Repair mosaic dataset paths',
+            'fnc' : executeCommand
+        },
     'CBMD' :
-        {   'desc' : 'Color balance Mosaic Dataset.',
+        {   'desc' : 'Color balance mosaic dataset.',
             'fnc' : executeCommand
         },
     'BPS' :
@@ -825,7 +842,8 @@ class Solutions(Base.Base):
             (ret, msg) = self.m_base.init()
             if (ret == False):
                 if (msg == self.m_base.const_init_ret_version or
-                    msg == self.m_base.const_init_ret_sde):
+                    msg == self.m_base.const_init_ret_sde or
+                    msg == self.m_base.const_init_ret_patch):
                     return False
                 raise
         except Exception as inf:
