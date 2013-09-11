@@ -276,7 +276,7 @@ class Base(object):
 
         patch_node = self.getXMLNode(self.m_doc, "Patch")
         if (patch_node ==''):
-            return False
+            return True
 
         if (patch_node.attributes.length == 0):
             return False
