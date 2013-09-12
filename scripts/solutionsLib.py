@@ -102,9 +102,9 @@ class Solutions(Base.Base):
                 self.getProcessInfoValue(processKey,'balancing_method', index),
                 self.getProcessInfoValue(processKey,'color_surface_type', index),
                 self.getProcessInfoValue(processKey,'target_raster', index),
-                self.getProcessInfoValue(processKey,'gamma', index),
                 self.getProcessInfoValue(processKey,'exclude_raster', index),
                 self.getProcessInfoValue(processKey,'stretch_type', index),
+                self.getProcessInfoValue(processKey,'gamma', index),
                 self.getProcessInfoValue(processKey,'block_field', index)
                 )
                 return True
