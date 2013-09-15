@@ -6,7 +6,7 @@
 # Author        	: ESRI raster solution team
 # Purpose 	    	: Class to log status from components to log files.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 10-02-2013
+# LastUpdated  		: 16-09-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -130,9 +130,11 @@ class Logger:
                 self.projects[key]['logs']['message'].append({'error' : {'type' : errorTypeText, 'text': message}})
 
             _message = 'log-' + errorTypeText + ': ' + message     #print out error message to console while logging.
-            print _message
+
             if (self.isGPRun == True):
                 arcpy.AddMessage(_message)
+            else:
+                print (_message)
 
             return True
 

@@ -6,7 +6,7 @@
 # Author        	: ESRI raster solution team
 # Purpose 	    	: This is the main program entry point to MDCS.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 11-09-2013
+# LastUpdated  		: 16-09-2013
 # Required Argument : -i:<config_file>
 # Optional Argument : -c|-m|-s|-l
 # Usage         : python.exe MDCS.py -c:<Optional:command(s)> -i:<config_file>
@@ -75,7 +75,6 @@ def postAddData(gdbPath, mdName, info):
     return True
 
 def main(argc, argv):
-    pass
 
     argc = len(argv)
     if (argc < 2):
@@ -123,8 +122,9 @@ def main(argc, argv):
 
     while(argIndx < argc):
         (values) = argv[argIndx].split(':')
-        if (len(values[0]) < 2
-            or values[0][:1] != '-'):
+        if (len(values[0]) < 2 or
+            values[0][:1] != '-' and
+            values[0][:1] != '#'):
             argIndx += 1
             continue
 
@@ -184,7 +184,7 @@ def main(argc, argv):
 
 
     if (os.path.isfile(config) == False):
-        errMessage = u"Error: Input config file is not specified/not found! " + config 
+        errMessage = u"Error: Input config file is not specified/not found! " + config
         arcpy.AddMessage(errMessage)
         return False
 
@@ -207,7 +207,7 @@ def main(argc, argv):
     if (com == ''):
         com = base.const_cmd_default_text
 
-    if (argv[0].lower() == '#gprun'):
+    if (argv[1].lower() == '#gprun'):
         log.isGPRun = True
     log.Project ('MDCS')
     log.LogNamePrefix(configName)
