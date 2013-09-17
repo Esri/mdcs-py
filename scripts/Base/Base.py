@@ -316,8 +316,12 @@ class Base(object):
         for i in range (self.CMAJOR, self.CBUILD + 1):
             installed_v_str += "%04d" % installed_ver[i]
 
+
         tVersion = int(target_v_str)
         iVersion = int(installed_v_str)
+
+        if (iVersion > tVersion):           # the first priority is to check for the patch version against the installed version
+            return True                     # if the installed ArcGIS version is greater than the patch's, it's OK to proceed.
 
         # if the installed ArcGIS version is lower than the intended target patch version, continue with the registry key check for the
         # possible patches installed.
@@ -337,9 +341,6 @@ class Base(object):
             reg_path = "Software\\Wow6432Node\\ESRI\\%s\\Updates" % (key)
             arcgis = _winreg.OpenKey(
                 _winreg.HKEY_LOCAL_MACHINE, reg_path)
-                                                # if the patch node is defined in the MDCS, the existence of the registry key is a must else we return error.
-            if (iVersion > tVersion):           # the second priority is to check for the patch version against the installed version
-                return True                     # if the installed ArcGIS version is greater than the patch's, it's OK to proceed.
 
             i = 0
             while 1:
