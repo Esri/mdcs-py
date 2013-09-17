@@ -6,7 +6,7 @@
 # Author        	: ESRI raster solution team
 # Purpose 	    	: Base call used by all Raster Solutions components.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 11-09-2013
+# LastUpdated  		: 17-09-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -319,9 +319,6 @@ class Base(object):
         tVersion = int(target_v_str)
         iVersion = int(installed_v_str)
 
-        if (iVersion > tVersion):           # if the installed ArcGIS version is greater than the patch's, it's OK to proceed.
-            return True
-
         # if the installed ArcGIS version is lower than the intended target patch version, continue with the registry key check for the
         # possible patches installed.
         #HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\ESRI\Desktop10.2\Updates
@@ -340,6 +337,9 @@ class Base(object):
             reg_path = "Software\\Wow6432Node\\ESRI\\%s\\Updates" % (key)
             arcgis = _winreg.OpenKey(
                 _winreg.HKEY_LOCAL_MACHINE, reg_path)
+                                                # if the patch node is defined in the MDCS, the existence of the registry key is a must else we return error.
+            if (iVersion > tVersion):           # the second priority is to check for the patch version against the installed version
+                return True                     # if the installed ArcGIS version is greater than the patch's, it's OK to proceed.
 
             i = 0
             while 1:
