@@ -6,7 +6,7 @@
 # Author        	: ESRI raster solution team
 # Purpose 	    	: Base call used by all Raster Solutions components.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 17-09-2013
+# LastUpdated  		: 23-09-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -391,7 +391,9 @@ class Base(object):
                 except:
                     ValError = True
 
-        version.append(spNumber)
+        CMAJOR_MINOR_REVISION = 3
+        if (len(version) < CMAJOR_MINOR_REVISION):  # On a system with full-install, ArcGIS version piece of information could return 3 numbers (major, minor, revision/SP)
+            version.append(spNumber)                # and thus the SP number shouldn't be added to the version sperately.
         version.append(buildNumber)
 
         return version

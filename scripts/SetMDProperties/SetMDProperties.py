@@ -6,7 +6,7 @@
 # Author        	: ESRI raster solution team
 # Purpose 	    	: To set Mosaic dataset properties
 # Created	    	: 14-08-2012
-# LastUpdated  		: 13-05-2013
+# LastUpdated  		: 23-09-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         : Object of this class should be instantiated.
@@ -28,27 +28,9 @@ class SetMDProperties(Base.Base):
 
         self.m_base = base
 
+
     def is101SP1(self):
-        setPropertiesNew = False
-        SPNumber = 0;
-
-        d = arcpy.GetInstallInfo('desktop')
-
-        for k in d:
-            key = k.upper()
-            if (key == 'VERSION'):
-                version = float(d[k])
-            elif(key == 'SPNUMBER'):
-                try:
-                    SPNumber = int(d[k])
-                except:
-                    SPNumber = SPNumber
-        if (version > 10.1):
-                setPropertiesNew = True
-        elif(version == 10.1 and SPNumber > 0):
-                setPropertiesNew = True
-
-        return setPropertiesNew
+        return self.CheckMDCSVersion([10, 1, 0, 0], [0, 0, 0, 0])       # ver [major, minor, revision, build]
 
 
     def getInternalPropValue(self, md, key):
