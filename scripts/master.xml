@@ -369,7 +369,7 @@
         <!-- SE     Set Environments -->
         <!-- http://resources.arcgis.com/en/help/main/10.2/index.html#/An_overview_of_raster_storage_settings/001w00000024000000/ -->
         <!-- http://resources.arcgis.com/en/help/main/10.2/index.html#/Parallel_Processing_Factor/001w0000004m000000/ -->
-        <SetEnvironment>
+        <Environment>
           <cellSize></cellSize>
           <mask></mask>
           <compression></compression>
@@ -391,7 +391,7 @@
           <resample></resample>
           <tileSize></tileSize>
           <parallelProcessingFactor></parallelProcessingFactor>
-        </SetEnvironment>
+        </Environment>
         <!-- CP Compact File Geodatabase -->
         <!-- This command does not have any arguments so needs only to be mentioned at command line -->
         <!--  http://resources.arcgis.com/en/help/main/10.2/index.html#/Compact/00170000000n000000/ -->
