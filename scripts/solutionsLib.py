@@ -6,7 +6,7 @@
 # Author        	: ESRI raster solution team
 # Purpose 	    	: To have a library of python modules to facilitate code to reuse for Raster Solutions projects.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 11-09-2013
+# LastUpdated  		: 23-10-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -641,6 +641,16 @@ class Solutions(Base.Base):
 
                 return True     #should unable to set environment variables return False?
 
+        else:
+
+            # The command could be a user defined function externally defined in the module (MDCS_UC.py). Let's invoke it.
+            data = {
+            'log' : self.m_log,
+            'workspace' : self.m_base.m_geoPath,
+            'mosaicdataset' : self.m_base.m_mdName,
+            'mdcs' : self.m_base.m_doc
+            }
+            return self.invoke_user_function(com, data)
 
         return False            #main function body return, no matching command found!
 
@@ -882,7 +892,10 @@ class Solutions(Base.Base):
         aryCmds = com_.split('+')
         for command in aryCmds:
 
+            ucCommand = command
             command = command.upper()
+
+            is_user_cmd = False
 
             cmd = ''.join(ch for ch in command if ch in (ascii_letters))
             index = 0
@@ -894,8 +907,20 @@ class Solutions(Base.Base):
                         # catch any float values entered, e.t.c
 
             if (self.commands.has_key(cmd) == False):
-                self.log("Command/Err: Unknown command:" + cmd, self.const_general_text)
-                continue
+                if (self.isUser_Function(ucCommand) == True):
+                    try:
+                        self.commands[ucCommand] = {}
+                        self.commands[ucCommand]['desc'] = 'User defined command (%s)' % (ucCommand)
+                        self.commands[ucCommand]['fnc'] = self.commands['CM']['fnc']        # can't use self.executeCommand directly here. Need to check.
+
+                        cmd = ucCommand     # preseve user defined function case.
+                        is_user_cmd = True
+                    except:
+                        self.log('Unabled to add user defined function/command (%s) to command chain.' % (ucCommand), self.const_warning_text)
+                        return False    # return to prevent further processing.
+                else:
+                    self.log("Command/Err: Unknown command:" + cmd, self.const_general_text)
+                    continue
 
             if (self.isLog() == True):
                  self.m_log.CreateCategory(cmd)
@@ -911,8 +936,9 @@ class Solutions(Base.Base):
             if (self.isLog() == True):
                 self.m_log.CloseCategory()
 
-            if (status == False and     # do not continue with any following commands if AR command fails.
-                cmd == 'AR'):
+            if (status == False and     # do not continue with any following commands if AR / user defined function commands fail.
+                (cmd == 'AR' or
+                 is_user_cmd == True)):
                     return False
 
         return True

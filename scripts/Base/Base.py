@@ -6,7 +6,7 @@
 # Author        	: ESRI raster solution team
 # Purpose 	    	: Base call used by all Raster Solutions components.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 23-09-2013
+# LastUpdated  		: 23-10-2013
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -16,12 +16,19 @@
 #!/usr/bin/env python
 
 import os
+import sys
 import arcpy
 import _winreg
 from datetime import datetime
 
 from xml.dom import minidom
 scriptPath = os.path.dirname(__file__)
+
+try:
+    import MDCS_UC
+except Exception as inf:
+    print 'User-Code functions disabled.'
+
 
 class Base(object):
 
@@ -58,6 +65,12 @@ class Base(object):
     CVERSION_ATTRIB = 'version'
 
     # ends
+
+    # externally user defined functions specific
+    CCLASS_NAME = 'UserCode'
+    CMODULE_NAME = 'MDCS_UC'
+    # ends
+
 
 
 #ends
@@ -218,6 +231,45 @@ class Base(object):
         print 'log-' + errorTypeText + ': ' + msg
 
         return True
+
+
+# user defined functions implementation code
+    def isUser_Function(self, name):
+        try:
+            frame = sys._getframe(0).f_globals
+
+            module = frame[self.CMODULE_NAME]
+            cls = getattr(module, self.CCLASS_NAME)
+            instance = cls()
+            fnc = getattr(instance, name)
+        except:
+            return False
+
+        return True
+
+
+    def invoke_user_function(self, name, data):       # MDCS is always passed on which is the MD Configuration Script XML DOM
+        ret = False
+        try:
+            frame = sys._getframe(0).f_globals  # default to first stack.
+
+            module = frame[self.CMODULE_NAME]
+            cls = getattr(module, self.CCLASS_NAME)
+            instance = cls()
+            fnc = getattr(instance, name)
+            try:
+                ret = fnc(data)
+            except Exception as inf:
+                self.log('Error: executing user defined function (%s)' % (name), self.const_critical_text)
+                self.log(str(inf), self.const_critical_text)
+                return False
+        except Exception as inf:
+            self.log('Error: please check if user function (%s) is found in class (%s) of MDCS_UC module.' % (name, CCLASS_NAME), self.const_critical_text)
+            self.log(str(inf), self.const_critical_text)
+            return False
+
+        return ret
+#ends
 
 
     def processEnv(self, node, pos, json):                #support fnc for 'SE' command.
