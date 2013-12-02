@@ -5,8 +5,8 @@
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
 # Purpose 	    	: A component to Add rasters/data to existing mosaic datasets.
-# Created	    	: 14-08-2012
-# LastUpdated  		: 17-07-2013
+# Created	    	: 20120814
+# LastUpdated  		: 20131202
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	: Object of this class should be instantiated.
@@ -14,7 +14,8 @@
 # License	    	: <your license>
 #-------------------------------------------------------------------------------
 
-import arcpy,os,sys
+import arcpy
+import os
 from xml.dom import minidom
 
 import Base
@@ -136,10 +137,6 @@ class AddRasters(Base.Base):
 
     def init(self, config):
 
-        sources_ = self.m_base.m_sources.split(',')
-        sources_max_ = len(sources_)
-        sources_indx_ = 0
-
         mdType = self.getXMLNodeValue(self.m_base.m_doc, 'MosaicDatasetType').lower()
         isDerived = mdType == 'derived'
 
@@ -183,9 +180,6 @@ class AddRasters(Base.Base):
 
                                             if (nodeName == 'addraster'):
 
-                                                if (sources_indx_ > 0):
-                                                    break;
-
                                                 hshAddRasters = {}
 
                                                 for node in node.childNodes:
@@ -227,13 +221,7 @@ class AddRasters(Base.Base):
                                                                                 keyFound = True
 
                                                             else:
-                                                                if (sources_indx_ < sources_max_):
-                                                                    dataPaths = sources_[sources_indx_]
-                                                                    sources_indx_ += 1
-                                                                    keyFound = True
-
-                                                            if (keyFound == False):
-                                                                continue
+                                                                dataPaths = self.m_base.m_sources
 
                                                             nodeValue = dataPaths
 

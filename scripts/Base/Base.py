@@ -5,8 +5,8 @@
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
 # Purpose 	    	: Base call used by all Raster Solutions components.
-# Created	    	: 14-08-2012
-# LastUpdated  		: 23-10-2013
+# Created	    	: 20120814
+# LastUpdated  		: 20131120
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -528,6 +528,7 @@ class Base(object):
         node = doc.getElementsByTagName(nodeName)
         if (node == None or
             node.length == 0 or
+            node[0].hasChildNodes() == False or
             node[0].firstChild.nodeType != minidom.Node.TEXT_NODE):
             return ''
 
@@ -630,12 +631,19 @@ class Base(object):
                  revalue = []
 
                  first = usr_key.find('$')
+                 if (usr_key[first - 1] == '\\'):
+                    revalue = usr_key[0:first - 1] + usr_key[first:]
+                    first = -2      # let's skip non dynamic values with '$' sign
+
                  first += 1
 
                  second =  first + usr_key[first+1:].find('$') + 1
 
                  if (first > 1):
                     revalue.append(usr_key[0:first - 1])
+
+                 if (first == -1):
+                        second = -1
 
                  while(second >= 0):
 
