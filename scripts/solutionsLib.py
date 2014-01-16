@@ -6,7 +6,7 @@
 # Author        	: ESRI raster solution team
 # Purpose 	    	: To have a library of python modules to facilitate code to reuse for Raster Solutions projects.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 23-10-2013
+# LastUpdated  		: 16-01-2014
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -505,12 +505,17 @@ class Solutions(Base.Base):
                 return not isError
 
 
-        elif(com == 'CV'):
-                    fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
-                    processKey = 'calculatevalues'
-                    maxValues = len(self.processInfo.processInfo[processKey][index])
+        elif(com == 'CV'):          # calculate values.
 
-                    self.log("Calculate values:" + fullPath, self.m_log.const_general_text)
+                    processKey = 'calculatevalues'
+
+                    max_CV = len(self.processInfo.processInfo[processKey])
+                    if (index > max_CV - 1):
+                        self.log('Wrong index (%s) specified for (%s). Max index is (%s)' % (index,  processKey, max_CV - 1), self.m_log.const_critical_text)
+                        return False
+
+                    fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                    maxValues = len(self.processInfo.processInfo[processKey][index])
                     isError = False
 
                     for indx in range(0, maxValues):
@@ -525,10 +530,9 @@ class Solutions(Base.Base):
                         expression = "OBJECTID >%s" % (str(self.m_base.m_last_AT_ObjectID))
                         if (isQuery == True):
                             expression += ' AND %s' % (query)
-
-                        arcpy.MakeMosaicLayer_management(fullPath, lyrName, expression)
-
                         try:
+                            arcpy.MakeMosaicLayer_management(fullPath, lyrName, expression)
+
                             arcpy.CalculateField_management(lyrName,
                             self.getProcessInfoValue(processKey, 'fieldname', index, indx),
                             self.getProcessInfoValue(processKey, 'expression', index, indx),
@@ -539,7 +543,7 @@ class Solutions(Base.Base):
                             self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                             isError = True
                         try:
-                            arcpy.Delete_management(lyrName)
+                            arcpy.Delete_management(lyrName)     # passes for unknown/uncreated layer names
                         except:
                             log.Message(arcpy.GetMessages(), log.const_warning_text)
                             isError = True
@@ -751,7 +755,7 @@ class Solutions(Base.Base):
             'fnc' : executeCommand
         },
     'CV' :
-        {   'desc' : 'Calculate values on the mosaic dataset.',
+        {   'desc' : 'Calculate mosaic dataset values.',
             'fnc' : executeCommand
         },
     'CP' :
@@ -922,10 +926,14 @@ class Solutions(Base.Base):
                     self.log("Command/Err: Unknown command:" + cmd, self.const_general_text)
                     continue
 
+            indexed_cmd = False if index == 0 else True
+            cat_cmd  = '%s%s' % (cmd, '' if not indexed_cmd else index)
             if (self.isLog() == True):
-                 self.m_log.CreateCategory(cmd)
+                 self.m_log.CreateCategory(cat_cmd)
 
-            self.log("Command:" + cmd + '->' + self.commands[cmd]['desc'], self.const_general_text)
+            self.log("Command:" + cat_cmd + '->' + '%s' % self.commands[cmd]['desc'], self.const_general_text)
+            if (indexed_cmd):
+                self.log('Using parameter values at index (%s)' % index, self.const_general_text)
             success = 'OK'
 
             status = self.commands[cmd]['fnc'](self, cmd, index)

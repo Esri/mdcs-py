@@ -6,7 +6,7 @@
 # Author        	: ESRI raster solution team
 # Purpose 	    	: This is the main program entry point to MDCS.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 16-09-2013
+# LastUpdated  		: 20-11-2013
 # Required Argument : -i:<config_file>
 # Optional Argument : -c|-m|-s|-l
 # Usage         : python.exe MDCS.py -c:<Optional:command(s)> -i:<config_file>
@@ -147,16 +147,13 @@ def main(argc, argv):
         elif(exSubCode == 'artdem'):
             artdem =  value
         elif(subCode == 'p'):
-            aryP = value.split('$')
-            pMax = len(aryP) - 1
-            if (pMax == 0):
+            pMax = value.rfind('$')
+            if (pMax == -1):
                 argIndx += 1
                 continue
 
-            dynamic_var = aryP[pMax].upper()
-
-            del aryP[pMax]
-            v = ''.join(aryP)
+            dynamic_var = value[pMax + 1:].upper()
+            v =  value[0: pMax]
             if (dynamic_var.strip() != ''):
                 if (base.m_dynamic_params.has_key(dynamic_var) == False):
                     base.m_dynamic_params[dynamic_var] = v
