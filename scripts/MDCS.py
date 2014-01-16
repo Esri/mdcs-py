@@ -6,7 +6,7 @@
 # Author        	: ESRI raster solution team
 # Purpose 	    	: This is the main program entry point to MDCS.
 # Created	    	: 14-08-2012
-# LastUpdated  		: 20-11-2013
+# LastUpdated  	: 16-01-2014
 # Required Argument : -i:<config_file>
 # Optional Argument : -c|-m|-s|-l
 # Usage         : python.exe MDCS.py -c:<Optional:command(s)> -i:<config_file>
