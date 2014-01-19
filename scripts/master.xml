@@ -336,6 +336,9 @@
             <ascending>ascending</ascending>
           </Index>
         </AddIndex>
+        <CacheFeatureClass>
+          <out_cache_featureclass>path of output FC with name</out_cache_featureclass>
+        </CacheFeatureClass>
         <!-- JF     Joing Fields -->
         <!-- http://resources.arcgis.com/en/help/main/10.2/index.html#/Join_Field/001700000065000000/ -->
         <JoinField>

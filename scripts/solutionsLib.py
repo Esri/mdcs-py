@@ -1,12 +1,12 @@
 #-------------------------------------------------------------------------------
 # Name  	    	: SolutionsLib
 # ArcGIS Version	: ArcGIS 10.1 sp1
-# Script Version	: 20130801
+# Script Version	: 20131205
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
 # Purpose 	    	: To have a library of python modules to facilitate code to reuse for Raster Solutions projects.
-# Created	    	: 14-08-2012
-# LastUpdated  		: 16-01-2014
+# Created	    	: 20120814
+# LastUpdated  		: 20140119
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -505,8 +505,65 @@ class Solutions(Base.Base):
                 return not isError
 
 
-        elif(com == 'CV'):          # calculate values.
+        elif(com == 'CFC'):
+            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            processKey = 'cachefeatureclass'
 
+            seamlineFC_name = 'AMD_' + self.m_base.m_mdName + '_SML'
+            seamlineFC_Path = os.path.join(self.m_base.m_geoPath,seamlineFC_name)
+            if (arcpy.Exists(seamlineFC_Path) == False):
+                self.log("Seamline does not exist for the mosaic dataset: " + fullPath, self.m_log.const_general_text)
+                return False
+
+            try:
+                outCFC = self.getProcessInfoValue(processKey, 'out_cache_featureclass', index).replace('\\', '/')
+            except Exception as inf:
+                self.log(str(inf), self.m_log.const_critical_text)
+                return False
+
+            if (outCFC.find('/') == -1):
+                outCFC = os.path.join(self.m_base.m_geoPath, outCFC)
+
+            if arcpy.Exists(outCFC):
+                self.log("Output cache feature class already exists: " + outCFC, self.m_log.const_critical_text)
+                return False
+
+            (outCFC_wrk, outCFC_name) = os.path.split(outCFC)
+            self.log("Exporting seamline as a feaure class: " + outCFC, self.m_log.const_general_text)
+
+            try:
+                arcpy.FeatureClassToFeatureClass_conversion(seamlineFC_Path, outCFC_wrk, outCFC_name, "#", "#", "#")
+            except:
+                self.log('Failed to create the output featue class (%s): (%s)' % (outCFC, arcpy.GetMessages()), self.m_log.const_critical_text)
+                return False
+            try:
+                dropFList = ['BlendWidthUnits', 'BlendType', 'BlendWidth', 'ItemHash']
+                sfieldList = arcpy.ListFields(seamlineFC_Path)
+                for sfield in sfieldList:
+                    if sfield.name.lower() in dropFList:
+                        dropFList.remove(sfield.name)
+
+                arcpy.DeleteField_management(outCFC, dropFList)
+            except:
+                self.log('Failed to delete the fields: ' + arcpy.GetMessages(), self.m_log.const_critical_text)
+
+            catfieldList= []
+            catfield = arcpy.ListFields(fullPath)
+            for field in catfield:
+                catfieldList.append(field.name)
+            removelist = [u'OBJECTID', u'Shape', u'Raster',u'MinPS', u'MaxPS', u'HighPS', u'Category', u'Tag', u'GroupName', u'ProductName', u'CenterX', u'CenterY', u'ZOrder', u'TypeID', u'ItemTS', u'UriHash', u'Uri', u'Shape_Length', u'Shape_Area', u'SOrder', u'SLevelPS']
+            importField = list(set(catfieldList) - set(removelist))
+
+            try:
+                arcpy.JoinField_management(outCFC, "RasterID", fullPath, "OBJECTID", importField)
+            except:
+                self.log("Failed to import metadata fields:" + arcpy.GetMessages(), self.m_log.const_critical_text)
+                return False
+
+            return True
+
+        elif(com == 'CV'):
+                    fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                     processKey = 'calculatevalues'
 
                     max_CV = len(self.processInfo.processInfo[processKey])
@@ -752,6 +809,10 @@ class Solutions(Base.Base):
         },
     'AI' :
         {   'desc' : 'Adds attribute index on the mosaic dataset.',
+            'fnc' : executeCommand
+        },
+    'CFC' :
+        {   'desc' : 'Create cache feature class.',
             'fnc' : executeCommand
         },
     'CV' :
