@@ -1,12 +1,12 @@
 #-------------------------------------------------------------------------------
 # Name  	    	: MDCS.py
 # ArcGIS Version	: ArcGIS 10.1 sp1
-# Script Version	: 20131205
+# Script Version	: 20130801
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
 # Purpose 	    	: This is the main program entry point to MDCS.
-# Created	    	: 14-08-2012
-# LastUpdated  	: 16-01-2014
+# Created	    	: 20120814
+# LastUpdated  		: 20131120
 # Required Argument : -i:<config_file>
 # Optional Argument : -c|-m|-s|-l
 # Usage         : python.exe MDCS.py -c:<Optional:command(s)> -i:<config_file>

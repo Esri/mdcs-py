@@ -295,6 +295,11 @@
           <stats_file>stats_file</stats_file>
           <nodata>nodata</nodata>
         </SetStatistics>
+        <!-- DF Delete Field -->
+        <!-- http://resources.arcgis.com/en/help/main/10.2/index.html#//00170000004n000000-->
+        <DeleteField>
+          <drop_field>test1;test2;test3;test4</drop_field>
+        </DeleteField>
         <!-- http://resources.arcgis.com/en/help/main/10.2/index.html#/Define_Overviews/00170000008r000000/ -->
         <!-- DO     Define Overviews -->
         <DefineOverviews>
@@ -369,6 +374,41 @@
             <expression>DatePart ("y",[AcquisitionDate] )</expression>
           </CalculateValue>
         </CalculateValues>
+        <!-- MTC     Manage Tile Cache -->
+        <!-- http://resources.arcgis.com/en/help/main/10.2/index.html#//001700000189000000/ -->
+        <ManageTileCache>
+          <in_cache_location></in_cache_location>
+          <manage_mode>RECREATE_ALL_TILES</manage_mode>
+          <in_cache_name></in_cache_name>
+          <tiling_scheme>IMPORT_SCHEME</tiling_scheme>
+          <import_tiling_scheme>user_defined_tiling_scheme.xml</import_tiling_scheme>
+          <scales>#</scales>
+          <area_of_interest>#</area_of_interest>
+          <max_cell_size>#</max_cell_size>
+        </ManageTileCache>
+        <!-- ETC     Export Tile Cache -->
+        <!-- http://resources.arcgis.com/en/help/main/10.2/index.html#//001700000187000000/ -->
+        <ExportTileCache>
+          <in_cache_source></in_cache_source>
+          <in_target_cache_folder></in_target_cache_folder>
+          <in_target_cache_name></in_target_cache_name>
+          <export_cache_type>TILE_PACKAGE</export_cache_type>
+          <storage_format_type>COMPACT</storage_format_type>
+          <scales>#</scales>
+          <area_of_interest>#</area_of_interest>
+        </ExportTileCache>
+        <!-- STP     Share Package -->
+        <!-- http://resources.arcgis.com/en/help/main/10.2/index.html#//0017000000vn000000/ -->
+        <SharePackage>
+          <in_package>a_tpk_file_with_file_ext.tpk</in_package>
+          <username></username>
+          <password></password>
+          <summary>Published using MDCS</summary>
+          <tags>mdcs;cache</tags>
+          <credits>Raster Solutions Team</credits>
+          <public>MYGROUPS</public>
+          <groups>#</groups>
+        </SharePackage>
         <!-- SE     Set Environments -->
         <!-- http://resources.arcgis.com/en/help/main/10.2/index.html#/An_overview_of_raster_storage_settings/001w00000024000000/ -->
         <!-- http://resources.arcgis.com/en/help/main/10.2/index.html#/Parallel_Processing_Factor/001w0000004m000000/ -->

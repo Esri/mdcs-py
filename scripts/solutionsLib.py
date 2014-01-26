@@ -6,7 +6,7 @@
 # Author        	: ESRI raster solution team
 # Purpose 	    	: To have a library of python modules to facilitate code to reuse for Raster Solutions projects.
 # Created	    	: 20120814
-# LastUpdated  		: 20140119
+# LastUpdated  		: 20140126
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -385,6 +385,24 @@ class Solutions(Base.Base):
                     return True
                 except:
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                    return False
+
+        # Delete fields
+        elif(com == 'DF'):
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                processKey = 'deletefield'
+                try:
+                    self.log ("Deleting fields (%s) " % (self.getProcessInfoValue(processKey, 'drop_field', index)))
+
+                    arcpy.DeleteField_management(
+                    fullPath,
+                    self.getProcessInfoValue(processKey, 'drop_field', index)
+                    )
+                    self.log(arcpy.GetMessages())
+                    return True
+                except:
+                    self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                    return False
 
         elif(com == 'RP'):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
@@ -399,6 +417,7 @@ class Solutions(Base.Base):
                     return True
                 except:
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                    return False
 
         elif(com == 'SS'):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
@@ -419,6 +438,7 @@ class Solutions(Base.Base):
                     return True
                 except:
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                    return False
 
         elif(com == 'CC'):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
@@ -438,6 +458,7 @@ class Solutions(Base.Base):
                     return True
                 except:
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                    return False
 
         elif(com == 'BO'):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
@@ -456,6 +477,7 @@ class Solutions(Base.Base):
                     return True
                 except:
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                    return False
 
         elif(com == 'DO'):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
@@ -481,6 +503,7 @@ class Solutions(Base.Base):
                     return True
                 except:
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                    return False
 
         elif(com == 'AI'):
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
@@ -573,6 +596,7 @@ class Solutions(Base.Base):
 
                     fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
                     maxValues = len(self.processInfo.processInfo[processKey][index])
+                    self.log("Calculate values:" + fullPath, self.m_log.const_general_text)
                     isError = False
 
                     for indx in range(0, maxValues):
@@ -615,6 +639,7 @@ class Solutions(Base.Base):
                     return True
                 except:
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                    return False
 
 
         elif(com == 'SY'):
@@ -644,6 +669,7 @@ class Solutions(Base.Base):
                     return True
                 except:
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                    return False
 
         elif(com == 'SE'):
                 self.log("Set environment variables on index: %s" % (index), self.m_log.const_general_text)
@@ -701,6 +727,65 @@ class Solutions(Base.Base):
                                 continue
 
                 return True     #should unable to set environment variables return False?
+
+        elif (com == 'MTC'):
+
+            mdName = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            processKey = 'managetilecache'
+            self.log("Building cache for:" + mdName, self.m_log.const_general_text)
+
+            try:
+                arcpy.ManageTileCache_management(
+                self.getProcessInfoValue(processKey, 'in_cache_location',index),
+                self.getProcessInfoValue(processKey, 'manage_mode',index),
+                self.getProcessInfoValue(processKey, 'in_cache_name',index),
+                mdName,
+                self.getProcessInfoValue(processKey, 'tiling_scheme',index),
+                self.getProcessInfoValue(processKey, 'import_tiling_scheme',index),
+                self.getProcessInfoValue(processKey,'scales',index),
+                self.getProcessInfoValue(processKey,'area_of_interest',index),
+                self.getProcessInfoValue(processKey, 'max_cell_size',index))
+
+                return True
+            except:
+                self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+
+        elif (com == 'ETC'):
+            processKey = 'exporttilecache'
+            try:
+                self.log("Exporting cache for:" + self.getProcessInfoValue(processKey, 'in_target_cache_name',index), self.m_log.const_general_text)
+
+                arcpy.ExportTileCache_management(
+                self.getProcessInfoValue(processKey, 'in_cache_source',index),
+                self.getProcessInfoValue(processKey, 'in_target_cache_folder',index),
+                self.getProcessInfoValue(processKey, 'in_target_cache_name',index),
+                self.getProcessInfoValue(processKey, 'export_cache_type',index),
+                self.getProcessInfoValue(processKey, 'storage_format_type',index),
+                self.getProcessInfoValue(processKey,'scales',index),
+                self.getProcessInfoValue(processKey,'area_of_interest',index))
+
+                return True
+            except:
+                self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+
+        elif (com == 'STP'):
+            processKey = 'sharepackage'
+            try:
+                self.log("Publishing Tile Package:" + self.getProcessInfoValue(processKey, 'in_package',index), self.m_log.const_general_text)
+
+                arcpy.SharePackage_management (
+                self.getProcessInfoValue(processKey, 'in_package',index),
+                self.getProcessInfoValue(processKey, 'username',index),
+                self.getProcessInfoValue(processKey, 'password',index),
+                self.getProcessInfoValue(processKey, 'summary',index),
+                self.getProcessInfoValue(processKey, 'tags',index),
+                self.getProcessInfoValue(processKey, 'credits',index),
+                self.getProcessInfoValue(processKey,'public',index),
+                self.getProcessInfoValue(processKey, 'groups',index))
+
+                return True
+            except:
+                self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
 
         else:
 
@@ -783,6 +868,10 @@ class Solutions(Base.Base):
         {   'desc' : 'Import mosaic dataset geometry.',
             'fnc' : executeCommand
         },
+    'DF' :
+        {   'desc' : 'Delete field.',
+            'fnc' : executeCommand
+        },
     'IF' :
         {   'desc' : 'Import field values/calculate fields.',
             'fnc' : executeCommand
@@ -829,6 +918,18 @@ class Solutions(Base.Base):
         },
     'SE' :
         {   'desc' : 'Set environment variables.',
+            'fnc' : executeCommand
+        },
+    'MTC' :
+        {   'desc' : 'Manage Tile Cache.',
+            'fnc' : executeCommand
+        },
+    'ETC' :
+        {   'desc' : 'Export Tile Cache.',
+            'fnc' : executeCommand
+        },
+    'STP' :
+        {   'desc' : 'Share Package.',
             'fnc' : executeCommand
         }
     }
@@ -881,7 +982,7 @@ class Solutions(Base.Base):
     sys.path.append(com_locations['Base']['pyc'])
 
 
-    #import all the modules required for the elevation project.
+    #import all the modules required for the MDCS project.
     #import Base
     import CreateMD
     import AddFields
