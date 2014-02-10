@@ -1,12 +1,12 @@
 #-------------------------------------------------------------------------------
 # Name  	    	: Base.py
 # ArcGIS Version	: ArcGIS 10.1 sp1
-# Script Version	: 20131205
+# Script Version	: 20130801
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
 # Purpose 	    	: Base call used by all Raster Solutions components.
 # Created	    	: 20120814
-# LastUpdated  		: 20131120
+# LastUpdated  		: 20140210
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
@@ -526,6 +526,7 @@ class Base(object):
         if (doc == None):
             return ''
         node = doc.getElementsByTagName(nodeName)
+
         if (node == None or
             node.length == 0 or
             node[0].hasChildNodes() == False or
@@ -631,10 +632,6 @@ class Base(object):
                  revalue = []
 
                  first = usr_key.find('$')
-                 if (usr_key[first - 1] == '\\'):
-                    revalue = usr_key[0:first - 1] + usr_key[first:]
-                    first = -2      # let's skip non dynamic values with '$' sign
-
                  first += 1
 
                  second =  first + usr_key[first+1:].find('$') + 1
@@ -642,17 +639,7 @@ class Base(object):
                  if (first > 1):
                     revalue.append(usr_key[0:first - 1])
 
-                 if (first == -1):
-                        second = -1
-
                  while(second >= 0):
-
-                    while(usr_key[second - 1: second] == '\\'):
-                        indx = usr_key[second+1:].find('$')
-                        if (indx == -1):
-                            indx = len(usr_key) - 1
-
-                        second = second + indx + 1
 
                     uValue = usr_key[first:second]
 
@@ -689,6 +676,7 @@ class Base(object):
         if (doc == None):
             return ''
         node = doc.getElementsByTagName(nodeName)
+
         if (node == None or
             node.length == 0 or
             node[0].hasChildNodes() == False or
