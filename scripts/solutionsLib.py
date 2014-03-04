@@ -4,13 +4,14 @@
 # Script Version	: 20131205
 # Name of Company 	: Environmental System Research Institute
 # Author        	: ESRI raster solution team
-# Purpose 	    	: To have a library of python modules to facilitate code to reuse for Raster Solutions projects.
+# Purpose 	    	: To have a library of python modules to facilitate code
+#                     to reuse for Raster Solutions projects.
 # Created	    	: 20120814
-# LastUpdated  		: 20140126
+# LastUpdated  		: 20140303
 # Required Argument 	: Not applicable
 # Optional Argument 	: Not applicable
 # Usage         	:  Object of this class should be instantiated.
-# Copyright	    	: (c) ESRI 2012
+# Copyright	    	: (c) ESRI 2014
 # License	    	: <your license>
 #-------------------------------------------------------------------------------
 #!/usr/bin/env python
@@ -112,9 +113,76 @@ class Solutions(Base.Base):
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
+    #Remove Index from Mosaic dataset.
+        elif (com == 'RI'):
+            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            processKey = 'removeindex'
+            try:
+                self.log ("Removing Index(%s) " % (self.getProcessInfoValue(processKey, 'index_name', index)))
+                arcpy.RemoveIndex_management(fullPath,
+                self.getProcessInfoValue(processKey, 'index_name', index)
+                )
+                self.log(arcpy.GetMessages())
+                return True
+            except:
+                self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                return False
+
+    #Remove raster/Items from Mosaic dataset.
+        elif (com == 'RRFMD'):
+            try:
+                self.m_log.Message("\tRemove rasters from mosaic dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                processKey = 'removerastersfrommosaicdataset'
+                arcpy.RemoveRastersFromMosaicDataset_management(fullPath,
+                self.getProcessInfoValue(processKey,'where_clause', index),
+                self.getProcessInfoValue(processKey,'update_boundary', index),
+                self.getProcessInfoValue(processKey,'mark_overviews_items', index),
+                self.getProcessInfoValue(processKey,'delete_overview_images', index),
+                self.getProcessInfoValue(processKey,'delete_item_cache', index),
+                self.getProcessInfoValue(processKey,'remove_items', index),
+                self.getProcessInfoValue(processKey,'update_cellsize_ranges', index)
+                )
+                return True
+            except:
+                self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                return False
+
+    # Delete mosaic dataset.
+        elif (com == 'DMD'):
+            try:
+                self.m_log.Message("\tDelete Mosaic dataset  : " + self.m_base.m_mdName, self.m_log.const_general_text)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                processKey = 'deletemosaicdataset'
+                arcpy.DeleteMosaicDataset_management(fullPath,
+                self.getProcessInfoValue(processKey,'delete_overview_images', index),
+                self.getProcessInfoValue(processKey,'delete_item_cache', index)
+                )
+                return True
+            except:
+                self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                return False
+
+    # Merge mosaic dataset
+        elif (com == 'MMDI'):
+            try:
+                self.m_log.Message("\tMerge mosaic dataset  Items: " + self.m_base.m_mdName, self.m_log.const_general_text)
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                processKey = 'mergemosaicdatasetitems'
+                arcpy.MergeMosaicDatasetItems_management (fullPath,
+                self.getProcessInfoValue(processKey,'where_clause', index),
+                self.getProcessInfoValue(processKey,'block_field', index),
+                self.getProcessInfoValue(processKey,'max_rows_per_merged_items', index)
+                )
+                return True
+            except:
+                self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                return False
+
+
         elif (com == 'ERF'):
             try:
-                self.m_log.Message("\tEditing Raster function : " + self.m_base.m_mdName, self.m_log.const_general_text)
+                self.m_log.Message("\tEditing raster function : " + self.m_base.m_mdName, self.m_log.const_general_text)
                 processKey = 'editrasterfunction'
                 rfunction_path = self.getProcessInfoValue(processKey,'function_chain_definition', index)
                 if (rfunction_path.find('.rft') >-1 and rfunction_path.find('/') == -1):
@@ -786,6 +854,7 @@ class Solutions(Base.Base):
                 return True
             except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                return False
 
         else:
 
@@ -848,6 +917,18 @@ class Solutions(Base.Base):
         {   'desc' : 'Color balance mosaic dataset.',
             'fnc' : executeCommand
         },
+    'RRFMD' :
+        {   'desc' : 'Remove Rasters from Mosaic ataset.',
+            'fnc' : executeCommand
+        },
+    'DMD' :
+        {   'desc' : 'Delete Mosaic dataset.',
+            'fnc' : executeCommand
+        },
+   'MMDI' :
+        {   'desc' : 'Merge Mosaic dataset items.',
+            'fnc' : executeCommand
+        },
     'BPS' :
         {   'desc' : 'Build pyramid and Statistics.',
             'fnc' : executeCommand
@@ -898,6 +979,10 @@ class Solutions(Base.Base):
         },
     'AI' :
         {   'desc' : 'Adds attribute index on the mosaic dataset.',
+            'fnc' : executeCommand
+        },
+    'RI' :
+        {   'desc' : 'Removes attribute index on the mosaic dataset.',
             'fnc' : executeCommand
         },
     'CFC' :
