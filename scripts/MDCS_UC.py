@@ -1,19 +1,22 @@
-#-------------------------------------------------------------------------------
-# Name  	    	: MDCS_UC.py
-# ArcGIS Version	: ArcGIS 10.1 sp1
-# Script Version	: 20131205
-# Name of Company 	: Environmental System Research Institute
-# Author        	: ESRI raster solution team
-# Purpose 	    	: A class to define all user defined functions to extend
-# the built in functions/commnands chain
-# Created	    	: 20131017
-# LastUpdated  		: 20131023
-# Required Argument 	: Not applicable
-# Optional Argument 	: Not applicable
-# Usage         	:  To be called only internally by 'MDCS' code.
-# Copyright	    	: (c) ESRI 2013
-# License	    	: <your license>
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+# Copyright 2013 Esri
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#------------------------------------------------------------------------------
+# Name: MDCS_UC.py
+# Description: A class to implement all user functions or to extend the built in MDCS functions/commands chain.
+# Requirements: ArcGIS 10.1 SP1
+# Author: ESRI Raster Solutions Team
+#------------------------------------------------------------------------------
 #!/usr/bin/env python
 
 import os

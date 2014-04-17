@@ -1,18 +1,23 @@
-#-------------------------------------------------------------------------------
-# Name  	    	: AddRasters.py
-# ArcGIS Version	: ArcGIS 10.1 sp1
-# Script Version	: 20131205
-# Name of Company 	: Environmental System Research Institute
-# Author        	: ESRI raster solution team
-# Purpose 	    	: A component to Add rasters/data to existing mosaic datasets.
-# Created	    	: 20120814
-# LastUpdated  		: 20131202
-# Required Argument 	: Not applicable
-# Optional Argument 	: Not applicable
-# Usage         	: Object of this class should be instantiated.
-# Copyright	    	: (c) ESRI 2012
-# License	    	: <your license>
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+# Copyright 2013 Esri
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#------------------------------------------------------------------------------
+# Name: AddRasters.py
+# Description: Add rasters/data to existing mosaic datasets.
+# Requirements: ArcGIS 10.1 SP1
+# Author: ESRI Raster Solutions Team
+#------------------------------------------------------------------------------
+#!/usr/bin/env python
 
 import arcpy
 import os
