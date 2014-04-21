@@ -14,6 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: Logger.py
 # Description: Class to log status from components to log files.
+# Version: 20140417
 # Requirements: ArcGIS 10.1 SP1
 # Author: ESRI raster solutions team
 #------------------------------------------------------------------------------

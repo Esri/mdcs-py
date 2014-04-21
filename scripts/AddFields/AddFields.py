@@ -14,6 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: AddFields.py
 # Description: Creates custom fields in mosaic datasets.
+# Version: 20140417
 # Requirements: ArcGIS 10.1 SP1
 # Author: ESRI Raster Solutions Team
 #------------------------------------------------------------------------------

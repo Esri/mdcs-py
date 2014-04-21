@@ -14,6 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
+# Version: 20140417
 # Requirements: ArcGIS 10.1 SP1
 # Author: ESRI Raster Solutions Team
 #------------------------------------------------------------------------------

@@ -14,6 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: MDCS_UC.py
 # Description: A class to implement all user functions or to extend the built in MDCS functions/commands chain.
+# Version: 20140417
 # Requirements: ArcGIS 10.1 SP1
 # Author: ESRI Raster Solutions Team
 #------------------------------------------------------------------------------

@@ -14,6 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: search_replace.py
 # Description: MDCS setup related/Not used by MDCS directly.
+# Version: 20140417
 # Requirements: ArcGIS 10.1 SP1
 # Author: ESRI Raster Solutions Team
 #------------------------------------------------------------------------------
