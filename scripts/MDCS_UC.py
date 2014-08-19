@@ -16,7 +16,7 @@
 # Description: A class to implement all user functions or to extend the built in MDCS functions/commands chain.
 # Version: 20140417
 # Requirements: ArcGIS 10.1 SP1
-# Author: ESRI Raster Solutions Team
+# Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
 #!/usr/bin/env python
 
@@ -24,8 +24,14 @@ import os
 import sys
 import arcpy
 
+import Base
+
 class UserCode:
     def sample00(self, data):
+
+        base = Base.Base()          # using Base class for its XML specific common functions. (getXMLXPathValue, getXMLNodeValue, getXMLNode)
+        xmlDOM = data['mdcs']       # access to MDCS config file
+        command_used = base.getXMLNodeValue(xmlDOM, 'Command')
 
         workspace = data['workspace']
         md = data['mosaicdataset']
@@ -53,7 +59,7 @@ class UserCode:
         ds = os.path.join(workspace, md)
         ds_cursor = arcpy.UpdateCursor(ds)
         if (ds_cursor != None):
-            print 'Calculating values..'
+            print ('Calculating values..')
             row = ds_cursor.next()
             while(row != None):
                 row.setValue('MinPS', 0)

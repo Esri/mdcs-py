@@ -17,9 +17,9 @@
 # Version: 20140417
 # Requirements: ArcGIS 10.1 SP1
 # Required Arguments: -i:<config_file>
-# Usage: python.exe MDCS.py -c:<Optional:command(s)> -i:<config_file> 
+# Usage: python.exe MDCS.py -c:<Optional:command(s)> -i:<config_file>
 # Notes:Type 'python.exe mdcs.py' to display the usage and a list of valid command codes.
-# Author: ESRI Raster Solutions Team
+# Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
 #!/usr/bin/env python
 
@@ -102,22 +102,20 @@ def main(argc, argv):
         "-artdem: Update DEM path in ART file"
         ]
 
-        print "\nMDCS.py v5.6 [20130801]\nUsage: MDCS.py -c:<Optional:command> -i:<config_file>" \
-        "\n\nFlags to override configuration values," \
+        print ("\nMDCS.py v5.7 [20130801]\nUsage: MDCS.py -c:<Optional:command> -i:<config_file>" \
+        "\n\nFlags to override configuration values,") \
 
         for arg in user_args:
-            print arg
+            print (arg)
 
-        print \
+        print (\
         "\nNote: Commands can be combined with '+' to do multiple operations." \
-        "\nAvailable commands:"
+        "\nAvailable commands:")
 
         user_cmds = solutionsLib.Solutions().getAvailableCommands()
         for key in user_cmds:
-            print "\t" + key + ' = ' + user_cmds[key]['desc']
-
+            print ("\t" + key + ' = ' + user_cmds[key]['desc'])
         sys.exit(1)
-
 
     base = Base.Base()
     global log
@@ -162,7 +160,7 @@ def main(argc, argv):
             dynamic_var = value[pMax + 1:].upper()
             v =  value[0: pMax]
             if (dynamic_var.strip() != ''):
-                if (base.m_dynamic_params.has_key(dynamic_var) == False):
+                if ((dynamic_var in base.m_dynamic_params.keys()) == False):
                     base.m_dynamic_params[dynamic_var] = v
 
         argIndx += 1
@@ -229,11 +227,12 @@ def main(argc, argv):
 
     log.SetLogFolder(log_output_folder)
     solutions = solutionsLib.Solutions(base)
+
     success = solutions.run(config, com, comInfo)
 
-    log.WriteLog('#all')   #persist information/errors collected.
+    log.Message ("Done...", log.const_general_text)
 
-    print "Done..."
+    log.WriteLog('#all')   #persist information/errors collected.
 
 if __name__ == '__main__':
     main(3, sys.argv)

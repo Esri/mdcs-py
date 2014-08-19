@@ -16,10 +16,9 @@
 # Description: Class to read in process values from MDCS parameter/configuration XML file.
 # Version: 20140417
 # Requirements: ArcGIS 10.1 SP1
-# Author: ESRI Raster Solutions Team
+# Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
 #!/usr/bin/env python
-
 from xml.dom import minidom
 import os
 import Base
@@ -93,11 +92,11 @@ class ProcessInfo(Base.Base):
                                             procesName = node.nodeName
                                             procesName = procesName.lower()
 
-                                            if (self.m_hsh_parent_child_nodes.has_key(procesName)):
+                                            if (procesName in self.m_hsh_parent_child_nodes.keys()):
                                                 parentNode  = self.m_hsh_parent_child_nodes[procesName]['parent']
                                                 childNode = self.m_hsh_parent_child_nodes[procesName]['child']
 
-                                                if (self.processInfo.has_key(parentNode) == False):
+                                                if ((parentNode in self.processInfo.keys()) == False):
                                                     self.processInfo[parentNode] = []
 
                                                 aryCV = []
@@ -123,7 +122,7 @@ class ProcessInfo(Base.Base):
                                                 continue
 
 
-                                            if (self.processInfo.has_key(procesName) == False):
+                                            if ((procesName in self.processInfo.keys()) == False):
                                                 self.processInfo[procesName] = []
 
                                             hashCV = {}

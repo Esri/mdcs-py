@@ -16,7 +16,7 @@
 # Description: To map MDCS command codes to GP Tool functions.
 # Version: 20140417
 # Requirements: ArcGIS 10.1 SP1
-# Author: ESRI Raster Solutions Team
+# Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
 #!/usr/bin/env python
 
@@ -76,8 +76,8 @@ class Solutions(Base.Base):
             addRasters = self.AddRasters.AddRasters(self.m_base)
             bSuccess = addRasters.init(self.config)
             if (bSuccess):
-                if (self.userInfo.has_key(com)):
-                    if (self.userInfo[com].has_key('cb')):
+                if (com in self.userInfo.keys()):
+                    if ('cb' in self.userInfo[com].keys()):
                         bSuccess = addRasters.AddCallBack(self.userInfo[com]['cb'])
                 return addRasters.AddRasters()
             return False
@@ -1088,11 +1088,11 @@ class Solutions(Base.Base):
             raise
 
         if (indx > -1):     # handle process info on keys [addindex, calculatevalues]
-            if (self.processInfo.processInfo[process][index][indx].has_key(key)):
+            if (key in self.processInfo.processInfo[process][index][indx].keys()):
                     return self.processInfo.processInfo[process][index][indx][key]
             return '#'
 
-        if (self.processInfo.processInfo[process][index].has_key(key)):
+        if (key in self.processInfo.processInfo[process][index].keys()):
                 return self.processInfo.processInfo[process][index][key]
         return '#'
 
@@ -1161,7 +1161,7 @@ class Solutions(Base.Base):
                         self.log("Command/Err: Invalid command index:" + command, self.const_warning_text)
                         # catch any float values entered, e.t.c
 
-            if (self.commands.has_key(cmd) == False):
+            if ((cmd in self.commands.keys()) == False):
                 if (self.isUser_Function(ucCommand) == True):
                     try:
                         self.commands[ucCommand] = {}

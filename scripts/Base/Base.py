@@ -16,14 +16,19 @@
 # Description: Base class used by MDCS/All Raster Solutions components.
 # Version: 20140417
 # Requirements: ArcGIS 10.1 SP1
-# Author: ESRI Raster Solutions Team
+# Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
 #!/usr/bin/env python
 
 import os
 import sys
 import arcpy
-import _winreg
+
+if (sys.version_info[0] < 3):           # _winreg has been renamed as (winreg) in python3+
+    from _winreg import *
+else:
+    from winreg import *
+
 from datetime import datetime
 
 from xml.dom import minidom
@@ -32,7 +37,7 @@ scriptPath = os.path.dirname(__file__)
 try:
     import MDCS_UC
 except Exception as inf:
-    print 'User-Code functions disabled.'
+    print ('User-Code functions disabled.')
 
 
 class Base(object):
@@ -233,7 +238,7 @@ class Base(object):
         elif(level == self.const_critical_text):
              errorTypeText = 'critical'
 
-        print 'log-' + errorTypeText + ': ' + msg
+        print ('log-' + errorTypeText + ': ' + msg)
 
         return True
 
@@ -283,7 +288,7 @@ class Base(object):
             if(node.nodeType != minidom.Node.TEXT_NODE):
 
                 k = str(pos)
-                if (json.has_key(k) == False):
+                if ((k in json.keys()) == False):
                         json[k] = {'key' : [], 'val' : [], 'type' : [] }
 
                 json[k]['key'].append(node.nodeName)
@@ -338,7 +343,7 @@ class Base(object):
         if (patch_node.attributes.length == 0):
             return False
 
-        if (patch_node.attributes.has_key(self.CVERSION_ATTRIB) == False):
+        if ((self.CVERSION_ATTRIB in patch_node.attributes.keys()) == False):
             return False
         target_ver = patch_node.attributes.getNamedItem(self.CVERSION_ATTRIB).nodeValue.strip()
         if (len(target_ver) == 0):
@@ -388,24 +393,24 @@ class Base(object):
         CVERSION = 'Version'
 
         setupInfo = arcpy.GetInstallInfo()
-        if (CVERSION in setupInfo.keys() == False or
-            CPRODUCT_NAME in setupInfo.keys() == False):
+        if ((CVERSION in setupInfo.keys()) == False or
+            (CPRODUCT_NAME in setupInfo.keys()) == False):
             return False
 
         key = setupInfo[CPRODUCT_NAME] + setupInfo[CVERSION]
 
         try:
             reg_path = "Software\\Wow6432Node\\ESRI\\%s\\Updates" % (key)
-            arcgis = _winreg.OpenKey(
-                _winreg.HKEY_LOCAL_MACHINE, reg_path)
+            arcgis = OpenKey(
+                HKEY_LOCAL_MACHINE, reg_path)
 
             i = 0
             while 1:
-                name = _winreg.EnumKey(arcgis, i)
-                arcgis_sub = _winreg.OpenKey(
-                    _winreg.HKEY_LOCAL_MACHINE, reg_path + '\\' + name)
+                name = EnumKey(arcgis, i)
+                arcgis_sub = OpenKey(
+                    HKEY_LOCAL_MACHINE, reg_path + '\\' + name)
                 try:
-                    value, type = _winreg.QueryValueEx(arcgis_sub, "Name")
+                    value, type = QueryValueEx(arcgis_sub, "Name")
                     if (type == 1):   # reg_sz
                         if (value.lower().find(search_key.lower()) >= 0):
                             return True     # return true if the value is found!
@@ -609,7 +614,7 @@ class Base(object):
 
 
     def getInternalPropValue(self, dic, key):
-        if (dic.has_key(key)):
+        if (key in dic.keys()):
             return dic[key]
         else:
             return ''
@@ -648,7 +653,7 @@ class Base(object):
 
                     uValue = usr_key[first:second]
 
-                    if (self.m_dynamic_params.has_key(uValue.upper())):
+                    if (uValue.upper() is self.m_dynamic_params.keys()):
                         revalue.append(self.m_dynamic_params[uValue.upper()])
                     else:
                         if (uValue.find('\$') >= 0):

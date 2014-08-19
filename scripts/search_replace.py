@@ -16,7 +16,7 @@
 # Description: MDCS setup related/Not used by MDCS directly.
 # Version: 20140417
 # Requirements: ArcGIS 10.1 SP1
-# Author: ESRI Raster Solutions Team
+# Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
 #!/usr/bin/env python
 
@@ -30,9 +30,9 @@ if __name__ == '__main__':
     main()
 
 
-if len(sys.argv) <> 5:
-    print " number of inputs are invalid"
-    print " <path to the folder> <search string> <replace string> <file extension filter>"
+if len(sys.argv) != 5:
+    print (" number of inputs are invalid")
+    print (" <path to the folder> <search string> <replace string> <file extension filter>")
     sys.exit()
 parent_folder_path= sys.argv[1]
 search = sys.argv[2]
@@ -50,9 +50,9 @@ for path, subdirs, files in os.walk(parent_folder_path):
 
             try:
 
-                print newfilePath
-                print "String [%s] replaced with [%s]" % (search, replace)
-                print "-------------------------------"
+                print (newfilePath)
+                print ("String [%s] replaced with [%s]" % (search, replace))
+                print ("-------------------------------")
 
                 l_indx_ = xml.lower().index(search.lower())
                 while(l_indx_ >= 0):
@@ -73,4 +73,4 @@ for path, subdirs, files in os.walk(parent_folder_path):
 
             xml = ''
             file = ''
-print "Done"
+print ("Done")

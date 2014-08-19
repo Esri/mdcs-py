@@ -16,7 +16,7 @@
 # Description: Class to log status from components to log files.
 # Version: 20140417
 # Requirements: ArcGIS 10.1 SP1
-# Author: ESRI raster solutions team
+# Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
 #!/usr/bin/env python
 
@@ -70,7 +70,7 @@ class Logger:
             self.start_time = datetime.now()
 
     def CloseCategory(self):
-        if (self.projects[self.active_key].has_key(const_start_time_node)):
+        if (const_start_time_node in self.projects[self.active_key].keys()):
             end_time = datetime.now()
             start_time = self.projects[self.active_key][const_start_time_node]
             duration = end_time - start_time
@@ -94,7 +94,7 @@ class Logger:
         if (category == ''):
             category = '__root'
 
-        if (self.projects.has_key(category) == False):
+        if ((category in self.projects.keys()) == False):
             self.CreateCategory(category)
 
         self.active_key = category
@@ -102,7 +102,7 @@ class Logger:
 
     def CreateCategory(self, project):
             key = project.strip()
-            if (self.projects.has_key(key) == False):
+            if ((key in self.projects.keys()) == False):
                 self.projects[key] = {'logs' : { 'message' : []}}
                 self.active_key = key
 
@@ -194,7 +194,7 @@ class Logger:
                     if (key == 'logs'):
                         for msg in self.projects[prj]['logs']['message']:
 
-                            if (msg.has_key('text')):
+                            if ('text' in msg.keys()):
                                 nodeName = 'Message'
                                 if (msg['type'] == 'status'):
                                     nodeName = 'Status'
@@ -204,7 +204,7 @@ class Logger:
 
                                 msgNode = eleMessage
 
-                            elif(msg.has_key('error')):
+                            elif('error' in msg.keys()):
 
                                 eleError = doc.createElement('Error')
                                 eleErrorType = doc.createElement('type')
@@ -228,7 +228,7 @@ class Logger:
                             else:
                                 eleProject.appendChild(eleMessage)
 
-                        if (self.projects[prj].has_key('DurationLabel')):
+                        if ('DurationLabel' in self.projects[prj].keys()):
                             durationLogNode = doc.createElement('Duration')
                             durationLogNode.appendChild(doc.createTextNode(self.projects[prj]['DurationLabel']))
 
@@ -266,6 +266,6 @@ class Logger:
             c.write(doc.toxml())
             c.close()
         except:
-            print "\nError creating log file."
+            print ("\nError creating log file.")
 
 
