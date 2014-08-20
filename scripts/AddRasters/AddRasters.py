@@ -57,7 +57,7 @@ class AddRasters(Base.Base):
 
     def GetValue(self, dic_values, key):
         try:
-            if (dic_values.has_key(key)):
+            if (key in dic_values.keys()):
                 return dic_values[key]
             return ''
         except:
@@ -85,7 +85,7 @@ class AddRasters(Base.Base):
                     rasterType = 'Raster Dataset'
 
                     name_toupper = MDName.upper()
-                    if (hshAddRaster.has_key('art')):
+                    if ('art' in hshAddRaster.keys()):
                         rasterType = hshAddRaster['art']
                         self.log("\tUsing ART for " + name_toupper + ': ' + rasterType, self.const_general_text)
 
@@ -99,12 +99,12 @@ class AddRasters(Base.Base):
 
                     set_filter = ''
 
-                    if (hshAddRaster.has_key('filter')):
+                    if ('filter' in hshAddRaster.keys()):
                         set_filter = hshAddRaster['filter']
                         if (set_filter == '*'):
                             set_filter = ''
                     set_spatial_reference = ''
-                    if (hshAddRaster.has_key('spatial_reference')):
+                    if ('spatial_reference' in hshAddRaster.keys()):
                         set_spatial_reference = hshAddRaster['spatial_reference']
 
 
@@ -168,7 +168,7 @@ class AddRasters(Base.Base):
                                         self.sMdNameList[mosasicDataset]['type'] = self.getXMLNodeValue(self.m_base.m_doc, "MosaicDatasetType")
 
                                 elif(node.nodeName == 'dataset_id'):
-                                    if (self.sMdNameList.has_key(mosasicDataset)):
+                                    if (mosasicDataset in self.sMdNameList.keys()):
                                         idValue = node.firstChild.nodeValue
                                         self.sMdNameList[mosasicDataset]['Dataset_ID'] = idValue.strip()
 
@@ -239,7 +239,7 @@ class AddRasters(Base.Base):
 
                                                         hshAddRasters[nodeName] = nodeValue
 
-                                                if (self.sMdNameList.has_key(mosasicDataset)):
+                                                if (mosasicDataset in self.sMdNameList.keys()):
                                                     try:
                                                         self.sMdNameList[mosasicDataset]['addraster'].append(hshAddRasters)
                                                     except:

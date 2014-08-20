@@ -41,7 +41,7 @@ class SetMDProperties(Base.Base):
 
 
     def getInternalPropValue(self, md, key):
-        if (self.dic_properties_lst.has_key(key)):
+        if (key in self.dic_properties_lst.keys()):
             return self.dic_properties_lst[key]
         else:
             return ''

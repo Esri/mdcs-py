@@ -148,7 +148,7 @@ class CreateReferencedMD(Base.Base):
                                 if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
                                     nodeName = node.nodeName.lower()
                                     if (node.childNodes.length > 0):
-                                        if (self.dic_ref_info.has_key(nodeName) == False):
+                                        if ((nodeName in self.dic_ref_info.keys()) == False):
                                             if (nodeName.lower() == 'in_dataset'):
                                                 if (self.m_base.m_sources == ''):
                                                     in_dataset = node.firstChild.nodeValue
@@ -207,11 +207,11 @@ class CreateReferencedMD(Base.Base):
                                                                             arydNameVal[indx] = os.path.join(self.m_base.m_geoPath, _f)
                                                                             _file = arydNameVal[indx].upper()
 
-                                                                        if (dListEmpty or self.dic_derive_lst.has_key(_file) == False):
+                                                                        if ((_file in dListEmpty or self.dic_derive_lst.keys()) == False):
                                                                                 self.dic_derive_lst[_file] = { 'ref' : {}}
                                                                                 dListEmpty = False
 
-                                                                        prev_indx  = self.dic_derive_lst[_file]['ref'].has_key(refMD)
+                                                                        prev_indx  = refMD in self.dic_derive_lst[_file]['ref'].keys()
 
                                                                         if (prev_indx == False):
                                                                             functions = []
