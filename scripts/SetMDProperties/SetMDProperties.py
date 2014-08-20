@@ -36,8 +36,8 @@ class SetMDProperties(Base.Base):
         self.m_base = base
 
 
-    def is101SP1(self):
-        return self.CheckMDCSVersion([10, 1, 0, 0], [0, 0, 0, 0])       # ver [major, minor, revision, build]
+    def is101SP1(self): # if python version is >= 3, it's asssumed we're being run from ArcGIS Pro
+        return self.CheckMDCSVersion([10, 1, 0, 0] if (sys.version_info[0] < 3) else [1, 0, 0, 0], [0, 0, 0, 0])       # ver [major, minor, revision, build]
 
 
     def getInternalPropValue(self, md, key):
