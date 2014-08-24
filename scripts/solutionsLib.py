@@ -190,7 +190,7 @@ class Solutions(Base.Base):
                 processKey = 'editrasterfunction'
                 rfunction_path = self.getProcessInfoValue(processKey,'function_chain_definition', index)
                 if (rfunction_path.find('.rft') >-1 and rfunction_path.find('/') == -1):
-                    rfunction_path = self.const_raster_function_templates_path_ + "/" + rfunction_path
+                    rfunction_path = self.m_base.const_raster_function_templates_path_ + "/" + rfunction_path
 
                 fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
 
@@ -391,7 +391,7 @@ class Solutions(Base.Base):
                     igIndxSep = importPath.find('\\')
 
                     if (igIndxSep == igIndx + len(const_ig_search_) - 1):
-                        importPath = self.prefixFolderPath(importPath, self.const_import_geometry_features_path_)
+                        importPath = self.prefixFolderPath(importPath, self.m_base.const_import_geometry_features_path_)
 
                     arcpy.ImportMosaicDatasetGeometry_management(
                     fullPath,
@@ -497,7 +497,7 @@ class Solutions(Base.Base):
                 self.log("Setting MD statistics for:" + fullPath, self.m_log.const_general_text)
                 stats_file_ss = self.m_base.getAbsPath(self.getProcessInfoValue(processKey, 'stats_file', index))
                 if stats_file_ss != '#' and stats_file_ss != '' :
-                    stats_file_ss = self.prefixFolderPath(self.getProcessInfoValue(processKey, 'stats_file', index), self.const_statistics_path_)
+                    stats_file_ss = self.prefixFolderPath(self.getProcessInfoValue(processKey, 'stats_file', index), self.m_base.const_statistics_path_)
 
                 try:
                     arcpy.SetRasterProperties_management(

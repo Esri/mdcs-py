@@ -27,11 +27,11 @@ import Base
 
 class AddFields(Base.Base):
 
-    fieldNameList = []
-    fieldTypeList = []
-    fieldLengthList = []
-
     def __init__(self, base):
+        self.fieldNameList = []
+        self.fieldTypeList = []
+        self.fieldLengthList = []
+
         self.setLog(base.m_log)
         self.m_base = base
 

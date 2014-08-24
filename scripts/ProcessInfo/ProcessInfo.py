@@ -25,26 +25,24 @@ import Base
 
 class ProcessInfo(Base.Base):
 
-
-    m_hsh_parent_child_nodes = \
-    {
-        'addindex' :
-            {   'parent' : 'addindex',
-                'child' : 'index'
-            },
-        'calculatevalues' :
-            {   'parent' : 'calculatevalues',
-                'child' : 'calculatevalue'
-            }
-    }
-
-    hasProcessInfo = False
-    userProcessInfoValues  = False
-
-    processInfo = {}
-    userProcessInfo = {}
-
     def __init__(self, base=None):
+        self.m_hsh_parent_child_nodes = \
+        {
+            'addindex' :
+                {   'parent' : 'addindex',
+                    'child' : 'index'
+                },
+            'calculatevalues' :
+                {   'parent' : 'calculatevalues',
+                    'child' : 'calculatevalue'
+                }
+        }
+
+        self.hasProcessInfo = False
+        self.userProcessInfoValues  = False
+
+        self.processInfo = {}
+        self.userProcessInfo = {}
 
         self.m_base = base
         self.setLog(base.m_log)

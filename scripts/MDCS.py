@@ -124,7 +124,7 @@ def main(argc, argv):
 
 
     argIndx = 1
-    md_path_ = artdem = config = com = log_folder = ''
+    md_path_ = artdem = config = com = log_folder = code_base =  ''
 
     while(argIndx < argc):
         (values) = argv[argIndx].split(':')
@@ -149,6 +149,8 @@ def main(argc, argv):
             base.m_sources = value
         elif(subCode == 'l'):
             log_folder =  value
+        elif(subCode == 'b'):
+            code_base =  value
         elif(exSubCode == 'artdem'):
             artdem =  value
         elif(subCode == 'p'):
@@ -164,6 +166,10 @@ def main(argc, argv):
                     base.m_dynamic_params[dynamic_var] = v
 
         argIndx += 1
+
+
+    if (code_base != ''):
+        base.setCodeBase(code_base)
 
 
     if (md_path_ != ''):

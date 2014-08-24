@@ -27,14 +27,15 @@ from xml.dom import minidom
 import Base
 class AddRasters(Base.Base):
 
-    sMdNameList = {}
-    callback_functions = []
-
     def __init__(self, base):
+        self.sMdNameList = {}
+        self.callback_functions = []
+
         self.setLog(base.m_log)
         self.m_sources = base.m_sources
 
         self.m_base = base
+
 
     def AddCallBack(self, fnc):
         self.callback_functions.append(fnc)
@@ -235,7 +236,7 @@ class AddRasters(Base.Base):
                                                         elif (nodeName == 'raster_type'):
                                                             nodeName = 'art'
                                                             if (nodeValue.lower().find('.art') >= 0):
-                                                                nodeValue = self.prefixFolderPath(nodeValue, self.const_raster_type_path_)
+                                                                nodeValue = self.prefixFolderPath(nodeValue, self.m_base.const_raster_type_path_)
 
                                                         hshAddRasters[nodeName] = nodeValue
 

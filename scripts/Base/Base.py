@@ -32,7 +32,6 @@ else:
 from datetime import datetime
 
 from xml.dom import minidom
-scriptPath = os.path.dirname(__file__)
 
 try:
     import MDCS_UC
@@ -47,12 +46,6 @@ class Base(object):
     const_warning_text = 1
     const_critical_text = 2
     const_status_text = 3
-
-    const_statistics_path_ = os.path.join(scriptPath, '..\\..\\parameter\\Statistics')
-    const_raster_function_templates_path_ = os.path.join(scriptPath, '..\\..\\parameter\\RasterFunctionTemplates')
-    const_raster_type_path_ = os.path.join(scriptPath, '..\\..\\parameter\\Rastertype')
-    const_workspace_path_ = os.path.join(scriptPath, '..\\..\\')      #.gdb output
-    const_import_geometry_features_path_ = os.path.join(scriptPath, '..\\..\\parameter')
 
     const_cmd_default_text = "#defaults"
     const_geodatabase_ext = '.GDB'
@@ -121,12 +114,17 @@ class Base(object):
         self.m_SDE_database_user = ''
         # ends
 
+        # set MDCS code base path
+        self.m_code_base = ''
+        self.setCodeBase(os.path.dirname(__file__))
+        # ends
+
+
 
     def init(self):         #return (status [true|false], reason)
 
         if (self.m_doc == None):
             return False
-
 
         #version check.
         try:
@@ -202,6 +200,21 @@ class Base(object):
                 return (False, self.const_init_ret_sde)
 
         return (True, 'OK')
+
+
+    def setCodeBase(self, path):
+        if (os.path.exists(path) == False):
+            return None
+
+        self.m_code_base = path
+
+        self.const_statistics_path_ = os.path.join(self.m_code_base, '..\\parameter\\Statistics')
+        self.const_raster_function_templates_path_ = os.path.join(self.m_code_base, '..\\parameter\\RasterFunctionTemplates')
+        self.const_raster_type_path_ = os.path.join(self.m_code_base, '..\\parameter\\Rastertype')
+        self.const_workspace_path_ = os.path.join(self.m_code_base, '..\\')      #.gdb output
+        self.const_import_geometry_features_path_ = os.path.join(self.m_code_base, '..\\parameter')
+
+        return self.m_code_base
 
 
     def getXMLXPathValue(self, xPath, key):
@@ -334,6 +347,10 @@ class Base(object):
 
     def isArcGISPatched(self):      # return values [true | false]
 
+        # if we're running on python 3+, it's assumed we're on (ArcGIS Pro) and there's no need to check for patches.
+        if (sys.version_info[0] >= 3):
+            return True
+
         # if the patch XML node is not properly formatted in structure/with values, MDCS returns an error and will abort the operation.
 
         patch_node = self.getXMLNode(self.m_doc, "Patch")
@@ -463,6 +480,11 @@ class Base(object):
 
 
     def CheckMDCSVersion(self, min, max, print_err_msg = True):
+
+        # if python version is >= 3, it's asssumed we're being run from ArcGIS Pro
+        if (sys.version_info[0] >= 3):
+            min = [1, 0, 0, 0]
+            max = [0, 0, 0, 0]
 
         if (len(min) != self.const_ver_len or
             len(max) != self.const_ver_len):

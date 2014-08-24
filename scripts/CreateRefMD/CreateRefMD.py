@@ -30,14 +30,14 @@ from xml.dom import minidom
 
 class CreateReferencedMD(Base.Base):
 
-    srs = ''
-    pixel_type = ''
-
-    dic_derive_lst = {}
-    dic_ref_info = {}
-    m_numBands = ''
-
     def __init__(self, base):
+        self.srs = ''
+        self.pixel_type = ''
+
+        self.dic_derive_lst = {}
+        self.dic_ref_info = {}
+        self.m_numBands = ''
+
         self.setLog(base.m_log)
         self.m_base = base
 
@@ -232,7 +232,7 @@ class CreateReferencedMD(Base.Base):
                                     if (node.childNodes.length > 0):
                                         rftNode = self.m_base.getAbsPath(node.firstChild.nodeValue.strip())
                                         if (len(rftNode) != 0):
-                                            rft =  self.prefixFolderPath(rftNode, self.const_raster_function_templates_path_)
+                                            rft =  self.prefixFolderPath(rftNode, self.m_base.const_raster_function_templates_path_)
                                             if (os.path.exists(rft) == False):
                                                     rft = rftNode
                                             for md in self.dic_derive_lst.keys():
