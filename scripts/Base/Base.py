@@ -675,7 +675,7 @@ class Base(object):
 
                     uValue = usr_key[first:second]
 
-                    if (uValue.upper() is self.m_dynamic_params.keys()):
+                    if (uValue.upper() in self.m_dynamic_params.keys()):
                         revalue.append(self.m_dynamic_params[uValue.upper()])
                     else:
                         if (uValue.find('\$') >= 0):
