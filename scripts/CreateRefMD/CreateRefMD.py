@@ -207,7 +207,7 @@ class CreateReferencedMD(Base.Base):
                                                                             arydNameVal[indx] = os.path.join(self.m_base.m_geoPath, _f)
                                                                             _file = arydNameVal[indx].upper()
 
-                                                                        if ((_file in dListEmpty or self.dic_derive_lst.keys()) == False):
+                                                                        if (dListEmpty or (_file in self.dic_derive_lst.keys()) == False):
                                                                                 self.dic_derive_lst[_file] = { 'ref' : {}}
                                                                                 dListEmpty = False
 
