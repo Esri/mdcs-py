@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: SetMDProperties.py
 # Description: To set mosaic dataset properties
-# Version: 20140417
+# Version: 20150121
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -49,6 +49,7 @@ class SetMDProperties(Base.Base):
     def setMDProperties(self, mdPath):
 
         mdName = os.path.basename(mdPath).upper()
+
         noRasterPerMosaic = self.getInternalPropValue(mdName, 'max_num_per_mosaic')    #"50"
         maxRequestSizex = self.getInternalPropValue(mdName, 'rows_maximum_imagesize')  #"4000"
         maxRequestSizey = self.getInternalPropValue(mdName, 'columns_maximum_imagesize')  #"4000"
@@ -84,49 +85,100 @@ class SetMDProperties(Base.Base):
         max_num_of_download_items = self.getInternalPropValue(mdName, 'max_num_of_download_items')
         max_num_of_records_returned = self.getInternalPropValue(mdName,'max_num_of_records_returned')
 
+        is_10_3_plus = self.CheckMDCSVersion([10, 3, 0, 4321], [0, 0, 0, 0], False)
 
         if (self.is101SP1() == False):  #OrderField set to 'BEST' would fail in 10.1 without SP1
             orderField = 'MinPS'
 
         try:
-            self.log("\t\tSetting MD Properties", self.const_general_text)
-            arcpy.SetMosaicDatasetProperties_management(
-            mdPath,
-            maxRequestSizex,
-            maxRequestSizey,
-            allowedCompression,
-            defaultCompression,
-            compressionQuality,
-            LERC_Tolerance,
-            resampling_type,
-            clipToFootprint,
-            footprints_may_contain_nodata,
-            clip_to_boundary,
-            color_correction,
-            allowed_mensuration_capabilities,
-            default_mensuration_capabilities,
-            allowed_mosaic_methods,
-            defaultMosaicMethod,
-            orderField,
-            order_base,
-            sorting_order,
-            mosaic_operator,
-            blend_width,
-            view_point_x,
-            view_point_y,
-            noRasterPerMosaic,
-            cell_size_tolerance,
-            cell_size,
-            metadata_level,
-            allowedFields,
-            use_time,
-            start_time_field,
-            end_time_field,
-            time_format,
-            geographic_transform,
-            max_num_of_download_items,
-            max_num_of_records_returned
-            )
+            self.log("\t\tSetting MD Properties : ", self.const_general_text)
+            #if dversion > 10304320:
+            if (is_10_3_plus == True):
+                data_source_type = self.getInternalPropValue(mdName,'data_source_type')
+                minimum_pixel_contribution = self.getInternalPropValue(mdName,'minimum_pixel_contribution')
+                processing_templates = self.getInternalPropValue(mdName,'processing_templates')
+                default_processing_template = self.getInternalPropValue(mdName,'default_processing_template')
+
+                arcpy.SetMosaicDatasetProperties_management(
+                mdPath,
+                maxRequestSizex,
+                maxRequestSizey,
+                allowedCompression,
+                defaultCompression,
+                compressionQuality,
+                LERC_Tolerance,
+                resampling_type,
+                clipToFootprint,
+                footprints_may_contain_nodata,
+                clip_to_boundary,
+                color_correction,
+                allowed_mensuration_capabilities,
+                default_mensuration_capabilities,
+                allowed_mosaic_methods,
+                defaultMosaicMethod,
+                orderField,
+                order_base,
+                sorting_order,
+                mosaic_operator,
+                blend_width,
+                view_point_x,
+                view_point_y,
+                noRasterPerMosaic,
+                cell_size_tolerance,
+                cell_size,
+                metadata_level,
+                allowedFields,
+                use_time,
+                start_time_field,
+                end_time_field,
+                time_format,
+                geographic_transform,
+                max_num_of_download_items,
+                max_num_of_records_returned,
+                data_source_type,
+                minimum_pixel_contribution,
+                processing_templates,
+                default_processing_template
+                )
+
+            else:
+                arcpy.SetMosaicDatasetProperties_management(
+                mdPath,
+                maxRequestSizex,
+                maxRequestSizey,
+                allowedCompression,
+                defaultCompression,
+                compressionQuality,
+                LERC_Tolerance,
+                resampling_type,
+                clipToFootprint,
+                footprints_may_contain_nodata,
+                clip_to_boundary,
+                color_correction,
+                allowed_mensuration_capabilities,
+                default_mensuration_capabilities,
+                allowed_mosaic_methods,
+                defaultMosaicMethod,
+                orderField,
+                order_base,
+                sorting_order,
+                mosaic_operator,
+                blend_width,
+                view_point_x,
+                view_point_y,
+                noRasterPerMosaic,
+                cell_size_tolerance,
+                cell_size,
+                metadata_level,
+                allowedFields,
+                use_time,
+                start_time_field,
+                end_time_field,
+                time_format,
+                geographic_transform,
+                max_num_of_download_items,
+                max_num_of_records_returned
+                )
             self.log("\t\tDone setting mosaic dataset properties for : " + mdName, self.const_general_text)
             return True
 
@@ -151,7 +203,24 @@ class SetMDProperties(Base.Base):
                         if (node.nodeName == 'DefaultProperties'):
                             for node in node.childNodes:
                                 if (node.nodeType == minidom.Node.ELEMENT_NODE):
-                                    self.dic_properties_lst[node.nodeName] = node.firstChild.nodeValue
+                                    if node.nodeName == 'processing_templates' or node.nodeName == 'default_processing_template':
+                                        ptvalue = node.firstChild.nodeValue
+                                        if ptvalue != '#':
+                                            ptvaluesplit = ptvalue.split(';')
+                                            rftpaths = ''
+                                            for each in ptvaluesplit:
+                                                if each.find('/') == -1:
+                                                    if each.lower() == 'none':
+                                                        rftpaths = rftpaths + each + ";"
+                                                    else:
+                                                        rftpaths = rftpaths + os.path.abspath(os.path.join((self.m_base.const_raster_function_templates_path_),each)) +";"
+                                            rftpaths = rftpaths[:-1]
+                                            self.dic_properties_lst[node.nodeName] = rftpaths
+                                        else:
+                                            self.dic_properties_lst[node.nodeName] = ptvalue
+                                    else:
+
+                                        self.dic_properties_lst[node.nodeName] = node.firstChild.nodeValue
 
         except:
             Error = True
