@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: MDCS.py
 # Description: This is the main program entry point to MDCS.
-# Version: 20150429
+# Version: 20150611
 # Requirements: ArcGIS 10.1 SP1
 # Required Arguments: -i:<config_file>
 # Usage: python.exe MDCS.py -c:<Optional:command(s)> -i:<config_file>
@@ -36,6 +36,22 @@ import Base
 
 
 randomCount = 0
+# cli callback ptrs
+g_cli_callback = None
+g_cli_msg_callback = None
+# ends
+
+# cli arcpy callback
+def register_for_callbacks(fn_ptr):
+    global g_cli_callback
+    g_cli_callback = fn_ptr
+# ends
+
+# cli msg callback
+def register_for_msg_callbacks(fn_ptr):
+    global g_cli_msg_callback
+    g_cli_msg_callback = fn_ptr
+# ends
 
 def postAddData(gdbPath, mdName, info):
     global randomCount
@@ -50,6 +66,7 @@ def postAddData(gdbPath, mdName, info):
         lyrName = "Mosaiclayer" + str(randomCount)
         randomCount += 1
         expression = "OBJECTID >" + str(obvalue)
+
         try:
             arcpy.MakeMosaicLayer_management(fullPath,lyrName,expression)
         except:
@@ -57,6 +74,7 @@ def postAddData(gdbPath, mdName, info):
             log.Message(arcpy.GetMessages(), log.const_critical_text)
 
             return False
+
         try:
             fieldName = 'dataset_id'
             fieldExist = arcpy.ListFields(fullPath, fieldName)
@@ -69,6 +87,7 @@ def postAddData(gdbPath, mdName, info):
             log.Message(arcpy.GetMessages(), log.const_critical_text)
 
             return False
+
         try:
             arcpy.Delete_management(lyrName)
         except:
@@ -76,13 +95,12 @@ def postAddData(gdbPath, mdName, info):
             log.Message(arcpy.GetMessages(), log.const_critical_text)
 
             return False
+
     return True
 
 def main(argc, argv):
 
-    argc = len(argv)
     if (argc < 2):
-
     #command-line argument codes.
     #-i:config file.
     #-c:command codes
@@ -98,7 +116,7 @@ def main(argc, argv):
         "-artdem: Update DEM path in ART file"
         ]
 
-        print ("\nMDCS.py v5.6 [20150429]\nUsage: MDCS.py -c:<Optional:command> -i:<config_file>" \
+        print ("\nMDCS.py v5.8 [20150611]\nUsage: MDCS.py -c:<Optional:command> -i:<config_file>" \
         "\n\nFlags to override configuration values,") \
 
         for arg in user_args:
@@ -114,12 +132,15 @@ def main(argc, argv):
         sys.exit(1)
 
     base = Base.Base()
+    if (not g_cli_callback is None):
+        base.m_cli_callback_ptr = g_cli_callback
+    if (not g_cli_msg_callback is None):
+        base.m_cli_msg_callback_ptr = g_cli_msg_callback
     global log
-    log = logger.Logger();
+    log = logger.Logger(base);
     base.setLog(log)
 
-
-    argIndx = 1
+    argIndx = 0
     md_path_ = artdem = config = com = log_folder = code_base =  ''
 
     while(argIndx < argc):
@@ -149,6 +170,8 @@ def main(argc, argv):
             code_base =  value
         elif(exSubCode == 'artdem'):
             artdem =  value
+        elif(exSubCode == 'gprun'):
+            log.isGPRun = True                  # direct log messages also to (arcpy.AddMessage)
         elif(subCode == 'p'):
             pMax = value.rfind('$')
             if (pMax == -1):
@@ -188,32 +211,10 @@ def main(argc, argv):
             base.m_mdName = f
 
 
-    if (os.path.isfile(config) == False):
-        errMessage = u"Error: Input config file is not specified/not found! " + config
-        arcpy.AddMessage(errMessage)
-        return False
-
-
-    if (artdem != ''):
-        (base.m_art_ws, base.m_art_ds) = os.path.split(artdem)
-        base.m_art_apply_changes = True
-
-
-    comInfo = {
-    'AR' : { 'cb' : postAddData }       #assign a callback function to run custom user code when adding rasters.
-    }
-
-
     configName, ext = os.path.splitext(config)
     configName = os.path.basename(configName)
 
-
-
-    if (com == ''):
-        com = base.const_cmd_default_text
-
-    if (argv[1].lower() == '#gprun'):
-        log.isGPRun = True
+    # setup log
     log.Project ('MDCS')
     log.LogNamePrefix(configName)
     log.StartLog()
@@ -228,15 +229,32 @@ def main(argc, argv):
             log.LogFileName(fileName)
 
     log.SetLogFolder(log_output_folder)
-    solutions = solutionsLib.Solutions(base)
+    # ends
 
+    if (os.path.isfile(config) == False):
+        log.Message('Input config file is not specified/not found! ({})'.format(config), logger.Logger.const_critical_text)
+        log.Message(base.CCMD_STATUS_FAILED, logger.Logger.const_status_text)    # set (failed) status
+        log.WriteLog('#all')
+        return False
+
+    if (artdem != ''):
+        (base.m_art_ws, base.m_art_ds) = os.path.split(artdem)
+        base.m_art_apply_changes = True
+
+    comInfo = {
+    'AR' : { 'cb' : postAddData }       #assign a callback function to run custom user code when adding rasters.
+    }
+
+    if (com == ''):
+        com = base.const_cmd_default_text
+
+    solutions = solutionsLib.Solutions(base)
     success = solutions.run(config, com, comInfo)
 
     log.Message ("Done...", log.const_general_text)
-
     log.WriteLog('#all')   #persist information/errors collected.
 
 if __name__ == '__main__':
-    main(3, sys.argv)
+    main(len(sys.argv), sys.argv)
 
 

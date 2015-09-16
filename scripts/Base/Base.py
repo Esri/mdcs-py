@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
-# Version: 20150421
+# Version: 20150611
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -70,19 +70,21 @@ class DynaInvoke:
             self.m_args = self.m_args[:arg_count]
         return True
     def invoke(self):
-        result = 'FAILED'
+        result = 'OK'
         try:
             if (self.m_evnt_update_args is not None):
                 usr_args = self.m_evnt_update_args(self.m_args, self.m_name)
+                if (usr_args is None):      # set to (None) to skip fnc invocation, it's treated as a non-error.
+                    return True
                 if (usr_args is not None and
                     len(usr_args) == len(self.m_args)):      # user is only able to update the contents, not the trim or expand args.
                         self.__message ('Original args may have been updated through custom code.', self.const_warning_text)
                         self.m_args = usr_args
             self.__message ('Calling (%s)' % (self.m_name), self.const_general_text)
             ret = eval ('%s(*self.m_args)' % (self.m_name))     # gp-tools return NULL?
-            result = 'OK'
             return True
         except Exception as exp:
+            result = 'FAILED'
             self.__message (str(exp), self.const_critical_text)
             return False
         finally:
@@ -106,7 +108,6 @@ class Base(object):
     const_init_ret_patch = 'patch'
     # ends
 
-
     #version specific
     const_ver_len = 4
 
@@ -123,8 +124,10 @@ class Base(object):
     CMODULE_NAME = 'MDCS_UC'
     # ends
 
-
-
+    # log status (codes)
+    CCMD_STATUS_OK = 'OK'
+    CCMD_STATUS_FAILED = 'Failed!'
+    # ends
 #ends
 
     def __init__(self):
@@ -168,7 +171,10 @@ class Base(object):
         self.setCodeBase(os.path.dirname(__file__))
         # ends
 
-
+        # client_callback_ptrs
+        self.m_cli_callback_ptr = None
+        self.m_cli_msg_callback_ptr = None
+        # ends
 
     def init(self):         #return (status [true|false], reason)
 
@@ -251,6 +257,26 @@ class Base(object):
         return (True, 'OK')
 
 
+    def invokeDynamicFnCallback(self, args, fn_name = None):
+        if (fn_name == None):
+            return args
+        fn = fn_name.lower()
+        if (self.invoke_cli_callback(fn_name, args)):
+            return args
+        return None
+
+    # cli callback ptrs
+    def invoke_cli_callback(self, fname, args):
+        if (not self.m_cli_callback_ptr is None):
+            return self.m_cli_callback_ptr(fname, args)
+        return args
+
+    def invoke_cli_msg_callback(self, mtype, args):
+        if (not self.m_cli_msg_callback_ptr is None):
+            return self.m_cli_msg_callback_ptr(mtype, args)
+        return args
+    # ends
+
     def setCodeBase(self, path):
         if (os.path.exists(path) == False):
             return None
@@ -332,7 +358,7 @@ class Base(object):
             try:
                 ret = fnc(data)
             except Exception as inf:
-                self.log('Error: executing user defined function (%s)' % (name), self.const_critical_text)
+                self.log('Executing user defined function (%s)' % (name), self.const_critical_text)
                 self.log(str(inf), self.const_critical_text)
                 return False
         except Exception as inf:
@@ -810,4 +836,4 @@ class Base(object):
 
         return tot_count_sec_
 
- 
+
