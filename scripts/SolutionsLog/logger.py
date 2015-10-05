@@ -55,8 +55,10 @@ class Logger(Base.Base):
         self.logNamePrefix = ''
         self.logFileName = ''
 
-        self.setLog(base.m_log)
+        if (base):
+            self.setLog(base.m_log)
         self.m_base = base
+
         self.isGPRun = False
 
     @property
@@ -148,7 +150,8 @@ class Logger(Base.Base):
             else:
                 print (_message)
                 msg_type = 'general'     # msg-code
-                self.m_base.invoke_cli_msg_callback(msg_type, [_message])
+                if (self.m_base):
+                    self.m_base.invoke_cli_msg_callback(msg_type, [_message])
             return True
 
     def WriteLog(self, project):
