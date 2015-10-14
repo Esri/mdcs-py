@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: SolutionsLib.py
 # Description: To map MDCS command codes to GP Tool functions.
-# Version: 20150422
+# Version: 20151014
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -100,6 +100,8 @@ class Solutions(Base.Base):
             bSuccess = createMD.init(self.config)
             if (bSuccess):
                 bSuccess = createMD.createGeodataBase()
+                if (not bSuccess):
+                    return False
                 return createMD.createMD()
             return False
 
@@ -1287,7 +1289,7 @@ class Solutions(Base.Base):
                         self.log('Unabled to add user defined function/command (%s) to command chain.' % (ucCommand), self.const_warning_text)
                         return False    # return to prevent further processing.
                 else:
-                    self.log("Command/Err: Unknown command:" + cmd, self.const_general_text)
+                    self.log("Command/Err: Unknown command:" + cmd, self.const_warning_text)
                     continue
 
             indexed_cmd = False if index == 0 else True
@@ -1310,6 +1312,7 @@ class Solutions(Base.Base):
 
             if (status == False and     # do not continue with any following commands if AR / user defined function commands fail.
                 (cmd == 'AR' or
+                 cmd == 'CM' or
                  is_user_cmd == True)):
                     return False
 

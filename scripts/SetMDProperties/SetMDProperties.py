@@ -14,13 +14,13 @@
 #------------------------------------------------------------------------------
 # Name: SetMDProperties.py
 # Description: To set mosaic dataset properties
-# Version: 20150405
+# Version: 20151014
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
 #!/usr/bin/env python
 
-import arcpy,os,sys
+import os
 from xml.dom import minidom
 import Base
 
@@ -72,7 +72,7 @@ class SetMDProperties(Base.Base):
         args.append(self.getInternalPropValue(mdName,'default_mensuration_capabilities'))
         args.append(self.getInternalPropValue(mdName,'allowed_mosaic_methods'))
         args.append(self.getInternalPropValue(mdName, 'default_mosaic_method'))
-        args.append(self.getInternalPropValue(mdName, 'Order_field'))
+        args.append(self.getInternalPropValue(mdName, 'order_field'))
         args.append(self.getInternalPropValue(mdName,'order_base'))
         args.append(self.getInternalPropValue(mdName,'sorting_order'))
         args.append(self.getInternalPropValue(mdName,'mosaic_operator'))
@@ -115,9 +115,9 @@ class SetMDProperties(Base.Base):
                   if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
                         if (node.nodeName == 'DefaultProperties'):
                             for node in node.childNodes:
+                                ptvalue = node.firstChild.nodeValue if node.firstChild else ''
                                 if (node.nodeType == minidom.Node.ELEMENT_NODE):
                                     if node.nodeName == 'processing_templates' or node.nodeName == 'default_processing_template':
-                                        ptvalue = node.firstChild.nodeValue
                                         if ptvalue != '#':
                                             ptvaluesplit = ptvalue.split(';')
                                             rftpaths = ''
@@ -127,15 +127,9 @@ class SetMDProperties(Base.Base):
                                                         rftpaths = rftpaths + each + ";"
                                                     else:
                                                         rftpaths = rftpaths + os.path.abspath(os.path.join((self.m_base.const_raster_function_templates_path_),each)) +";"
-                                            rftpaths = rftpaths[:-1]
-                                            self.dic_properties_lst[node.nodeName] = rftpaths
-                                        else:
-                                            self.dic_properties_lst[node.nodeName] = ptvalue
-                                    else:
-
-                                        self.dic_properties_lst[node.nodeName] = node.firstChild.nodeValue
-
+                                            ptvalue = rftpaths = rftpaths[:-1]
+                                    self.dic_properties_lst[node.nodeName] = ptvalue
         except:
             Error = True
 
-        return True 
+        return True

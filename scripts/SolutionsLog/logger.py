@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: Logger.py
 # Description: Class to log status from components to log files.
-# Version: 20150510
+# Version: 20151014
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -146,7 +146,13 @@ class Logger(Base.Base):
             _message = 'log-' + errorTypeText + ': ' + message     #print out error message to console while logging.
 
             if (self.isGPRun == True):
-                arcpy.AddMessage(_message)
+                _arcpy_msg = message
+                if (messageType == self.const_warning_text):
+                    arcpy.AddWarning(_arcpy_msg)
+                elif (messageType == self.const_critical_text):
+                    arcpy.AddError(_arcpy_msg)
+                else:
+                    arcpy.AddMessage(_arcpy_msg)
             else:
                 print (_message)
                 msg_type = 'general'     # msg-code
