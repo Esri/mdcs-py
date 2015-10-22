@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: SetMDProperties.py
 # Description: To set mosaic dataset properties
-# Version: 20151014
+# Version: 20151022
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -117,16 +117,19 @@ class SetMDProperties(Base.Base):
                             for node in node.childNodes:
                                 ptvalue = node.firstChild.nodeValue if node.firstChild else ''
                                 if (node.nodeType == minidom.Node.ELEMENT_NODE):
-                                    if node.nodeName == 'processing_templates' or node.nodeName == 'default_processing_template':
-                                        if ptvalue != '#':
+                                    if (node.nodeName == 'processing_templates' or
+                                        node.nodeName == 'default_processing_template'):
+                                        if (ptvalue != '#' and
+                                            ptvalue != ''):
                                             ptvaluesplit = ptvalue.split(';')
                                             rftpaths = ''
                                             for each in ptvaluesplit:
-                                                if each.find('/') == -1:
-                                                    if each.lower() == 'none':
-                                                        rftpaths = rftpaths + each + ";"
+                                                if (each.find('/') == -1):
+                                                    if (each.lower() == 'none'):        # 'none' is an acceptable value.
+                                                        rftpaths = rftpaths + each
                                                     else:
-                                                        rftpaths = rftpaths + os.path.abspath(os.path.join((self.m_base.const_raster_function_templates_path_),each)) +";"
+                                                        rftpaths = rftpaths + os.path.abspath(os.path.join((self.m_base.const_raster_function_templates_path_),each))
+                                                    rftpaths += ';'
                                             ptvalue = rftpaths = rftpaths[:-1]
                                     self.dic_properties_lst[node.nodeName] = ptvalue
         except:
