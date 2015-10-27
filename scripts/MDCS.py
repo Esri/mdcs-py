@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: MDCS.py
 # Description: This is the main program entry point to MDCS.
-# Version: 20150611
+# Version: 20150727
 # Requirements: ArcGIS 10.1 SP1
 # Required Arguments: -i:<config_file>
 # Usage: python.exe MDCS.py -c:<Optional:command(s)> -i:<config_file>
@@ -34,8 +34,6 @@ import logger
 import solutionsLib     #import Raster Solutions library
 import Base
 
-
-randomCount = 0
 # cli callback ptrs
 g_cli_callback = None
 g_cli_msg_callback = None
@@ -54,48 +52,27 @@ def register_for_msg_callbacks(fn_ptr):
 # ends
 
 def postAddData(gdbPath, mdName, info):
-    global randomCount
-
     mdName = info['md']
     obvalue = info['pre_AddRasters_record_count']
     fullPath = os.path.join(gdbPath, mdName)
 
     mosaicMDType = info['type'].lower()
-
     if(mosaicMDType == 'source'):
-        lyrName = "Mosaiclayer" + str(randomCount)
-        randomCount += 1
-        expression = "OBJECTID >" + str(obvalue)
-
+        expression = 'OBJECTID >{}'.format(obvalue)
         try:
-            arcpy.MakeMosaicLayer_management(fullPath,lyrName,expression)
-        except:
-            log.Message("Failed to make mosaic layer (%s)" % (lyrName), log.const_critical_text)
-            log.Message(arcpy.GetMessages(), log.const_critical_text)
-
-            return False
-
-        try:
-            fieldName = 'dataset_id'
+            fieldName = 'Dataset_ID'
             fieldExist = arcpy.ListFields(fullPath, fieldName)
-            if len(fieldExist) == 0:
+            if (not fieldExist):
                 arcpy.AddField_management(fullPath, fieldName, "TEXT", "", "", "50")
-            log.Message("Calculating \'Dataset ID\' for the mosaic dataset (%s) with value (%s)" % (mdName, info['Dataset_ID']), log.const_general_text)
-            arcpy.CalculateField_management(lyrName, fieldName, "\"" + info['Dataset_ID'] + "\"", "PYTHON")
-        except :
-            log.Message('Failed to calculate \'Dataset_ID\'', log.const_critical_text)
-            log.Message(arcpy.GetMessages(), log.const_critical_text)
-
-            return False
-
-        try:
-            arcpy.Delete_management(lyrName)
+            log.Message('Calculating \'Dataset ID\' for the mosaic dataset ({}) with value ({})'.format(mdName, info[fieldName]), log.const_general_text)
+            with arcpy.da.UpdateCursor(fullPath,[fieldName],expression) as rows:
+                for row in rows:
+                    row[0] = info[fieldName]
+                    rows.updateRow(row)
         except:
-            log.Message("Failed to delete the layer", log.const_critical_text)
+            log.Message('Err. Failed to calculate \'Dataset_ID\'', log.const_critical_text)
             log.Message(arcpy.GetMessages(), log.const_critical_text)
-
             return False
-
     return True
 
 def main(argc, argv):
@@ -116,7 +93,7 @@ def main(argc, argv):
         "-artdem: Update DEM path in ART file"
         ]
 
-        print ("\nMDCS.py v5.8 [20150611]\nUsage: MDCS.py -c:<Optional:command> -i:<config_file>" \
+        print ("\nMDCS.py v5.8a [20150611]\nUsage: MDCS.py -c:<Optional:command> -i:<config_file>" \
         "\n\nFlags to override configuration values,") \
 
         for arg in user_args:

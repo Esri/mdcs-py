@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: SolutionsLib.py
 # Description: To map MDCS command codes to GP Tool functions.
-# Version: 20151014
+# Version: 20151027
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -797,7 +797,6 @@ class Solutions(Base.Base):
                         isQuery = False
                         query = self.getProcessInfoValue(processKey, 'query', index, indx)
                         lyrName = 'lyr_%s' % str(self.m_base.m_last_AT_ObjectID)
-
                         if (query != '#'):
                             isQuery = True
 
@@ -806,8 +805,8 @@ class Solutions(Base.Base):
                             expression += ' AND %s' % (query)
                         try:
                             arcpy.MakeMosaicLayer_management(fullPath, lyrName, expression)
-
-                            arcpy.CalculateField_management(lyrName,
+                            lyrName_footprint = lyrName + "/Footprint"
+                            arcpy.CalculateField_management(lyrName_footprint,
                             self.getProcessInfoValue(processKey, 'fieldname', index, indx),
                             self.getProcessInfoValue(processKey, 'expression', index, indx),
                             self.getProcessInfoValue(processKey, 'expression_type', index, indx),
@@ -819,7 +818,7 @@ class Solutions(Base.Base):
                         try:
                             arcpy.Delete_management(lyrName)     # passes for unknown/uncreated layer names
                         except:
-                            log.Message(arcpy.GetMessages(), log.const_warning_text)
+                            self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                             isError = True
 
                     return not isError
