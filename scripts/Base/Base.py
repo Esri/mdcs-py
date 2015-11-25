@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
-# Version: 20150611
+# Version: 20151125
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -77,7 +77,7 @@ class DynaInvoke:
                 if (usr_args is None):      # set to (None) to skip fnc invocation, it's treated as a non-error.
                     return True
                 if (usr_args is not None and
-                    len(usr_args) == len(self.m_args)):      # user is only able to update the contents, not the trim or expand args.
+                    len(usr_args) == len(self.m_args)):      # user is only able to update the contents, not to trim or expand args.
                         self.__message ('Original args may have been updated through custom code.', self.const_warning_text)
                         self.m_args = usr_args
             self.__message ('Calling (%s)' % (self.m_name), self.const_general_text)
@@ -644,7 +644,6 @@ class Base(object):
 
 
     def updateART(self, doc, workspace, dataset):
-
         if (doc == None):
             return False
 
@@ -668,39 +667,35 @@ class Base(object):
                                 if (workspace != ''):
                                     vs[1] = ' ' + workspace
                                     if (node.nextSibling != None):
-                                        if (node.nextSibling.nodeName == 'PathName'):
-                                            node.nextSibling.firstChild.nodeValue = workspace
+                                        if (node.nextSibling.nextSibling.nodeName == 'PathName'):
+                                            node.nextSibling.nextSibling.firstChild.nodeValue = workspace
 
                             elif (vs_.find('rasterdataset') > 0):
                                 if (dataset != ''):
                                     vs[1] = ' ' + dataset
                                     if (node.previousSibling != None):
-                                        if (node.previousSibling.nodeName == 'Name'):
-                                            node.previousSibling.firstChild.nodeValue = dataset
+                                        if (node.previousSibling.previousSibling.nodeName == 'Name'):
+                                            node.previousSibling.previousSibling.firstChild.nodeValue = dataset
                         upd_buff.append('='.join(vs))
 
                     if (len(upd_buff) > 0):
                         upd_nodeValue = ';'.join(upd_buff)
                         node.firstChild.nodeValue = upd_nodeValue
 
-
             nodeName = 'ConnectionProperties'
             node_list = doc.getElementsByTagName(nodeName)
             found = False
             for node in node_list:      # only one node should exist.
-                for n in node.firstChild.childNodes:
-                    if (n.firstChild != None):
-                        if (n.firstChild.firstChild != None):
-                            if (n.firstChild.nodeName.lower() == 'key'):
-                                if (n.firstChild.firstChild.nodeValue.lower() == 'database'):
-                                    n.firstChild.nextSibling.firstChild.nodeValue  = workspace
+                for n in node.firstChild.nextSibling.childNodes:
+                    if (n.nextSibling != None):
+                        if (n.nextSibling.firstChild != None):
+                            if (n.nextSibling.firstChild.nextSibling.nodeName.lower() == 'key'):
+                                if (n.nextSibling.firstChild.nextSibling.firstChild.nodeValue.lower() == 'database'):
+                                    n.nextSibling.firstChild.nextSibling.nextSibling.nextSibling.firstChild.nodeValue  = workspace
                                     found = True
                                     break;
-
                 if (found == True):
                     break
-
-
         except Exception as inst:
             self.log(str(inst), self.const_critical_text)
             return False
@@ -836,4 +831,4 @@ class Base(object):
 
         return tot_count_sec_
 
-
+ 
