@@ -254,6 +254,113 @@ class Solutions(Base.Base):
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
+        elif (com == 'ANCP'):
+                    self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+                    fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                    return self.__invokeDynamicFn(
+                    [fullPath],
+                    'analyzecontrolpoints',
+                    'arcpy.AnalyzeControlPoints_management',
+                    index
+                    )
+        elif (com == 'APCP'):
+                    self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+                    return self.__invokeDynamicFn(
+                    [],
+                    'appendcontrolpoints',
+                    'arcpy.AppendControlPoints_management ',
+                    index
+                    )
+
+        elif (com == 'ABA'):
+                    self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+                    fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                    return self.__invokeDynamicFn(
+                    [fullPath],
+                    'applyblockadjustment',
+                    'arcpy.ApplyBlockAdjustment_management',
+                    index
+                    )
+
+        elif (com == 'CBA'):
+                    self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+                    fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                    return self.__invokeDynamicFn(
+                    [fullPath],
+                    'computeblockadjustment',
+                    'arcpy.ComputeBlockAdjustment_management',
+                    index
+                    )
+
+        elif (com == 'CCP'):
+                    self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+                    fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                    return self.__invokeDynamicFn(
+                    [fullPath],
+                    'computecontrolpoints',
+                    'arcpy.ComputeControlPoints_management',
+                    index
+                    )
+
+        elif (com == 'CTP'):
+                    self.m_log.Message("\tCompute Tie Points : " + self.m_base.m_mdName, self.m_log.const_general_text)
+                    fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                    return self.__invokeDynamicFn(
+                    [fullPath],
+                    'computetiepoints',
+                    'arcpy.ComputeTiePoints_management',
+                    index
+                    )
+
+        elif (com == 'AMDS'):
+                    self.m_log.Message("\tAlter Mosaic Dataset Schema : " + self.m_base.m_mdName, self.m_log.const_general_text)
+                    fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                    return self.__invokeDynamicFn(
+                    [fullPath],
+                    'altermosaicdatasetschema',
+                    'arcpy.AlterMosaicDatasetSchema_management',
+                    index
+                    )
+
+        elif (com == 'AMD'):
+                    self.m_log.Message("\Analyze Mosaic Dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
+                    fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                    return self.__invokeDynamicFn(
+                    [fullPath],
+                    'analyzemosaicdataset',
+                    'arcpy.AnalyzeMosaicDataset_management',
+                    index
+                    )
+
+        elif (com == 'BMDIC'):
+                    self.m_log.Message("\Build Mosaic Dataset Item Cache : " + self.m_base.m_mdName, self.m_log.const_general_text)
+                    fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                    return self.__invokeDynamicFn(
+                    [fullPath],
+                    'buildmosaicdatasetitemcache',
+                    'arcpy.BuildMosaicDatasetItemCache_management',
+                    index
+                    )
+
+        elif (com == 'CDA'):
+                    self.m_log.Message("\Compute Dirty Area : " + self.m_base.m_mdName, self.m_log.const_general_text)
+                    fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                    return self.__invokeDynamicFn(
+                    [fullPath],
+                    'computedirtyarea',
+                    'arcpy.ComputeDirtyArea_management',
+                    index
+                    )
+
+        elif (com == 'GEA'):
+                    self.m_log.Message("\Generate Exclude Area : " + self.m_base.m_mdName, self.m_log.const_general_text)
+                    return self.__invokeDynamicFn(
+                    [],
+                    'generateexcludearea',
+                    'arcpy.GenerateExcludeArea_management',
+                    index
+                    )
+
         elif (com == 'CS'):
             try:
                 self.m_log.Message("\tCalculate statistic for the mosaic dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
@@ -997,6 +1104,50 @@ class Solutions(Base.Base):
         },
     'BP' :
         {   'desc' : 'Build Pyramid.',
+            'fnc' : executeCommand
+        },
+    'ANCP' :
+        {   'desc' : 'Analyze Control Points.',
+            'fnc' : executeCommand
+        },
+    'APCP' :
+        {   'desc' : 'Append Control Points.',
+            'fnc' : executeCommand
+        },
+    'ABA' :
+        {   'desc' : 'Apply Block Adjustment.',
+            'fnc' : executeCommand
+        },
+    'CBA' :
+        {   'desc' : 'Compute Block Adjustment.',
+            'fnc' : executeCommand
+        },
+    'CCP' :
+        {   'desc' : 'Compute Control Points.',
+            'fnc' : executeCommand
+        },
+    'CTP' :
+        {   'desc' : 'Compute Tie Points.',
+            'fnc' : executeCommand
+        },
+    'AMDS' :
+        {   'desc' : 'Alter Mosaic Dataset Schema.',
+            'fnc' : executeCommand
+        },
+    'AMD' :
+        {   'desc' : 'Analyze Mosaic Dataset.',
+            'fnc' : executeCommand
+        },
+    'BMDIC' :
+        {   'desc' : 'Build Mosaic Dataset Item Cache.',
+            'fnc' : executeCommand
+        },
+    'CDA' :
+        {   'desc' : 'Compute Dirty Area.',
+            'fnc' : executeCommand
+        },
+    'GEA' :
+        {   'desc' : 'Generate Exclude Area.',
             'fnc' : executeCommand
         },
     'CS' :
