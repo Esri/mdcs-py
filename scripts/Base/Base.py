@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
-# Version: 20151125
+# Version: 20151209
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -50,23 +50,23 @@ class DynaInvoke:
         self.m_args = args
         self.m_evnt_update_args =  evnt_fnc_update_args
         self.m_log = log
-    def __message(self, msg, msg_type):
-        if (self.m_log is not None):
+    def _message(self, msg, msg_type):
+        if (self.m_log):
             return self.m_log(msg, msg_type)
         print (msg)
     def init(self):
         try:
             arg_count = eval('%s.__code__.co_argcount' % (self.m_name))
         except Exception as exp:
-            self.__message(str(exp), self.const_critical_text)
+            self._message(str(exp), self.const_critical_text)
             return False
         len_args = len(self.m_args)
         if (len_args < arg_count):
-            self.__message('Args less than required, filling with default (#)', self.const_warning_text)
+            self._message('Args less than required, filling with default (#)', self.const_warning_text)
             for i in range (len_args, arg_count):
                 self.m_args.append('#')
         elif (len_args > arg_count):
-            self.__message ('More args supplied than required to function (%s)' % (self.m_name), self.const_warning_text)
+            self._message ('More args supplied than required to function (%s)' % (self.m_name), self.const_warning_text)
             self.m_args = self.m_args[:arg_count]
         return True
     def invoke(self):
@@ -78,17 +78,17 @@ class DynaInvoke:
                     return True
                 if (usr_args is not None and
                     len(usr_args) == len(self.m_args)):      # user is only able to update the contents, not to trim or expand args.
-                        self.__message ('Original args may have been updated through custom code.', self.const_warning_text)
+                        self._message ('Original args may have been updated through custom code.', self.const_warning_text)
                         self.m_args = usr_args
-            self.__message ('Calling (%s)' % (self.m_name), self.const_general_text)
+            self._message ('Calling (%s)' % (self.m_name), self.const_general_text)
             ret = eval ('%s(*self.m_args)' % (self.m_name))     # gp-tools return NULL?
             return True
         except Exception as exp:
             result = 'FAILED'
-            self.__message (str(exp), self.const_critical_text)
+            self._message (str(exp), self.const_critical_text)
             return False
         finally:
-            self.__message ('Status: %s' % (result), self.const_general_text)
+            self._message ('Status: %s' % (result), self.const_general_text)
 
 class Base(object):
 
