@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: SetMDProperties.py
 # Description: To set mosaic dataset properties
-# Version: 20151022
+# Version: 20151209
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ class SetMDProperties(Base.Base):
         else:
             return ''
 
-    def __message(self, msg, type):
+    def _message(self, msg, type):
         self.log(msg, type)
 
     def __setpropertiesCallback(self, args, fn_name):
@@ -96,7 +96,7 @@ class SetMDProperties(Base.Base):
         args.append(self.getInternalPropValue(mdName,'processing_templates'))
         args.append(self.getInternalPropValue(mdName,'default_processing_template'))
 
-        setProperties = Base.DynaInvoke('arcpy.SetMosaicDatasetProperties_management', args, self.__setpropertiesCallback, self.__message)
+        setProperties = Base.DynaInvoke('arcpy.SetMosaicDatasetProperties_management', args, self.__setpropertiesCallback, self._message)
         if (setProperties.init() == False):
             return False
         return setProperties.invoke()
@@ -135,4 +135,4 @@ class SetMDProperties(Base.Base):
         except:
             Error = True
 
-        return True
+        return True 
