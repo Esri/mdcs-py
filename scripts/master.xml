@@ -140,6 +140,7 @@
       </DefaultProperties>
       <Table>
         <!-- AF  Add Fields-->
+		<!--http://desktopdev.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/add-field.htm -->
         <AddFields>AddFields</AddFields>
         <Fields>
           <Field>
@@ -428,8 +429,8 @@
         <DeleteField>
           <drop_field>test1;test2;test3;test4</drop_field>
         </DeleteField>
-        <!-- http://desktopdev.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/define-overviews.htm -->
         <!-- DO     Define Overviews -->
+        <!-- http://desktopdev.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/define-overviews.htm -->		
         <DefineOverviews>
           <overview_image_folder>overview_image_folder</overview_image_folder>
           <in_template_dataset>in_template_dataset</in_template_dataset>
@@ -444,8 +445,8 @@
           <compression_method>JPEG;JPEG_YCbCr;None;LZW</compression_method>
           <compression_quality>0-100</compression_quality>
         </DefineOverviews>
-        <!-- http://desktopdev.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/build-overviews.htm -->
         <!-- BO     Build Overviews -->
+        <!-- http://desktopdev.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/build-overviews.htm -->		
         <BuildOverviews>
           <where_clause>where_clause</where_clause>
           <define_missing_tiles>DEFINE_MISSING_TILES;NO_DEFINE_MISSING_TILES</define_missing_tiles>
@@ -573,8 +574,8 @@
           <groups>#</groups>
         </SharePackage>
         <!-- SE     Set Environments -->
-        <!-- http://resources.arcgis.com/en/help/main/10.2/index.html#/An_overview_of_raster_storage_settings/001w00000024000000/ -->
-        <!-- http://resources.arcgis.com/en/help/main/10.2/index.html#/Parallel_Processing_Factor/001w0000004m000000/ -->
+        <!-- http://desktopdev.arcgis.com/en/arcmap/latest/tools/environments/an-overview-of-raster-storage-settings.htm -->
+        <!-- http://desktopdev.arcgis.com/en/arcmap/latest/tools/environments/parallel-processing-factor.htm -->
         <Environment>
           <cellSize></cellSize>
           <mask></mask>
@@ -626,7 +627,7 @@
           <where_clause />
         </SplitMosaicDatasetItems>
         <!-- CSDD Create an image service definition draft file -->
-        <!-- http://resources.arcgis.com/en/help/main/10.2/index.html#//018v00000094000000 -->
+        <!-- http://desktopdev.arcgis.com/en/arcmap/latest/analyze/arcpy-functions/createimagesddraft.htm -->
         <CreateImageSDDraft>
           <out_sddraft></out_sddraft>
           <service_name></service_name>
@@ -644,7 +645,7 @@
           <out_service_definition></out_service_definition>
         </StageService_server>
         <!-- USD Uploads and publishes a service definition to a specified server -->
-        <!-- http://resources.arcgis.com/en/help/main/10.2/index.html#/Upload_Service_Definition/00540000001p000000/ -->
+        <!-- http://desktopdev.arcgis.com/en/arcmap/latest/tools/server-toolbox/upload-service-definition.htm -->
         <UploadServiceDefinition_server>
           <in_sd_file></in_sd_file>
           <in_server></in_server>
