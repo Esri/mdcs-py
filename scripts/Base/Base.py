@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
-# Version: 20151209
+# Version: 20160531
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -646,15 +646,26 @@ class Base(object):
     def updateART(self, doc, workspace, dataset):
         if (doc == None):
             return False
-
         if (workspace.strip() == ''
         and dataset.strip() == ''):
             return False        # nothing to do.
-
         try:
+            nodeName = 'Key'
+            node_list = doc.getElementsByTagName(nodeName)
+            for node in node_list:
+                if (node.hasChildNodes()):
+                    _nValue = node.firstChild.nodeValue
+                    if (_nValue and
+                        _nValue.lower() == 'dem'):
+                        if (node.nextSibling and
+                            node.nextSibling.nextSibling and
+                            node.nextSibling.nextSibling.hasChildNodes() and
+                            node.nextSibling.nextSibling.firstChild.nodeValue):
+                            node.nextSibling.nextSibling.firstChild.nodeValue = '{}'.format(
+                            os.path.join(workspace, dataset))
+                        break
             nodeName = 'NameString'
             node_list = doc.getElementsByTagName(nodeName)
-
             for node in node_list:
                 if (node.hasChildNodes() == True):
                     vals = node.firstChild.nodeValue.split(';')
@@ -669,7 +680,6 @@ class Base(object):
                                     if (node.nextSibling != None):
                                         if (node.nextSibling.nextSibling.nodeName == 'PathName'):
                                             node.nextSibling.nextSibling.firstChild.nodeValue = workspace
-
                             elif (vs_.find('rasterdataset') > 0):
                                 if (dataset != ''):
                                     vs[1] = ' ' + dataset
@@ -677,11 +687,9 @@ class Base(object):
                                         if (node.previousSibling.previousSibling.nodeName == 'Name'):
                                             node.previousSibling.previousSibling.firstChild.nodeValue = dataset
                         upd_buff.append('='.join(vs))
-
                     if (len(upd_buff) > 0):
                         upd_nodeValue = ';'.join(upd_buff)
                         node.firstChild.nodeValue = upd_nodeValue
-
             nodeName = 'ConnectionProperties'
             node_list = doc.getElementsByTagName(nodeName)
             found = False
@@ -699,11 +707,7 @@ class Base(object):
         except Exception as inst:
             self.log(str(inst), self.const_critical_text)
             return False
-
         return True
-
-
-
 
     def getInternalPropValue(self, dic, key):
         if (key in dic.keys()):
