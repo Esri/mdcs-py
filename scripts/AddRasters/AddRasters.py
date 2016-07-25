@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: AddRasters.py
 # Description: Add rasters/data to existing mosaic datasets.
-# Version: 20151209
+# Version: 20160721
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -66,6 +66,12 @@ class AddRasters(Base.Base):
 
     def AddRasters(self):
         self.log("Adding rasters:", self.const_general_text)
+        ArcGISVersion = self.m_base.getDesktopVersion()
+        enabledARTEdit = True
+        if (len(ArcGISVersion) >= 2):   # no editing of (ART) if ArcGIS version is >= 10.4
+            if (ArcGISVersion[0] >= 10 and
+                ArcGISVersion[1] >= 4):
+                enabledARTEdit = False
         for sourceID in self.sMdNameList:
             MDName = self.sMdNameList[sourceID]['md']
             fullPath = os.path.join(self.m_base.m_geoPath, MDName)
@@ -82,7 +88,8 @@ class AddRasters(Base.Base):
                     if ('art' in hshAddRaster.keys()):
                         rasterType = hshAddRaster['art']
                         self.log("\tUsing ART for " + name_toupper + ': ' + rasterType, self.const_general_text)
-                        if (self.m_base.m_art_apply_changes == True):
+                        if (self.m_base.m_art_apply_changes == True and
+                            enabledARTEdit):
                             art_doc = minidom.parse(rasterType)
                             if (self.m_base.updateART(art_doc, self.m_base.m_art_ws, self.m_base.m_art_ds) == True):
                                     self.log("\tUpdating ART (Workspace, RasterDataset) values with (%s, %s) respectively." % (self.m_base.m_art_ws, self.m_base.m_art_ds), self.const_general_text)
@@ -100,7 +107,6 @@ class AddRasters(Base.Base):
                     objID = self.getLastObjectID (self.m_base.m_geoPath, MDName)
                     self.sMdNameList[sourceID]['pre_AddRasters_record_count'] = objID
                     self.sMdNameList[sourceID]['Dataset_ID'] = hshAddRaster['dataset_id']
-
                     self.log('Adding items..')
                     args=[]
                     args.append(fullPath)
@@ -123,6 +129,9 @@ class AddRasters(Base.Base):
                     args.append(self.GetValue(hshAddRaster,'force_spatial_reference'))
                     args.append(self.GetValue(hshAddRaster,'estimate_statistics'))
                     args.append(self.GetValue(hshAddRaster,'aux_inputs'))
+                    if (self.m_base.m_art_apply_changes and
+                        not enabledARTEdit):
+                        args[len(args) - 1] += ';DEM {}'.format(os.path.join(self.m_base.m_art_ws, self.m_base.m_art_ds))
                     AddRaster = Base.DynaInvoke('arcpy.AddRastersToMosaicDataset_management', args, None, self.m_base.m_log.Message)
                     if (AddRaster.init() == False):
                         return False
@@ -149,69 +158,51 @@ class AddRasters(Base.Base):
     def init(self, config):
         mdType = self.getXMLNodeValue(self.m_base.m_doc, 'MosaicDatasetType').lower()
         isDerived = mdType == 'derived'
-
         Nodelist = self.m_base.m_doc.getElementsByTagName("MosaicDataset")
         if (Nodelist.length == 0):
             self.log("Error: <MosaicDataset> node is not found! Invalid schema.", self.const_critical_text)
             return False
-
         try:
             for node in Nodelist[0].childNodes:
                   node =  node.nextSibling
                   if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
-
                                 if (node.nodeName == 'Name'):
                                         mosasicDataset = self.m_base.m_mdName
                                         if (mosasicDataset == ''):
                                             mosasicDataset = node.firstChild.nodeValue
                                         mosasicDataset = mosasicDataset.strip()
-
                                         self.sMdNameList[mosasicDataset] = {'md' : mosasicDataset}
                                         self.sMdNameList[mosasicDataset]['addraster'] = []
-
                                         self.sMdNameList[mosasicDataset]['type'] = self.getXMLNodeValue(self.m_base.m_doc, "MosaicDatasetType")
-
                                 elif(node.nodeName == 'dataset_id'):
                                     if (mosasicDataset in self.sMdNameList.keys()):
                                         idValue = node.firstChild.nodeValue
                                         self.sMdNameList[mosasicDataset]['Dataset_ID'] = idValue.strip()
-
                                 elif(node.nodeName == 'AddRasters'):
-
                                     rasterType = False
-
                                     if (len(mosasicDataset) == 0):
                                         self.log("Error: <Name> should be the first child-element in <MosaicDataset>", self.const_critical_text)
                                         return False
-
                                     for node in node.childNodes:
                                         if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
                                             nodeName = node.nodeName.lower()
-
                                             if (nodeName == 'addraster'):
-
                                                 hshAddRasters = {}
-
                                                 for node in node.childNodes:
                                                     if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
                                                         nodeName = node.nodeName.lower()
-
                                                         nodeValue = ''
                                                         if (node.childNodes.length > 0):
                                                             nodeValue = node.firstChild.nodeValue
-
                                                         if (nodeName == 'sources'):
-
                                                             dataPaths =  ''
                                                             keyFound = False
                                                             nodeName = 'data_path'       #only <DataPath> nodes can exist under <Sources>
-
                                                             if (self.m_base.m_sources == ''):
                                                                 for cNode in node.childNodes:
                                                                     if (cNode != None and cNode.nodeType == minidom.Node.ELEMENT_NODE):
                                                                         name_ = cNode.nodeName
                                                                         name_ = name_.lower()
-
                                                                         if (name_ == nodeName):
                                                                             if (cNode.childNodes.length > 0):
                                                                                 _file  = cNode.firstChild.nodeValue.strip()
@@ -226,40 +217,28 @@ class AddRasters(Base.Base):
                                                                                             _file = indata[1:len(indata)]
                                                                                         else:
                                                                                             _file = indata
-
                                                                                 dataPaths = dataPaths + _file + ';'
                                                                                 keyFound = True
-
                                                             else:
                                                                 dataPaths = self.m_base.m_sources
-
                                                             nodeValue = dataPaths
-
-
                                                         elif (nodeName == 'raster_type'):
                                                             nodeName = 'art'
                                                             if (nodeValue.lower().find('.art') >= 0):
                                                                 nodeValue = self.prefixFolderPath(nodeValue, self.m_base.const_raster_type_path_)
-
                                                         hshAddRasters[nodeName] = nodeValue
-
                                                 if (mosasicDataset in self.sMdNameList.keys()):
                                                     try:
                                                         self.sMdNameList[mosasicDataset]['addraster'].append(hshAddRasters)
                                                     except:
                                                         Warning_ = True
                                                         #print "Warning: empty value for: MosaicDataset/" + nodeName
-
         except Exception as inst:
-            self.log("Error: reading MosaicDataset nodes.", self.const_critical_text)
+            self.log("Err. Reading MosaicDataset nodes.", self.const_critical_text)
             self.log(str(inst), self.const_critical_text)
             return False
-
-
         if not arcpy.Exists(self.m_base.m_workspace):
-                self.log("Error: workspace not found!:" + self.m_base.m_workspace, self.const_critical_text)
+                self.log("Err. Workspace not found!:" + self.m_base.m_workspace, self.const_critical_text)
                 self.log(arcpy.GetMessages(), self.const_critical_text)
                 return False
-
-
         return True
