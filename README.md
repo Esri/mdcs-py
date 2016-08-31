@@ -27,7 +27,7 @@ An application that uses MDCS can be found on the Image Management workflow Solu
 
 ## Resources
 
-* [ElevationScripts from ArcGIS Resource Center] (http://www.arcgis.com/home/item.html?id=f1e1020f94ab40219cf0d2f22a62ceee/)
+* [ElevationScripts from ArcGIS Resource Center] (http://www.arcgis.com/home/item.html?id=d2a055e12af14258a931fdc3ecf2c8b4)
 
 ## Issues
 
