@@ -3,7 +3,7 @@
   <!-- Support for Dynamic Variable <Name>$xyz$</Name> or <Name>DefaultValue;$xyz$</Name> The variable value can be passed from the command line -->
   <Name>Name_of_Project</Name>
   <Command>DefaultCommand</Command>
-  <!-- Commands avaiable CM, AR, SP, BP, CBMD, ERF, ANCP, APCP, ABA, CBA, CCP, CTP, AMDS, AMD, BMDIC, CDA, GEA, CS, BPS, BF, BS, BB, DN, SY, IG, SS, DF, DO, BO, MMDI, DMD, RRFMD, RP RI, AI, JF, CV, MTC, ETC, STP, SE, EMDG, EMDI, SMDI, CSDD, STS, USD -->
+  <!-- Commands avaiable CM, AR, SP, BP, CBMD, ERF, ANCP, APCP, ABA, CBA, CCP, CTP, AMDS, AMD, BMDIC, CDA, GEA, CS, BPS, BF, BS, BB, DN, SY, IG, SS, DF, DO, BO, MMDI, DMD, RRFMD, RP, RI, AI, JF, CV, MTC, ETC, STP, SE, EMDG, EMDI, SMDI, CSDD, STS, CRRT, CLT,CCM,BSM,GPC,IFPC,CRA,USD -->
   <!-- Commands can be combined using the + sign and some commands can be called multiple times, refer to MDCS document for more help -->
   <ArcGISVersion>
     <!-- Defines Min Max version required. Eg due to know issue in previsous versions -->
@@ -30,10 +30,10 @@
       <CreateReferencedMosaicDataset>
         <in_dataset>Input_MosaicDataset</in_dataset>
         <out_mosaic_dataset>Output_MosiacDataset</out_mosaic_dataset>
-        <SRS>PROJCS['WGS_1984_Web_Mercator_Auxiliary_Sphere',GEOGCS['GCS_WGS_1984',DATUM['D_WGS_1984',SPHEROID['WGS_1984',6378137.0,298.257223563]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Mercator_Auxiliary_Sphere'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',0.0],PARAMETER['Standard_Parallel_1',0.0],PARAMETER['Auxiliary_Sphere_Type',0.0],UNIT['Meter',1.0]];-20037700 -30241100 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision</SRS>		
+        <SRS>PROJCS['WGS_1984_Web_Mercator_Auxiliary_Sphere',GEOGCS['GCS_WGS_1984',DATUM['D_WGS_1984',SPHEROID['WGS_1984',6378137.0,298.257223563]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Mercator_Auxiliary_Sphere'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',0.0],PARAMETER['Standard_Parallel_1',0.0],PARAMETER['Auxiliary_Sphere_Type',0.0],UNIT['Meter',1.0]];-20037700 -30241100 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision</SRS>
         <number_of_bands>#</number_of_bands>
-        <pixel_type>#</pixel_type>		
-        <where_clause>SQL_QUERY</where_clause>		
+        <pixel_type>#</pixel_type>
+        <where_clause>SQL_QUERY</where_clause>
         <in_template_dataset>RasterLayer_or_FeatureLayer</in_template_dataset>
         <extent>Envelope</extent>
         <select_using_features>SELECT_USING_FEATURES;NO_SELECT_USING_FEATURES</select_using_features>
@@ -68,7 +68,7 @@
           <operation_description></operation_description>
           <force_spatial_reference>FORCE_SPATIAL_REFERENCE;NO_FORCE_SPATIAL_REFERENCE</force_spatial_reference>
           <estimate_statistics>NO_STATISTICS;ESTIMATE_STATISTICS</estimate_statistics>
-          <aux_inputs>#</aux_inputs>		  
+          <aux_inputs>"FileType1 'path to the file';FileType12 'path to the file'....."</aux_inputs>
         </AddRaster>
         <AddRaster>
           <dataset_id>ID</dataset_id>
@@ -136,11 +136,13 @@
         <data_source_type>GENERIC;THEMATIC;PROCESSED;ELEVATION;SCIENTIFIC;VECTOR_UV;VECTOR_MAGDIR</data_source_type>
         <minimum_pixel_contribution>#</minimum_pixel_contribution>
         <processing_templates>#</processing_templates>
-        <default_processing_template>#</default_processing_template>		
+        <default_processing_template>#</default_processing_template>
+        <time_interval>#</time_interval>
+        <time_interval_units>None;Milliseconds;Seconds;Minutes;Hours;Days;Weeks;Months;Years;Decades;Centuries</time_interval_units>
       </DefaultProperties>
       <Table>
         <!-- AF  Add Fields-->
-		<!--http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/add-field.htm -->
+        <!--http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/add-field.htm -->
         <AddFields>AddFields</AddFields>
         <Fields>
           <Field>
@@ -175,7 +177,7 @@
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/color-balance-mosaic-dataset.htm -->
         <ColorBalanceMosaicDataset>
           <balancing_method>DODGING;HISTOGRAM;STANDARD_DEVIATION</balancing_method>
-          <color_surface_type>SINGLE_COLOR;COLOR_GRID;FIRST_ORDER;SECOND_ORDER;SECOND_ORDER;THIRD_ORDER</color_surface_type>
+          <color_surface_type>SINGLE_COLOR;COLOR_GRID;FIRST_ORDER;SECOND_ORDER;THIRD_ORDER</color_surface_type>
           <target_raster>#</target_raster>
           <gamma>#</gamma>
           <exclude_raster>#</exclude_raster>
@@ -197,8 +199,9 @@
           <out_coverage_table>#</out_coverage_table>
           <out_overlap_table>#</out_overlap_table>
           <in_mask_dataset>#</in_mask_dataset>
-          <minimum_area>#</minimum_area>		  
-        </AnalyzeControlPoints>	
+          <minimum_area>#</minimum_area>
+          <maximum_level>#</maximum_level>
+        </AnalyzeControlPoints>
         <!-- APCP     Append Control Points -->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/append-control-points.htm -->
         <AppendControlPoints>
@@ -206,27 +209,35 @@
           <in_input_control_points>#</in_input_control_points>
           <in_z_field>#</in_z_field>
           <in_tag_field>#</in_tag_field>
-          <in_dem>#</in_dem>		  
-        </AppendControlPoints>			
+          <in_dem>#</in_dem>
+          <in_xy_accuracy>#</in_xy_accuracy>
+          <in_z_accuracy>#</in_z_accuracy>
+        </AppendControlPoints>
         <!-- ABA     Apply Block Adjustment -->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/apply-block-adjustment.htm -->
         <ApplyBlockAdjustment>
           <adjustment_operation>ADJUST;RESET</adjustment_operation>
           <input_solution_table>#</input_solution_table>
-          <pan_to_ms_scaling_factor>#</pan_to_ms_scaling_factor>	  
-        </ApplyBlockAdjustment>		
+          <pan_to_ms_scaling_factor>#</pan_to_ms_scaling_factor>
+          <DEM>#</DEM>
+          <zoffset>#</zoffset>
+          <control_point_table>#</control_point_table>
+          <adjust_footprints>NO_ADJUST_FOOTPRINTS;ADJUST_FOOTPRINTS</adjust_footprints>
+        </ApplyBlockAdjustment>
         <!-- CBA     Compute Block Adjustment -->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/compute-block-adjustments.htm -->
         <ComputeBlockAdjustment>
           <in_control_points>#</in_control_points>
-          <transformation_type>POLYORDER0;POLYORDER1</transformation_type>
+          <transformation_type>POLYORDER0;POLYORDER1;RPC;Frame</transformation_type>
           <out_solution_table>#</out_solution_table>
           <out_solution_point_table>#</out_solution_point_table>
-          <maximum_residual_value>0.7</maximum_residual_value>
-          <adjustment_options>MinResidual;MaxResidualFactor;_BAO;_BAI</adjustment_options>		  
+          <maximum_residual_value>2</maximum_residual_value>
+          <adjustment_options>MinResidual;MaxResidualFactor;_BAO;_BAI</adjustment_options>
+          <location_accuracy>HIGH;MEDIUM;LOW</location_accuracy>
+          <out_quality_table>#</out_quality_table>
         </ComputeBlockAdjustment>
         <!-- CCP     Compute Control Points -->
-        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/compute-control-points.htm -->		
+        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/compute-control-points.htm -->
         <ComputeControlPoints>
           <in_reference_images>#</in_reference_images>
           <out_control_points>#</out_control_points>
@@ -234,33 +245,93 @@
           <out_image_feature_points>#</out_image_feature_points>
           <density>LOW;MEDIUM;HIGH</density>
           <distribution>RANDOM;REGULAR</distribution>
-          <area_of_interest>#</area_of_interest>		  
+          <area_of_interest>#</area_of_interest>
+          <location_accuracy>HIGH;MEDIUM;LOW</location_accuracy>
         </ComputeControlPoints>
         <!-- CTP     Compute Tie Points -->
-        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/compute-tie-points.htm -->		
+        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/compute-tie-points.htm -->
         <ComputeTiePoints>
           <out_control_points>#</out_control_points>
           <similarity>LOW;MEDIUM;HIGH</similarity>
           <in_mask_dataset>#</in_mask_dataset>
-          <out_image_features>#</out_image_features>		  
+          <out_image_features>#</out_image_features>
           <density>LOW;MEDIUM;HIGH</density>
-          <distribution>RANDOM;REGULAR</distribution>	  
+          <distribution>RANDOM;REGULAR</distribution>
+          <location_accuracy>HIGH;MEDIUM;LOW</location_accuracy>
         </ComputeTiePoints>
+        <!-- CCM     Compute Camera Model -->
+        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/compute-camera-model.htm -->
+        <!--This tool will work only with 10.5 and above version-->
+        <ComputeCameraModel>
+          <out_dsm>#</out_dsm>
+          <gps_accuracy>HIGH;MEDIUM,LOW;VERY_LOW</gps_accuracy>
+          <estimate>ESTIMATE;NO_ESTIMATE</estimate>
+          <refine>REFINE;NO_REFINE</refine>
+          <apply_adjustment>APPLY;NO_APPLY</apply_adjustment>
+          <maximum_residual>5</maximum_residual>
+          <initial_tiepoint_resolution>8</initial_tiepoint_resolution>
+          <out_control_points>#</out_control_points>
+          <out_solution_table>#</out_solution_table>
+          <out_solution_point_table>#</out_solution_point_table>
+          <out_flight_path>#</out_flight_path>
+          <maximum_overlap>#</maximum_overlap>
+          <minimum_coverage>0.2</minimum_coverage>
+          <remove>NO_REMOVE;REMOVE</remove>
+          <in_control_points>#</in_control_points>
+          <options>[option1,option2...]</options>
+        </ComputeCameraModel>
+        <!-- BSM    Build Stereo Model -->
+        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/build-stereo-model.htm -->
+        <!--This tool will work only with 10.5 and above version-->
+        <BuildStereoModel>
+          <minimum_angle>10</minimum_angle>
+          <maximum_angle>70</maximum_angle>
+          <minimum_overlap>0.5</minimum_overlap>
+          <maximum_diff_OP>#</maximum_diff_OP>
+          <maximum_diff_GSD>2</maximum_diff_GSD>
+        </BuildStereoModel>
+        <!-- GPC     Generate Point Cloud -->
+        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/generate-point-cloud.htm -->
+        <!--This tool will work only with 10.5 and above version-->
+        <GeneratePointCloud>
+          <matching_method>ETM;SGM;ESGM</matching_method>
+          <out_folder>#</out_folder>
+          <out_base_name>#</out_base_name>
+          <object_size>50</object_size>
+          <ground_spacing>#</ground_spacing>
+          <minimum_pairs>2</minimum_pairs>
+          <minimum_area>0.6</minimum_area>
+          <minimum_adjustment_quality>0.2</minimum_adjustment_quality>
+          <maximum_diff_gsd>2</maximum_diff_gsd>
+          <maximum_diff_OP>8</maximum_diff_OP>
+        </GeneratePointCloud>
+        <!-- IFPC     Interpolate From Point Cloud -->
+        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/interpolate-from-point-cloud.htm -->
+        <!--This tool will work only with 10.5 and above version-->
+        <InterpolateFromPointCloud>
+          <in_container>#</in_container>
+          <out_raster>#</out_raster>
+          <cell_size>#</cell_size>
+          <interpolation_method>TRIANGULATION;NATURAL_NEIGHBOR;IDW</interpolation_method>
+          <smooth_method>GAUSS3x3;GAUSS5x5;GAUSS7x7;GAUSS9x9;NONE</smooth_method>
+          <surface_type>DTM;DSM</surface_type>
+          <fill_dem>#</fill_dem>
+        </InterpolateFromPointCloud>
         <!-- AMDS     Alter Mosaic Dataset Schema -->
-        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/alter-mosaic-dataset-schema.htm -->		
+        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/alter-mosaic-dataset-schema.htm -->
         <AlterMosaicDatasetSchema>
           <side_tables>side_tables</side_tables>
           <raster_type_names>raster_types</raster_type_names>
-          <editor_tracking>NO_EDITOR_TRACKING;EDITOR_TRACKING</editor_tracking> 
-        </AlterMosaicDatasetSchema>	
+          <editor_tracking>NO_EDITOR_TRACKING;EDITOR_TRACKING</editor_tracking>
+        </AlterMosaicDatasetSchema>
         <!-- AMD     Analyze Mosaic Dataset  -->
-        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/analyze-mosaic-dataset.htm -->		
+        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/analyze-mosaic-dataset.htm -->
         <AnalyzeMosaicDataset>
           <where_clause>#</where_clause>
           <checker_keywords>FOOTPRINT;FUNCTION;RASTER;PATHS;SOURCE_VALIDITY;STALE;PYRAMIDS;STATISTICS;PERFORMANCE;INFORMATION</checker_keywords>
-        </AnalyzeMosaicDataset>		
+        </AnalyzeMosaicDataset>
         <!-- BMDIC     Build Mosaic Dataset Item Cache  -->
-        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/build-mosaic-dataset-item-cache.htm -->		
+        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/build-mosaic-dataset-item-cache.htm -->
         <BuildMosaicDatasetItemCache>
           <where_clause>#</where_clause>
           <define_cache>DEFINE_CACHE;NO_DEFINE_CACHE</define_cache>
@@ -271,17 +342,17 @@
           <max_allowed_rows>#</max_allowed_rows>
           <max_allowed_columns>#</max_allowed_columns>
           <request_size_type>PIXEL_SIZE_FACTOR;PIXEL_SIZE</request_size_type>
-          <request_size>#</request_size>	  
+          <request_size>#</request_size>
         </BuildMosaicDatasetItemCache>
         <!-- CDA     Compute Dirty Area  -->
-        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/compute-dirty-area.htm -->		
+        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/compute-dirty-area.htm -->
         <ComputeDirtyArea>
           <where_clause>#</where_clause>
           <timestamp>#</timestamp>
-          <out_feature_class>#</out_feature_class>	  
-        </ComputeDirtyArea>	
+          <out_feature_class>#</out_feature_class>
+        </ComputeDirtyArea>
         <!-- GEA     Generate Exclude Area  -->
-        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/generate-exclude-area.htm -->		
+        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/generate-exclude-area.htm -->
         <GenerateExcludeArea>
           <in_raster>#</in_raster>
           <out_raster>#</out_raster>
@@ -296,8 +367,8 @@
           <max_cyan>255</max_cyan>
           <max_yellow>255</max_yellow>
           <percentage_low>0</percentage_low>
-          <percentage_high>100</percentage_high>	  		  
-        </GenerateExcludeArea>		
+          <percentage_high>100</percentage_high>
+        </GenerateExcludeArea>
         <!-- CS   Calcualate Statistic -->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/calculate-statistics.htm -->
         <CalculateStatistics>
@@ -339,11 +410,11 @@
           <skip_derived_images>SKIP_DERIVED_IMAGES;NO_SKIP_DERIVED_IMAGES</skip_derived_images>
           <maintain_edges>NO_MAINTAIN_EDGES;MAINTAIN_EDGES</maintain_edges>
           <request_size>2000</request_size>
-          <min_region_size></min_region_size>
+          <min_region_size>#</min_region_size>
           <simplification_method>NONE;CONVEX_HULL;ENVELOPE</simplification_method>
           <edge_tolerance>#</edge_tolerance>
           <max_sliver_size>#</max_sliver_size>
-          <min_thinness_ratio>0.0-1.0</min_thinness_ratio>		  
+          <min_thinness_ratio>0.0-1.0</min_thinness_ratio>
         </BuildFootprint>
         <!-- BS  Build Seamlines-->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/build-seamlines.htm -->
@@ -353,7 +424,7 @@
           <sort_order>ASCENDING;DESCENDING</sort_order>
           <order_by_attribute>#</order_by_attribute>
           <order_by_base_value>#</order_by_base_value>
-          <view_point>0</view_point>
+          <view_point>#</view_point>
           <computation_method>GEOMETRY;RADIOMETRY;COPY_FOOTPRINT;COPY_TO_SIBLING</computation_method>
           <blend_width>#</blend_width>
           <blend_type>BOTH;INSIDE;OUTSIDE</blend_type>
@@ -362,7 +433,10 @@
           <blend_width_units>PIXELS;GROUND_UNITS</blend_width_units>
           <area_of_interest>#</area_of_interest>
           <where_clause>#</where_clause>
-          <update_existing>IGNORE_EXISTING;UPDATE_EXISTING </update_existing>		  
+          <update_existing>IGNORE_EXISTING;UPDATE_EXISTING </update_existing>
+          <min_region_size>100</min_region_size>
+          <min_thinness_ratio>#</min_thinness_ratio>
+          <max_sliver_size>#</max_sliver_size>
         </BuildSeamlines>
         <!-- BB  Build Boundary -->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/build-boundary.htm -->
@@ -400,7 +474,7 @@
           <broken_items>IGNORE_BROKEN_ITEMS;REMOVE_BROKEN_ITEMS</broken_items>
           <skip_existing_items>SKIP_EXISTING_ITEMS;OVERWRITE_EXISTING_ITEMS</skip_existing_items>
           <refresh_aggregate_info>NO_REFRESH_INFO;REFRESH_INFO</refresh_aggregate_info>
-          <estimate_statistics>NO_STATISTICS;ESTIMATE_STATISTICS</estimate_statistics>		  
+          <estimate_statistics>NO_STATISTICS;ESTIMATE_STATISTICS</estimate_statistics>
         </SynchronizeMosaicDataset>
         <!-- IG    Import Geometry -->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/import-mosaic-dataset-geometry.htm -->
@@ -422,7 +496,7 @@
           <data_type>GENERIC;ELEVATION;THEMATIC;PROCESSED</data_type>
           <statistics>[[band_index, min, max, mean, std_dev],...]</statistics>
           <stats_file>stats_file</stats_file>
-          <nodata>nodata</nodata>
+          <nodata>[[band index, nodata_value],...]</nodata>
         </SetStatistics>
         <!-- DF Delete Field -->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/delete-field.htm-->
@@ -430,7 +504,7 @@
           <drop_field>test1;test2;test3;test4</drop_field>
         </DeleteField>
         <!-- DO     Define Overviews -->
-        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/define-overviews.htm -->		
+        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/define-overviews.htm -->
         <DefineOverviews>
           <overview_image_folder>overview_image_folder</overview_image_folder>
           <in_template_dataset>in_template_dataset</in_template_dataset>
@@ -446,7 +520,7 @@
           <compression_quality>0-100</compression_quality>
         </DefineOverviews>
         <!-- BO     Build Overviews -->
-        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/build-overviews.htm -->		
+        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/build-overviews.htm -->
         <BuildOverviews>
           <where_clause>where_clause</where_clause>
           <define_missing_tiles>DEFINE_MISSING_TILES;NO_DEFINE_MISSING_TILES</define_missing_tiles>
@@ -484,7 +558,6 @@
           <where_clause></where_clause>
           <paths_list></paths_list>
         </RepairMosaicDatasetPaths>
-		
         <!-- RI     Remove Attribute Index -->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/remove-attribute-index.htm -->
         <RemoveIndex>
@@ -538,6 +611,30 @@
             <expression>DatePart ("y",[AcquisitionDate] )</expression>
           </CalculateValue>
         </CalculateValues>
+        <!-- CRTT  Clear Raster Type Table -->
+        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/delete-rows.htm -->
+        <ClearRasterTypeTable>
+          <!-- This tool requires only one input:full path to the MD/AMD_<MDName>_ART which is fetched directly at the run time from -m(if defined) or from the default md location -->
+        </ClearRasterTypeTable>
+        <!-- CLT  Clear Logs Table -->
+        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/delete-rows.htm -->
+        <ClearLogsTable>
+          <!-- This tool requires only one input:full path to the MD/AMD_<MDName>_LOG which is fetched directly at the run time from -m(if defined) or from the default md location -->
+        </ClearLogsTable>
+        <!-- CRA  Copy Raster -->
+        <!--http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/copy-raster.htm -->
+        <CopyRaster>
+          <out_rasterdataset>#</out_rasterdataset>
+          <config_keyword>#</config_keyword>
+          <background_value>#</background_value>
+          <nodata_value>#</nodata_value>
+          <onebit_to_eightbit>NONE;ColormapToRGB</onebit_to_eightbit>
+          <pixel_type>1_BIT;2_BIT;4_BIT;8_BIT_UNSIGNED;8_BIT_SIGNED;16_BIT_UNSIGNED;16_BIT_SIGNED;32_BIT_UNSIGNED;32_BIT_SIGNED;32_BIT_FLOAT;64_BIT</pixel_type>
+          <scale_pixel_value>NONE;ScalePixelValue</scale_pixel_value>
+          <RGB_to_Colormap>NONE;RGBToColormap</RGB_to_Colormap>
+          <format>TIFF;IMAGINE Image;BMP;GIF;PNG;JPEG;JP2;GRID;BIL;BSQ;BIP;ENVI;CRF;MRF</format>
+          <transform>NONE;Transform</transform>
+        </CopyRaster>
         <!-- MTC     Manage Tile Cache -->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/manage-tile-cache.htm -->
         <ManageTileCache>
@@ -549,6 +646,8 @@
           <scales>#</scales>
           <area_of_interest>#</area_of_interest>
           <max_cell_size>#</max_cell_size>
+          <min_cached_scale>#</min_cached_scale>
+          <max_cached_scale>#</max_cached_scale>
         </ManageTileCache>
         <!-- ETC     Export Tile Cache -->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/export-tile-cache.htm -->
