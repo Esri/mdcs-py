@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: SolutionsLib.py
 # Description: To map MDCS command codes to GP Tool functions.
-# Version: 20151209
+# Version: 20170117
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -1056,7 +1056,82 @@ class Solutions(Base.Base):
             except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
-
+        elif (com == 'CRTT'):
+                    self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+                    fullPath = os.path.join(self.m_base.m_geoPath, "AMD_{0}_ART".format(self.m_base.m_mdName))
+                    return self.__invokeDynamicFn(
+                    [fullPath],
+                    'clearrastertypetable',
+                    'arcpy.DeleteRows_management',
+                    index
+                    )
+        elif (com == 'CLT'):
+                    self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+                    fullPath = os.path.join(self.m_base.m_geoPath, "AMD_{0}_LOG".format(self.m_base.m_mdName))
+                    return self.__invokeDynamicFn(
+                    [fullPath],
+                    'clearlogstable',
+                    'arcpy.DeleteRows_management',
+                    index
+                    )
+        elif(com == 'RP'):
+                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                processKey = 'repairmosaicdatasetpaths'
+                self.log ("Repairing mosaic dataset paths ")
+                try:
+                    arcpy.RepairMosaicDatasetPaths_management(
+                    fullPath,
+                    self.getProcessInfoValue(processKey, 'paths_list', index),
+                    self.getProcessInfoValue(processKey, 'where_clause', index)
+                    )
+                    return True
+                except:
+                    self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                    return False
+        elif (com == 'CCM'):
+                    self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+                    fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                    return self.__invokeDynamicFn(
+                    [fullPath],
+                    'computecameramodel',
+                    'arcpy.ComputeCameraModel_management',
+                    index
+                    )
+        elif (com == 'BSM'):
+                    self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+                    fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                    return self.__invokeDynamicFn(
+                    [fullPath],
+                    'buildstereomodel',
+                    'arcpy.BuildStereoModel_management',
+                    index
+                    )
+        elif (com == 'GPC'):
+                    self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+                    fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                    return self.__invokeDynamicFn(
+                    [fullPath],
+                    'generatepointcloud',
+                    'arcpy.GeneratePointCloud_management',
+                    index
+                    )
+        elif (com == 'IFPC'):
+                    self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+                    return self.__invokeDynamicFn(
+                    [],
+                    'interpolatefrompointcloud',
+                    'arcpy.InterpolateFromPointCloud_management',
+                    index
+                    )
+        elif (com == 'CRA'):
+                    self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+                    fullPath = fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                    return self.__invokeDynamicFn(
+                    [fullPath],
+                    'copyraster',
+                    'arcpy.CopyRaster_management',
+                    index
+                    )
         else:
 
             # The command could be a user defined function externally defined in the module (MDCS_UC.py). Let's invoke it.
@@ -1285,9 +1360,40 @@ class Solutions(Base.Base):
     'USD' :
         {   'desc' : 'Uploads and publishes a service definition to a specified server.',
             'fnc' : executeCommand
+        },
+    'CRTT' :
+        {   'desc' : 'Delete records from the Raster Type table.',
+            'fnc' : executeCommand
+        },
+    'CLT' :
+        {   'desc' : 'Delete records from the Logs table.',
+            'fnc' : executeCommand
+        },
+    'AR' :
+        {   'desc' : 'Add rasters/data to a mosaic dataset.',
+            'fnc' : executeCommand
+        },
+    'CCM' :
+        {   'desc' : 'Compute Camera Model.',
+            'fnc' : executeCommand
+        },
+    'BSM' :
+        {   'desc' : 'Build Stereo Model.',
+            'fnc' : executeCommand
+        },
+    'GPC' :
+        {   'desc' : 'Generate Point Cloud.',
+            'fnc' : executeCommand
+        },
+    'IFPC' :
+        {   'desc' : 'Interpolate From Point Cloud.',
+            'fnc' : executeCommand
+        },
+    'CRA' :
+        {   'desc' : 'Copy Raster.',
+            'fnc' : executeCommand
         }
     }
-
 
     #mapping of config/component paths.
 

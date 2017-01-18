@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: SetMDProperties.py
 # Description: To set mosaic dataset properties
-# Version: 20151209
+# Version: 20170118
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -95,6 +95,8 @@ class SetMDProperties(Base.Base):
         args.append(self.getInternalPropValue(mdName,'minimum_pixel_contribution'))
         args.append(self.getInternalPropValue(mdName,'processing_templates'))
         args.append(self.getInternalPropValue(mdName,'default_processing_template'))
+        args.append(self.getInternalPropValue(mdName,'time_interval'))
+        args.append(self.getInternalPropValue(mdName,'time_interval_units'))
 
         setProperties = Base.DynaInvoke('arcpy.SetMosaicDatasetProperties_management', args, self.__setpropertiesCallback, self._message)
         if (setProperties.init() == False):
@@ -135,4 +137,4 @@ class SetMDProperties(Base.Base):
         except:
             Error = True
 
-        return True 
+        return True
