@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application>
+  <Name>Amberg1Demo</Name>
+  <Command>CM+AR+AF+BB+SP+CC+DO+BO+CV+CSDD+STS+USD</Command>
+  <Workspace>
+    <WorkspacePath>md</WorkspacePath>
+    <Geodatabase>Amberg</Geodatabase>
+    <MosaicDataset>
+      <MosaicDatasetType>Source</MosaicDatasetType>
+      <Name>Amberg1</Name>
+      <SRS>PROJCS['WGS_1984_Web_Mercator_Auxiliary_Sphere',GEOGCS['GCS_WGS_1984',DATUM['D_WGS_1984',SPHEROID['WGS_1984',6378137.0,298.257223563]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Mercator_Auxiliary_Sphere'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',0.0],PARAMETER['Standard_Parallel_1',0.0],PARAMETER['Auxiliary_Sphere_Type',0.0],UNIT['Meter',1.0]];-20037700 -30241100 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision</SRS>
+      <num_bands>3</num_bands>
+      <pixel_type>8_BIT_UNSIGNED</pixel_type>
+      <AddRasters>
+        <AddRaster>
+          <dataset_id>Amberg</dataset_id>
+          <raster_type>Raster Dataset</raster_type>
+          <Sources>
+            <data_path>currFolder\data\Amberg</data_path>
+          </Sources>
+          <filter>*</filter>
+        </AddRaster>
+      </AddRasters>
+      <DefaultProperties>
+        <max_num_per_mosaic>50</max_num_per_mosaic>
+        <rows_maximum_imagesize>4000</rows_maximum_imagesize>
+        <columns_maximum_imagesize>4000</columns_maximum_imagesize>
+        <allowed_compressions>NONE;JPEG;LZ77</allowed_compressions>
+        <default_compression_type>JPEG</default_compression_type>
+        <JPEG_quality>80</JPEG_quality>
+        <resampling_type>BILINEAR</resampling_type>
+        <LERC_Tolerance>0.01</LERC_Tolerance>
+        <clip_to_footprints>CLIP</clip_to_footprints>
+        <clip_to_boundary>CLIP</clip_to_boundary>
+        <color_correction>NOT_APPLY</color_correction>
+        <footprints_may_contain_nodata>FOOTPRINTS_DO_NOT_CONTAIN_NODATA</footprints_may_contain_nodata>
+        <allowed_mensuration_capabilities>BASIC</allowed_mensuration_capabilities>
+        <default_mensuration_capabilities>BASIC</default_mensuration_capabilities>
+        <allowed_mosaic_methods>Center;NorthWest;Nadir;LockRaster;ByAttribute;Seamline;None</allowed_mosaic_methods>
+        <default_mosaic_method>Center</default_mosaic_method>
+        <Order_field>#</Order_field>
+        <order_base>0</order_base>
+        <sorting_order>Ascending</sorting_order>
+        <mosaic_operator>FIRST</mosaic_operator>
+        <blend_width>10</blend_width>
+        <view_point_x>300</view_point_x>
+        <view_point_y>300</view_point_y>
+        <max_num_per_mosaic>50</max_num_per_mosaic>
+        <cell_size_tolerance>2.5</cell_size_tolerance>
+        <cell_size>#</cell_size>
+        <metadata_level>BASIC</metadata_level>
+        <transmission_fields>Name;MinPS;MaxPS;LowPS;HighPS;</transmission_fields>
+        <use_time>DISABLED</use_time>
+        <start_time_field>#</start_time_field>
+        <end_time_field>#</end_time_field>
+        <time_format>#</time_format>
+        <geographic_transform>#</geographic_transform>
+        <max_num_of_download_items>50</max_num_of_download_items>
+        <max_num_of_records_returned>2000</max_num_of_records_returned>
+      </DefaultProperties>
+      <Table>
+          <AddFields>AddFields</AddFields>
+          <Fields>
+            <Field>
+              <name>TownName</name>
+              <type>TEXT</type>
+              <length>32</length>
+            </Field>
+          </Fields>
+      </Table>
+      <Processes>
+      <CalculateValues>
+          <CalculateValue>
+			  		  <expression_type>PYTHON</expression_type>
+                   <!-- NOTE: Set expression_type to PYTHON explicitly for 64 bit systems -->
+              <fieldName>TownName</fieldName>
+              <expression>"Amberg Germany"</expression>
+          </CalculateValue>
+      </CalculateValues>
+        <CalculateCellSizeranges>
+          <where_clause/>
+          <do_compute_min>MIN_CELL_SIZES</do_compute_min>
+          <do_compute_max>MAX_CELL_SIZES</do_compute_max>
+          <max_range_factor>10</max_range_factor>
+          <cell_size_tolerance_factor>0.8</cell_size_tolerance_factor>
+          <update_missing_only>UPDATE_ALL</update_missing_only>
+        </CalculateCellSizeranges>
+        <BuildFootprint>
+          <reset_footprint>GEOMETRY</reset_footprint>
+          <max_data_value>255</max_data_value>
+          <min_data_value>1</min_data_value>
+          <approx_num_vertices>25</approx_num_vertices>
+          <update_boundary>UPDATE_BOUNDARY</update_boundary>
+        </BuildFootprint>
+        <BuildBoundary>
+          <append_to_existing>OVERWRITE</append_to_existing>
+          <simplification_method>NONE</simplification_method>
+        </BuildBoundary>
+        <BuildOverviews>
+          <where_clause>#</where_clause>
+          <define_missing_tiles>DEFINE_MISSING_TILES</define_missing_tiles>
+          <generate_overviews>GENERATE_OVERVIEWS</generate_overviews>
+          <generate_missing_images>GENERATE_MISSING_IMAGES</generate_missing_images>
+          <regenerate_stale_images>REGENERATE_STALE_IMAGES</regenerate_stale_images>
+        </BuildOverviews>
+        <DefineOverviews>
+          <overview_image_folder></overview_image_folder>
+          <in_template_dataset>#</in_template_dataset>
+          <extent>#</extent>
+          <pixel_size>#</pixel_size>
+          <number_of_levels>#</number_of_levels>
+          <tile_rows>5120</tile_rows>
+          <tile_cols>5120</tile_cols>
+          <overview_factor>2</overview_factor>
+          <force_overview_tiles>NO_FORCE_OVERVIEW_TILES</force_overview_tiles>
+          <resampling_method>BILINEAR</resampling_method>
+          <compression_method>JPEG_YCbCr</compression_method>
+          <compression_quality>80</compression_quality>
+        </DefineOverviews>
+        <AddIndex>
+        </AddIndex>
+	    <CreateImageSDDraft>
+          <out_sddraft>currFolder\data\amberg.sddraft</out_sddraft>
+          <service_name>Amberg</service_name>
+          <server_type>ARCGIS_SERVER</server_type>
+          <connection_file_path>currFolder\data\server.ags</connection_file_path>
+          <copy_data_to_server>True</copy_data_to_server>
+          <folder_name></folder_name>
+          <summary>Summary of the service.</summary>
+          <tags>tags;MDCS;ImageService;</tags>
+        </CreateImageSDDraft>
+        <StageService_server>
+          <in_service_definition_draft>currFolder\data\amberg.sddraft</in_service_definition_draft>
+          <out_service_definition>currFolder\data\amberg.sd</out_service_definition>
+        </StageService_server>
+        <UploadServiceDefinition_server>
+          <in_sd_file>currFolder\data\amberg.sd</in_sd_file>
+          <in_server>currFolder\data\server.ags</in_server>
+          <in_service_name />
+          <in_cluster />
+          <in_folder_type />
+          <in_folder />
+          <in_startupType />
+          <in_override />
+          <in_my_contents />
+          <in_public />
+          <in_organization />
+          <in_groups />
+        </UploadServiceDefinition_server>	
+      </Processes>
+    </MosaicDataset>
+  </Workspace>
+</Application>
