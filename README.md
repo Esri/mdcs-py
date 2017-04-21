@@ -53,6 +53,5 @@ limitations under the License.
 
 A copy of the license is available in the repository's [license.txt](https://github.com/ArcGIS/mdcs-py/blob/master/license.txt) file.
 
-[](Esri Tags: MDCS Mosaic Datasets Imagery Management) 
-[](Esri Language: Python)
+
 
