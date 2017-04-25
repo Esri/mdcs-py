@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: logger.py
 # Description: Class to log status from Imagery w/f components to log files.
-# Version: 20170212
+# Version: 20170222
 # Requirements: Python
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -35,6 +35,7 @@ except:
     pass
 const_start_time_node = 'StartTime'
 const_end_time_node = 'EndTime'
+
 
 class Logger(object):
 
@@ -247,4 +248,4 @@ class Logger(object):
             c.write(doc.toprettyxml())
             c.close()
         except:
-            print ("\nError creating log file.")
+            print ("\nError creating log file.") 
