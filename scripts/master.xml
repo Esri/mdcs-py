@@ -561,7 +561,7 @@
         <!-- RI     Remove Attribute Index -->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/remove-attribute-index.htm -->
         <RemoveIndex>
-          <index_name>[index_name,...]</index_name>
+          <index_name>index_name;...</index_name>
         </RemoveIndex>
         <!-- AI     Add Attribute Index -->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/add-attribute-index.htm -->
