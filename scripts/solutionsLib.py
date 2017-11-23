@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: SolutionsLib.py
 # Description: To map MDCS command codes to GP Tool functions.
-# Version: 20171122
+# Version: 20170223
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -893,9 +893,7 @@ class Solutions(Base.Base):
             maxValues = len(self.processInfo.processInfo[processKey][index])
             self.log("Calculate values:" + fullPath, self.m_log.const_general_text)
             isError = False
-
             for indx in range(0, maxValues):
-
                 isQuery = False
                 query = self.getProcessInfoValue(processKey, 'query', index, indx)
                 lyrName = 'lyr_%s' % str(self.m_base.m_last_AT_ObjectID)
@@ -943,10 +941,8 @@ class Solutions(Base.Base):
                     index > len(node) - 1):
                 self.log('No environment variables could be found/at index (%s)' % (index), self.m_log.const_warning_text)
                 return False
-
             json = {}
             self.processEnv(node[index].firstChild, 0, json)
-
             for l in range(0, len(json)):
                 p = str(l)
                 pIndx = -1
@@ -966,18 +962,15 @@ class Solutions(Base.Base):
                             if (k == 'ClearEnvironment' or      # no use for these yet.
                                     k == 'ResetEnvironments'):
                                 continue
-
                             if (pIndx == 0):
                                 key_ = k
                                 val_ = v.strip()
-
                                 if (val_ != ''):
                                     arcpy.env[key_] = val_
                                     self.log('Env[%s]=%s' % (key_, val_), self.m_log.const_general_text)
                                 continue
                             else:
                                 key_ = json[p]['parent']
-
                             val_ += json[p]['val'][i]
                             if (i < key_len_ - 1):
                                 val_ += ' '
@@ -985,11 +978,9 @@ class Solutions(Base.Base):
                                 if (val_.strip() != ''):
                                     arcpy.env[key_] = val_
                                     self.log('Env[%s]=%s' % (key_, val_), self.m_log.const_general_text)
-
                         except Exception as inst:
                             self.log(str(inst), self.m_log.const_warning_text)
                             continue
-
             return True  # should unable to set environment variables return False?
 
         elif (com == 'MTC'):
@@ -1129,7 +1120,7 @@ class Solutions(Base.Base):
             )
         elif (com == 'DEL'):
             self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath,self.m_base.m_mdName)
+            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [],
                 'delete',
@@ -1141,11 +1132,11 @@ class Solutions(Base.Base):
             fullPath = fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             processKey = 'registerraster'
             try:
-                query = self.m_base.getXMLXPathValue('Application/Workspace/MosaicDataset/Processes/RegisterRaster/query','query')
+                query = self.m_base.getXMLXPathValue('Application/Workspace/MosaicDataset/Processes/RegisterRaster/query', 'query')
             except Exception as exp:
-                self.log(str(exp),self.m_log.const_critical_text)
-                self.log("Setting query value as #",self.m_log.const_warning_text)
-                query="#"
+                self.log(str(exp), self.m_log.const_critical_text)
+                self.log("Setting query value as #", self.m_log.const_warning_text)
+                query = "#"
             if query == "#":  # run the tool on the entire mosaic dataset
                 return self.__invokeDynamicFn(
                     [fullPath],
@@ -1154,22 +1145,22 @@ class Solutions(Base.Base):
                     index
                 )
             else:
-                with arcpy.da.SearchCursor(fullPath,["OBJECTID","Name"],where_clause=query) as sc:
+                with arcpy.da.SearchCursor(fullPath, ["OBJECTID", "Name"], where_clause=query) as sc:
                     for row in sc:
                         try:
-                            rasteritem = os.path.join(fullPath,"OBJECTID={}".format(row[0]))
+                            rasteritem = os.path.join(fullPath, "OBJECTID={}".format(row[0]))
                             status = self.__invokeDynamicFn(
-                            [rasteritem],
-                            'registerraster',
-                            'arcpy.RegisterRaster_management',
-                            index
+                                [rasteritem],
+                                'registerraster',
+                                'arcpy.RegisterRaster_management',
+                                index
                             )
                             if status == False:
-                                self.log("Failed for {}".format(row[1]),self.m_log.const_critical_text)
+                                self.log("Failed for {}".format(row[1]), self.m_log.const_critical_text)
                             else:
-                                self.log("Successful for {}".format(row[1]),self.m_log.const_general_text)
+                                self.log("Successful for {}".format(row[1]), self.m_log.const_general_text)
                         except Exception as exp:
-                            self.log("Failed for {}...{}".format(row[1], str(exp)),self.m_log.const_critical_text)
+                            self.log("Failed for {}...{}".format(row[1], str(exp)), self.m_log.const_critical_text)
                             continue
                 del sc
                 return True
@@ -1545,33 +1536,25 @@ class Solutions(Base.Base):
         bSuccess = self.processInfo.hasProcessInfo
         # split commands with '+'
         self.log('Using template:' + self.config, self.const_general_text)
-
         com_ = com
         if (com_.upper() == self.const_cmd_default_text.upper()):
             try:
                 com_ = self.getXMLNodeValue(self.m_base.m_doc, "Command")  # gets command defaults.
                 self.log('Using default command(s):' + com_)
-
             except:
                 self.log("Error: Reading input config file:" + self.config + "\nQuitting...",
                          self.const_critical_text)
                 return False
-
             if (len(com_.strip()) == 0):
                 self.log('Error: Empty command.',
                          self.const_critical_text)
                 return False
-
         self.log('Processing command(s):' + com_.upper(), self.const_general_text)
-
         aryCmds = com_.split('+')
         for command in aryCmds:
-
             ucCommand = command
             command = command.upper()
-
             is_user_cmd = False
-
             cmd = ''.join(ch for ch in command if ch in (ascii_letters))
             index = 0
             if (len(command) > len(cmd)):
@@ -1580,14 +1563,12 @@ class Solutions(Base.Base):
                 except:
                     self.log("Command/Err: Invalid command index:" + command, self.const_warning_text)
                     # catch any float values entered, e.t.c
-
             if ((cmd in self.commands.keys()) == False):
                 if (self.isUser_Function(ucCommand) == True):
                     try:
                         self.commands[ucCommand] = {}
                         self.commands[ucCommand]['desc'] = 'User defined command (%s)' % (ucCommand)
                         self.commands[ucCommand]['fnc'] = self.commands['CM']['fnc']        # can't use self.executeCommand directly here. Need to check.
-
                         cmd = ucCommand     # preseve user defined function case.
                         is_user_cmd = True
                     except:
@@ -1596,29 +1577,23 @@ class Solutions(Base.Base):
                 else:
                     self.log("Command/Err: Unknown command:" + cmd, self.const_warning_text)
                     continue
-
             indexed_cmd = False if index == 0 else True
             cat_cmd = '%s%s' % (cmd, '' if not indexed_cmd else index)
             if (self.isLog() == True):
                 self.m_log.CreateCategory(cat_cmd)
-
             self.log("Command:" + cat_cmd + '->' + '%s' % self.commands[cmd]['desc'], self.const_general_text)
             if (indexed_cmd):
                 self.log('Using parameter values at index (%s)' % index, self.const_general_text)
             success = 'OK'
-
             status = self.commands[cmd]['fnc'](self, cmd, index)
             if (status == False):
                 success = 'Failed!'
             self.log(success, self.const_status_text)
-
             if (self.isLog() == True):
                 self.m_log.CloseCategory()
-
             if (status == False and     # do not continue with any following commands if AR / user defined function commands fail.
                 (cmd == 'AR' or
                  cmd == 'CM' or
                  is_user_cmd == True)):
                 return False
-
         return True

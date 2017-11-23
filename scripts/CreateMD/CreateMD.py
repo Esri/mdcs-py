@@ -14,18 +14,22 @@
 #------------------------------------------------------------------------------
 # Name: CreateMD.py
 # Description: Creates source mosaic datasets.
-# Version: 20160721
+# Version: 20170222
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
 #!/usr/bin/env python
 
-import arcpy,os,sys
+import arcpy
+import os
+import sys
 from xml.dom import minidom
 
 import Base
 
+
 class CreateMD(Base.Base):
+
     def __init__(self, base):
         self.srs = ''
         self.pixel_type = ''
@@ -34,6 +38,7 @@ class CreateMD(Base.Base):
         self.product_band_definitions = ''
         self.setLog(base.m_log)
         self.m_base = base
+
     def createGeodataBase(self):
         if (self.m_base.m_IsSDE == True):       # MDCS doesn't create new SDE connections and assumes .SDE connection passed on exists @ the server
             return True                         # to create new Mosaic Datasets.
@@ -62,7 +67,7 @@ class CreateMD(Base.Base):
             mdPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             if not arcpy.Exists(mdPath):
                 self.log("\t" + self.m_base.m_mdName, self.const_general_text)
-                arcpy.CreateMosaicDataset_management(self.m_base.m_geoPath,self.m_base.m_mdName,self.srs,self.num_bands,self.pixel_type,self.product_definition,self.product_band_definitions)
+                arcpy.CreateMosaicDataset_management(self.m_base.m_geoPath, self.m_base.m_mdName, self.srs, self.num_bands, self.pixel_type, self.product_definition, self.product_band_definitions)
         except:
             self.log("Failed!", self.const_critical_text)
             self.log(arcpy.GetMessages(), self.const_critical_text)
@@ -76,22 +81,22 @@ class CreateMD(Base.Base):
             return False
         try:
             for node in Nodelist[0].childNodes:
-                  node =  node.nextSibling
-                  if (node != None and node.nodeType == minidom.Node.ELEMENT_NODE):
-                      if(node.nodeName == 'SRS'):   # required arg
-                            self.srs = node.firstChild.nodeValue
-                      elif(node.nodeName == 'pixel_type'):  # optional arg
-                            if (node.hasChildNodes()):
-                                self.pixel_type = node.firstChild.nodeValue
-                      elif(node.nodeName == 'num_bands'):   # optional arg
-                            if (node.hasChildNodes()):
-                                self.num_bands = node.firstChild.nodeValue
-                      elif(node.nodeName == 'product_definition'):  # optional arg
-                            if (node.hasChildNodes()):
-                                self.product_definition = node.firstChild.nodeValue
-                      elif(node.nodeName == 'product_band_definitions'):    # optional arg
-                            if (node.hasChildNodes()):
-                                self.product_band_definitions = node.firstChild.nodeValue
+                node = node.nextSibling
+                if (node is not None and node.nodeType == minidom.Node.ELEMENT_NODE):
+                    if(node.nodeName == 'SRS'):   # required arg
+                        self.srs = node.firstChild.nodeValue
+                    elif(node.nodeName == 'pixel_type'):  # optional arg
+                        if (node.hasChildNodes()):
+                            self.pixel_type = node.firstChild.nodeValue
+                    elif(node.nodeName == 'num_bands'):   # optional arg
+                        if (node.hasChildNodes()):
+                            self.num_bands = node.firstChild.nodeValue
+                    elif(node.nodeName == 'product_definition'):  # optional arg
+                        if (node.hasChildNodes()):
+                            self.product_definition = node.firstChild.nodeValue
+                    elif(node.nodeName == 'product_band_definitions'):    # optional arg
+                        if (node.hasChildNodes()):
+                            self.product_band_definitions = node.firstChild.nodeValue
         except:
             self.log("\nErr. Reading MosaicDataset nodes.", self.const_critical_text)
             return False

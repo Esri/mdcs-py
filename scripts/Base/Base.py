@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
-# Version: 20160602
+# Version: 20170223
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -38,6 +38,7 @@ try:
 except Exception as inf:
     print ('User-Code functions disabled.')
 
+
 class DynaInvoke:
     # log status types enums
     const_general_text = 0
@@ -45,15 +46,18 @@ class DynaInvoke:
     const_critical_text = 2
     const_status_text = 3
     # ends
-    def __init__(self, name, args, evnt_fnc_update_args = None, log = None):
+
+    def __init__(self, name, args, evnt_fnc_update_args=None, log=None):
         self.m_name = name
         self.m_args = args
-        self.m_evnt_update_args =  evnt_fnc_update_args
+        self.m_evnt_update_args = evnt_fnc_update_args
         self.m_log = log
+
     def _message(self, msg, msg_type):
         if (self.m_log):
             return self.m_log(msg, msg_type)
         print (msg)
+
     def init(self):
         try:
             arg_count = eval('%s.__code__.co_argcount' % (self.m_name))
@@ -63,12 +67,13 @@ class DynaInvoke:
         len_args = len(self.m_args)
         if (len_args < arg_count):
             self._message('Args less than required, filling with default (#)', self.const_warning_text)
-            for i in range (len_args, arg_count):
+            for i in range(len_args, arg_count):
                 self.m_args.append('#')
         elif (len_args > arg_count):
-            self._message ('More args supplied than required to function (%s)' % (self.m_name), self.const_warning_text)
+            self._message('More args supplied than required to function (%s)' % (self.m_name), self.const_warning_text)
             self.m_args = self.m_args[:arg_count]
         return True
+
     def invoke(self):
         result = 'OK'
         try:
@@ -77,22 +82,23 @@ class DynaInvoke:
                 if (usr_args is None):      # set to (None) to skip fnc invocation, it's treated as a non-error.
                     return True
                 if (usr_args is not None and
-                    len(usr_args) == len(self.m_args)):      # user is only able to update the contents, not to trim or expand args.
-                        self._message ('Original args may have been updated through custom code.', self.const_warning_text)
-                        self.m_args = usr_args
-            self._message ('Calling (%s)' % (self.m_name), self.const_general_text)
-            ret = eval ('%s(*self.m_args)' % (self.m_name))     # gp-tools return NULL?
+                        len(usr_args) == len(self.m_args)):      # user is only able to update the contents, not to trim or expand args.
+                    self._message('Original args may have been updated through custom code.', self.const_warning_text)
+                    self.m_args = usr_args
+            self._message('Calling (%s)' % (self.m_name), self.const_general_text)
+            ret = eval('%s(*self.m_args)' % (self.m_name))     # gp-tools return NULL?
             return True
         except Exception as exp:
             result = 'FAILED'
-            self._message (str(exp), self.const_critical_text)
+            self._message(str(exp), self.const_critical_text)
             return False
         finally:
-            self._message ('Status: %s' % (result), self.const_general_text)
+            self._message('Status: %s' % (result), self.const_general_text)
+
 
 class Base(object):
 
-#begin - constansts
+    #begin - constansts
     const_general_text = 0
     const_warning_text = 1
     const_critical_text = 2
@@ -108,7 +114,7 @@ class Base(object):
     const_init_ret_patch = 'patch'
     # ends
 
-    #version specific
+    # version specific
     const_ver_len = 4
 
     CMAJOR = 0
@@ -128,17 +134,17 @@ class Base(object):
     CCMD_STATUS_OK = 'OK'
     CCMD_STATUS_FAILED = 'Failed!'
     # ends
-#ends
+# ends
 
     def __init__(self):
         self.m_log = None
         self.m_doc = None
 
-#the follwoing variables could be overridden by the command-line to replace respective values in XML config file.
+# the follwoing variables could be overridden by the command-line to replace respective values in XML config file.
         self.m_workspace = ''
         self.m_geodatabase = ''
-        self.m_mdName = ''  #mosaic dataset name.
-#ends
+        self.m_mdName = ''  # mosaic dataset name.
+# ends
 
         self.m_sources = ''
 
@@ -147,7 +153,7 @@ class Base(object):
         self.m_config = ''
         self.m_commands = ''
 
-        self.m_sources = ''  #source data paths for adding new rasters.
+        self.m_sources = ''  # source data paths for adding new rasters.
 
         self.m_dynamic_params = {}
 
@@ -158,8 +164,7 @@ class Base(object):
         # ends
 
         # To keep track of the last objectID before any new data items could be added.
-        self.m_last_AT_ObjectID = 0     #by default, take in all the previous records for any operation.
-
+        self.m_last_AT_ObjectID = 0  # by default, take in all the previous records for any operation.
 
         # SDE specific variables
         self.m_IsSDE = False
@@ -176,42 +181,40 @@ class Base(object):
         self.m_cli_msg_callback_ptr = None
         # ends
 
-    def init(self):         #return (status [true|false], reason)
+    def init(self):  # return (status [true|false], reason)
 
-        if (self.m_doc == None):
+        if (self.m_doc is None):
             return False
-
-        #version check.
+        # version check.
         try:
-
+            # Update in memory parameter DOM to reflect {-m} user values
+            if (self.m_workspace):
+                self.setXMLNodeValue('Application/Workspace/WorkspacePath', 'WorkspacePath', self.m_workspace, '', '')
+            if (self.m_geodatabase):
+                self.setXMLNodeValue('Application/Workspace/Geodatabase', 'Geodatabase', self.m_geodatabase, '', '')
+            if (self.m_mdName):
+                self.setXMLNodeValue('Application/Workspace/MosaicDataset/Name', 'Name', self.m_mdName, '', '')
+            # ends
             min = self.getXMLXPathValue("Application/ArcGISVersion/Product/Min", "Min").split('.')
             max = self.getXMLXPathValue("Application/ArcGISVersion/Product/Max", "Max").split('.')
-
-            if (len(min) == self.const_ver_len): #version check is disabled if no values have been defined in the MDCS for min and max.
-
+            if (len(min) == self.const_ver_len):  # version check is disabled if no values have been defined in the MDCS for min and max.
                 CMAJOR = 0
                 CBUILD = self.const_ver_len
-
                 if (len(max) != self.const_ver_len):
                     max = [0, 0, 0, 0]               # zero up max if max version isn't defined / has errors.
-
                 for n in range(CMAJOR, CBUILD):
                     if (min[n] == ''):
                         min[n] = 0
                     if (max[n] == ''):
                         max[n] = 0
-
                     min[n] = int(min[n])
                     max[n] = int(max[n])
-
                 if (self.CheckMDCSVersion(min, max) == False):
-                    return (False, self.const_init_ret_version)        #version check failed.
-
+                    return (False, self.const_init_ret_version)  # version check failed.
         except Exception as inst:
             self.log('Version check failure/' + str(inst), self.const_critical_text)
             return False
-        #ends
-
+        # ends
 
         # ArcGIS patch test.
         if (self.isArcGISPatched() == False):
@@ -219,26 +222,24 @@ class Base(object):
             return (False, self.const_init_ret_patch)
         # ends
 
-
-        self.setUserDefinedValues()         #replace user defined dynamic variables in config file with values provided at the command-line.
+        self.setUserDefinedValues()  # replace user defined dynamic variables in config file with values provided at the command-line.
 
         if (self.m_workspace == ''):
             self.m_workspace = self.prefixFolderPath(self.getAbsPath(self.getXMLNodeValue(self.m_doc, "WorkspacePath")), self.const_workspace_path_)
 
         if (self.m_geodatabase == ''):
-            self.m_geodatabase =  self.getXMLNodeValue(self.m_doc, "Geodatabase")
+            self.m_geodatabase = self.getXMLNodeValue(self.m_doc, "Geodatabase")
 
         if (self.m_mdName == ''):
-            self.m_mdName =  self.getXMLXPathValue("Application/Workspace/MosaicDataset/Name", "Name")
-
+            self.m_mdName = self.getXMLXPathValue("Application/Workspace/MosaicDataset/Name", "Name")
 
         const_len_ext = len(self.const_geodatabase_ext)
         ext = self.m_geodatabase[-const_len_ext:].upper()
         if (ext != self.const_geodatabase_ext and
-            ext != self.const_geodatabase_SDE_ext):
-            self.m_geodatabase += self.const_geodatabase_ext.lower()        #if no extension specified, defaults to '.gdb'
+                ext != self.const_geodatabase_SDE_ext):
+            self.m_geodatabase += self.const_geodatabase_ext.lower()  # if no extension specified, defaults to '.gdb'
 
-        self.m_gdbName = self.m_geodatabase[:len(self.m_geodatabase) - const_len_ext]       #.gdb
+        self.m_gdbName = self.m_geodatabase[:len(self.m_geodatabase) - const_len_ext]  # .gdb
         self.m_geoPath = os.path.join(self.m_workspace, self.m_geodatabase)
 
         self.m_commands = self.getXMLNodeValue(self.m_doc, "Command")
@@ -247,7 +248,7 @@ class Base(object):
             self.m_IsSDE = True
             try:
                 self.log('Reading SDE connection properties from (%s)' % (self.m_geoPath))
-                conProperties  = arcpy.Describe(self.m_geoPath).connectionProperties
+                conProperties = arcpy.Describe(self.m_geoPath).connectionProperties
                 self.m_SDE_database_user = ('%s.%s.') % (conProperties.database, conProperties.user)
 
             except Exception as inst:
@@ -256,9 +257,8 @@ class Base(object):
 
         return (True, 'OK')
 
-
-    def invokeDynamicFnCallback(self, args, fn_name = None):
-        if (fn_name == None):
+    def invokeDynamicFnCallback(self, args, fn_name=None):
+        if (fn_name is None):
             return args
         fn = fn_name.lower()
         if (self.invoke_cli_callback(fn_name, args)):
@@ -286,11 +286,32 @@ class Base(object):
         self.const_statistics_path_ = os.path.join(self.m_code_base, '..\\..\\parameter\\Statistics')
         self.const_raster_function_templates_path_ = os.path.join(self.m_code_base, '..\\..\\parameter\\RasterFunctionTemplates')
         self.const_raster_type_path_ = os.path.join(self.m_code_base, '..\\..\\parameter\\Rastertype')
-        self.const_workspace_path_ = os.path.join(self.m_code_base, '..\\..\\')      #.gdb output
+        self.const_workspace_path_ = os.path.join(self.m_code_base, '..\\..\\')  # .gdb output
         self.const_import_geometry_features_path_ = os.path.join(self.m_code_base, '..\\..\\parameter')
 
         return self.m_code_base
 
+    def setXMLNodeValue(self, xPath, key, value, subKey, subValue):
+        nodes = self.m_doc.getElementsByTagName(key)
+        for node in nodes:
+            parents = []
+            c = node
+            while(c.parentNode is not None):
+                parents.insert(0, c.nodeName)
+                c = c.parentNode
+            p = '/'.join(parents)
+            if (p == xPath):
+                if (subKey != ''):
+                    try:
+                        if (node.firstChild.nodeValue == value):  # taking a short-cut to edit/this could change in future to support any child-node lookup
+                            if (node.nextSibling.nextSibling.nodeName == subKey):
+                                node.nextSibling.nextSibling.firstChild.data = subValue
+                            break
+                    except:
+                        break
+                    continue
+                node.firstChild.data = value
+                break
 
     def getXMLXPathValue(self, xPath, key):
 
@@ -298,7 +319,7 @@ class Base(object):
         for node in nodes:
             parents = []
             c = node
-            while(c.parentNode != None):
+            while(c.parentNode is not None):
                 parents.insert(0, c.nodeName)
                 c = c.parentNode
             p = '/'.join(parents)
@@ -314,17 +335,17 @@ class Base(object):
         return True
 
     def isLog(self):
-        return (not self.m_log == None)
+        return (not self.m_log is None)
 
-    def log(self, msg, level = const_general_text):
-        if (self.m_log != None):
+    def log(self, msg, level=const_general_text):
+        if (self.m_log is not None):
             return self.m_log.Message(msg, level)
 
         errorTypeText = 'msg'
         if (level > self.const_general_text):
-             errorTypeText = 'warning'
+            errorTypeText = 'warning'
         elif(level == self.const_critical_text):
-             errorTypeText = 'critical'
+            errorTypeText = 'critical'
 
         print ('log-' + errorTypeText + ': ' + msg)
 
@@ -344,7 +365,6 @@ class Base(object):
             return False
 
         return True
-
 
     def invoke_user_function(self, name, data):       # MDCS is always passed on which is the MD Configuration Script XML DOM
         ret = False
@@ -367,28 +387,27 @@ class Base(object):
             return False
 
         return ret
-#ends
+# ends
 
+    def processEnv(self, node, pos, json):  # support fnc for 'SE' command.
 
-    def processEnv(self, node, pos, json):                #support fnc for 'SE' command.
-
-        while(node.nextSibling != None):
+        while(node.nextSibling is not None):
             if(node.nodeType != minidom.Node.TEXT_NODE):
 
                 k = str(pos)
                 if ((k in json.keys()) == False):
-                        json[k] = {'key' : [], 'val' : [], 'type' : [] }
+                    json[k] = {'key': [], 'val': [], 'type': []}
 
                 json[k]['key'].append(node.nodeName)
                 v = ''
-                if (node.firstChild != None):
-                    v  = node.firstChild.nodeValue.strip()
+                if (node.firstChild is not None):
+                    v = node.firstChild.nodeValue.strip()
                 json[k]['val'].append(v)
                 json[k]['parent'] = node.parentNode.nodeName
                 json[k]['type'].append('c')
 
-                if (node.firstChild != None):
-                    if (node.firstChild.nextSibling != None):
+                if (node.firstChild is not None):
+                    if (node.firstChild.nextSibling is not None):
                         pos = len(json)
                         json[k]['type'][len(json[k]['type']) - 1] = 'p'
                         self.processEnv(node.firstChild.nextSibling, pos, json)
@@ -397,7 +416,6 @@ class Base(object):
 
         return True
 
-
     def getAbsPath(self, input):
         absPath = input
         if (os.path.exists(absPath) == True):
@@ -405,20 +423,17 @@ class Base(object):
 
         return absPath
 
-
     def prefixFolderPath(self, input, prefix):
 
-        _file  = input.strip()
+        _file = input.strip()
         _p, _f = os.path.split(_file)
         _indx = _p.lower().find('.gdb')
         if (_p == '' or _indx >= 0):
             if (_indx >= 0):
-                _f   = _p + '\\' + _f
+                _f = _p + '\\' + _f
             _file = os.path.join(prefix, _f)
 
         return _file
-
-
 
     def isArcGISPatched(self):      # return values [true | false]
 
@@ -429,7 +444,7 @@ class Base(object):
         # if the patch XML node is not properly formatted in structure/with values, MDCS returns an error and will abort the operation.
 
         patch_node = self.getXMLNode(self.m_doc, "Patch")
-        if (patch_node ==''):
+        if (patch_node == ''):
             return True
 
         if (patch_node.attributes.length == 0):
@@ -443,14 +458,13 @@ class Base(object):
 
         search_key = ''
         patch_desc_node = patch_node.firstChild.nextSibling
-        while (patch_desc_node != None):
+        while (patch_desc_node is not None):
             node_name = patch_desc_node.nodeName
             if (node_name == 'Name'):
                 if (patch_desc_node.hasChildNodes() == True):
                     search_key = patch_desc_node.firstChild.nodeValue
                     break
             patch_desc_node = patch_desc_node.nextSibling.nextSibling
-
 
         if (len(search_key) == 0):      # if no patch description could be found, return False
             return False
@@ -463,13 +477,12 @@ class Base(object):
         ver = ver[:4]       # accept only the first 4 digits.
 
         target_v_str = installed_v_str = ''
-        for i in range (self.CMAJOR, self.CBUILD + 1):
+        for i in range(self.CMAJOR, self.CBUILD + 1):
             target_v_str += "%04d" % ver[i]
 
         installed_ver = self.getDesktopVersion()
-        for i in range (self.CMAJOR, self.CBUILD + 1):
+        for i in range(self.CMAJOR, self.CBUILD + 1):
             installed_v_str += "%04d" % installed_ver[i]
-
 
         tVersion = int(target_v_str)
         iVersion = int(installed_v_str)
@@ -479,14 +492,14 @@ class Base(object):
 
         # if the installed ArcGIS version is lower than the intended target patch version, continue with the registry key check for the
         # possible patches installed.
-        #HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\ESRI\Desktop10.2\Updates
+        # HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\ESRI\Desktop10.2\Updates
 
         CPRODUCT_NAME = 'ProductName'
         CVERSION = 'Version'
 
         setupInfo = arcpy.GetInstallInfo()
         if ((CVERSION in setupInfo.keys()) == False or
-            (CPRODUCT_NAME in setupInfo.keys()) == False):
+                (CPRODUCT_NAME in setupInfo.keys()) == False):
             return False
 
         key = setupInfo[CPRODUCT_NAME] + setupInfo[CVERSION]
@@ -497,7 +510,7 @@ class Base(object):
                 HKEY_LOCAL_MACHINE, reg_path)
 
             i = 0
-            while 1:
+            while True:
                 name = EnumKey(arcgis, i)
                 arcgis_sub = OpenKey(
                     HKEY_LOCAL_MACHINE, reg_path + '\\' + name)
@@ -514,8 +527,7 @@ class Base(object):
 
         return False
 
-
-    def getDesktopVersion(self):    #returns major, minor, sp and the build number.
+    def getDesktopVersion(self):  # returns major, minor, sp and the build number.
 
         d = arcpy.GetInstallInfo()
 
@@ -534,7 +546,7 @@ class Base(object):
             key = k.lower()
             if (key == CVERSION or
                 key == CBUILDNUMBER or
-                key == CSPNUMBER):
+                    key == CSPNUMBER):
                 try:
                     if (key == CVERSION):
                         [version.append(int(x)) for x in d[k].split(".")]
@@ -552,9 +564,7 @@ class Base(object):
 
         return version
 
-
-
-    def CheckMDCSVersion(self, min, max, print_err_msg = True):
+    def CheckMDCSVersion(self, min, max, print_err_msg=True):
 
         # if python version is >= 3, it's asssumed we're being run from ArcGIS Pro
         if (sys.version_info[0] >= 3):
@@ -562,8 +572,8 @@ class Base(object):
             max = [0, 0, 0, 0]
 
         if (len(min) != self.const_ver_len or
-            len(max) != self.const_ver_len):
-                return False
+                len(max) != self.const_ver_len):
+            return False
 
         CMAJOR = 0
         CMINOR = 1
@@ -582,7 +592,7 @@ class Base(object):
 
         try:
             version = self.getDesktopVersion()
-            if (len(version) >= self.const_ver_len): # major, minor, sp, build
+            if (len(version) >= self.const_ver_len):  # major, minor, sp, build
 
                 inst_major = version[CMAJOR]
                 inst_minor = version[CMINOR]
@@ -592,32 +602,32 @@ class Base(object):
                 ver_failed = False
 
                 if (max_major > 0 and
-                    inst_major > max_major):
+                        inst_major > max_major):
                     ver_failed = True
                 elif (max_minor > 0 and
-                    inst_minor > max_minor):
-                        ver_failed = True
+                      inst_minor > max_minor):
+                    ver_failed = True
                 elif (max_cp > 0 and
-                    inst_sp > max_cp):
-                        ver_failed = True
+                      inst_sp > max_cp):
+                    ver_failed = True
                 elif (max_build > 0 and
                       inst_build > max_build):
-                            ver_failed = True
+                    ver_failed = True
                 elif (inst_major < min_major):
                     ver_failed = True
                 elif (inst_minor < min_minor):
-                        ver_failed = True
+                    ver_failed = True
                 elif (inst_sp < min_sp):
-                        ver_failed = True
+                    ver_failed = True
                 elif (min_build > 0 and
                       inst_build < min_build):
-                        ver_failed = True
+                    ver_failed = True
 
                 if (ver_failed):
                     if (print_err_msg == True):
                         self.log('MDCS can\'t proceed due to ArcGIS version incompatiblity.', self.const_critical_text)
-                        self.log('ArcGIS Desktop version is (%s.%s.%s.%s). MDCS min and max versions are (%s.%s.%s.%s) and (%s.%s.%s.%s) respectively.' % \
-                        (inst_major, inst_minor, inst_sp, inst_build, min_major, min_minor, min_sp, min_build, max_major, max_minor, max_cp, max_build), self.const_critical_text)
+                        self.log('ArcGIS Desktop version is (%s.%s.%s.%s). MDCS min and max versions are (%s.%s.%s.%s) and (%s.%s.%s.%s) respectively.' %
+                                 (inst_major, inst_minor, inst_sp, inst_build, min_major, min_minor, min_sp, min_build, max_major, max_minor, max_cp, max_build), self.const_critical_text)
 
                     return False
 
@@ -627,27 +637,24 @@ class Base(object):
 
         return True
 
-
-
-    def getXMLNodeValue(self, doc, nodeName) :
-        if (doc == None):
+    def getXMLNodeValue(self, doc, nodeName):
+        if (doc is None):
             return ''
         node = doc.getElementsByTagName(nodeName)
 
-        if (node == None or
+        if (node is None or
             node.length == 0 or
             node[0].hasChildNodes() == False or
-            node[0].firstChild.nodeType != minidom.Node.TEXT_NODE):
+                node[0].firstChild.nodeType != minidom.Node.TEXT_NODE):
             return ''
 
         return node[0].firstChild.data
 
-
     def updateART(self, doc, workspace, dataset):
-        if (doc == None):
+        if (doc is None):
             return False
         if (workspace.strip() == ''
-        and dataset.strip() == ''):
+                and dataset.strip() == ''):
             return False        # nothing to do.
         try:
             nodeName = 'Key'
@@ -658,13 +665,13 @@ class Base(object):
                     if (_nValue):
                         _nValue = _nValue.lower()
                         if (_nValue == 'dem' or
-                            _nValue == 'database'):
+                                _nValue == 'database'):
                             _node = node.nextSibling
                             while(_node):
                                 if (_node.hasChildNodes() and
-                                    _node.firstChild.nodeValue):
+                                        _node.firstChild.nodeValue):
                                     _node.firstChild.nodeValue = '{}'.format(
-                                    os.path.join(workspace, dataset) if _nValue == 'dem' else workspace)
+                                        os.path.join(workspace, dataset) if _nValue == 'dem' else workspace)
                                     break
                                 _node = _node.nextSibling
             nodeName = 'NameString'
@@ -710,37 +717,36 @@ class Base(object):
         else:
             return ''
 
-
     def setUserDefinedValues(self):
 
         nodes = self.m_doc.getElementsByTagName('*')
         for node in nodes:
-            if (node.firstChild != None):
-                 v = node.firstChild.data.strip()
+            if (node.firstChild is not None):
+                v = node.firstChild.data.strip()
 
-                 if (v.find('$') == -1):
+                if (v.find('$') == -1):
                     continue
 
-                 usr_key = v
-                 default = ''
+                usr_key = v
+                default = ''
 
-                 d = v.split(';')
+                d = v.split(';')
 
-                 if (len(d) > 1):
+                if (len(d) > 1):
                     default = d[0].strip()
                     usr_key = d[1].strip()
 
-                 revalue = []
+                revalue = []
 
-                 first = usr_key.find('$')
-                 first += 1
+                first = usr_key.find('$')
+                first += 1
 
-                 second =  first + usr_key[first+1:].find('$') + 1
+                second = first + usr_key[first + 1:].find('$') + 1
 
-                 if (first > 1):
+                if (first > 1):
                     revalue.append(usr_key[0:first - 1])
 
-                 while(second >= 0):
+                while(second >= 0):
 
                     uValue = usr_key[first:second]
 
@@ -754,13 +760,13 @@ class Base(object):
                                 default = uValue
 
                             if (first == 1
-                            and second == (len(usr_key) - 1)):
+                                    and second == (len(usr_key) - 1)):
                                 uValue = default
 
                         revalue.append(uValue)
 
                     first = second + 1
-                    indx = usr_key[first+1:].find('$')
+                    indx = usr_key[first + 1:].find('$')
                     if (indx == -1):
                         if (first != len(usr_key)):
                             revalue.append(usr_key[first:len(usr_key)])
@@ -768,20 +774,18 @@ class Base(object):
 
                     second = first + indx + 1
 
-                 updateVal = ''.join(revalue)
-                 node.firstChild.data = updateVal
+                updateVal = ''.join(revalue)
+                node.firstChild.data = updateVal
 
-
-
-    def getXMLNode(self, doc, nodeName) :
-        if (doc == None):
+    def getXMLNode(self, doc, nodeName):
+        if (doc is None):
             return ''
         node = doc.getElementsByTagName(nodeName)
 
-        if (node == None or
+        if (node is None or
             node.length == 0 or
             node[0].hasChildNodes() == False or
-            node[0].firstChild.nodeType != minidom.Node.TEXT_NODE):
+                node[0].firstChild.nodeType != minidom.Node.TEXT_NODE):
             return ''
 
         return node[0]
@@ -794,18 +798,17 @@ class Base(object):
             if (i[-5:].lower() == '.lock'):
                 sp = i.split('.')
                 pid = os.getpid()
-                if (pid == int(sp[3])):         #indx 3 == process id
+                if (pid == int(sp[3])):  # indx 3 == process id
                     found_lock_ = True
-                    break;
+                    break
 
         return found_lock_
-
 
     def waitForLockRelease(self, folder_path_):
 
         if (os.path.exists(folder_path_) == False):
             self.log('lock file path does not exist!. Quitting...', self.const_critical_text)
-            return -2       #path does not exist error code!
+            return -2  # path does not exist error code!
 
         t0 = datetime.now()
         duration_req_sec_ = 3
@@ -814,20 +817,18 @@ class Base(object):
 
         while True:
             if (tot_count_sec_ == 0):
-                if (self.foundLockFiles(folder_path_) == False):   #try to see if we could get lucky on the first try, else enter periodic check.
-                    break;
+                if (self.foundLockFiles(folder_path_) == False):  # try to see if we could get lucky on the first try, else enter periodic check.
+                    break
             t1 = datetime.now() - t0
 
             if (t1.seconds > duration_req_sec_):
                 if (self.foundLockFiles(folder_path_) == False):
-                    break;
+                    break
                 tot_count_sec_ += duration_req_sec_
                 if (tot_count_sec_ > max_time_to_wait_sec_):
                     self.log('lock file release timed out!. Quitting...', self.const_critical_text)
                     tot_count_sec_ = -1
-                    break;
+                    break
                 t0 = datetime.now()
 
-        return tot_count_sec_
-
- 
+        return tot_count_sec_ 

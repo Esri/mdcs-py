@@ -1,33 +1,32 @@
 # mdcs-py
 
-This is an Python Script that takes in parameters and an xml file to perform the various tasks set out by the user to create and populate a Mosaic Dataset.
-An application that uses MDCS can be found on the Image Management workflow Solutions
+The Mosaic Dataset Configuration Script (MDCS) is a Python script that reads parameters stored in an xml file in order to create, configure, and populate a [mosaic dataset](http://desktop.arcgis.com/en/arcmap/10.3/manage-data/raster-and-images/what-is-a-mosaic-dataset.htm).
 
-[Example : How MDCS is used to automate a workflow](http://www.arcgis.com/home/item.html?id=d1289a749b59477cb82228a09d1d0219/)
-
+If you want to try out MDCS, review the documentation included in the repo for instructions, and download the suggested sample data from [ArcGIS Online](http://pm.maps.arcgis.com/home/item.html?id=5f6c9a157ffc45c4863996c2987f4ac9). 
 
 ## Features
-* Automate creation of multiple Mosaic Datasets
-* Configure multiple mosaic datasets using configuration files.
-* Verbose reporting and logging system built in. 
-* Command line usage via batch files. 
+
+* Automate the creation of multiple mosaic datasets
+* Configure multiple mosaic datasets using XML files
+* Built-in verbose reporting and logging system
+* Command line usage via batch files 
 
 ## Instructions
 
-1. Download and unzip the .zip file.
-2. Create a folder called Image_Mgmt_Workflow in the root of c: drive.
-3. Create a project folder in Image_Mgmt_Workflows
-4. Copy content of zip file to the project folder. 
+1. Download the ZIP file (called mdcs-py-master.zip)
+2. Create a folder called Image_Mgmt_Workflows in the root of your C: drive
+3. Unzip the contents of the MDCS ZIP file into the Image_Mgmt_Workflows folder
 
-## Requirements
+## Suggested Requirements
 
-* Notepad / XML Editor.
-* Knowledge of Mosaic Datasets.
-* Knowledge of Python.
+* Notepad / XML Editor
+* Knowledge of [Mosaic Datasets](http://desktop.arcgis.com/en/arcmap/10.3/manage-data/raster-and-images/what-is-a-mosaic-dataset.htm)
+* Knowledge of Python
 
 ## Resources
 
-* [ElevationScripts from ArcGIS Resource Center] (http://www.arcgis.com/home/item.html?id=d2a055e12af14258a931fdc3ecf2c8b4)
+* Dowload [sample data](http://pm.maps.arcgis.com/home/item.html?id=5f6c9a157ffc45c4863996c2987f4ac9) for use with MDCS.
+* See the [Managing Elevation workflow scripts](http://www.arcgis.com/home/item.html?id=d2a055e12af14258a931fdc3ecf2c8b4) on ArcGIS Online for an example application of MDCS.
 
 ## Issues
 
@@ -54,6 +53,5 @@ limitations under the License.
 
 A copy of the license is available in the repository's [license.txt](https://github.com/ArcGIS/mdcs-py/blob/master/license.txt) file.
 
-[](Esri Tags: MDCS Mosaic Datasets Imagery Management) 
-[](Esri Language: Python)
+
 
