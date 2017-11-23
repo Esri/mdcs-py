@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Application>
   <!-- Support for Dynamic Variable <Name>$xyz$</Name> or <Name>DefaultValue;$xyz$</Name> The variable value can be passed from the command line -->
   <Name>Name_of_Project</Name>
   <Command>DefaultCommand</Command>
-  <!-- Commands avaiable CM, AR, SP, BP, CBMD, ERF, ANCP, APCP, ABA, CBA, CCP, CTP, AMDS, AMD, BMDIC, CDA, GEA, CS, BPS, BF, BS, BB, DN, SY, IG, SS, DF, DO, BO, MMDI, DMD, RRFMD, RP, RI, AI, JF, CV, MTC, ETC, STP, SE, EMDG, EMDI, SMDI, CSDD, STS, CRRT, CLT,CCM,BSM,GPC,IFPC,CRA,USD -->
+  <!-- Commands avaiable CM, AR, SP, BP, CBMD, ERF, ANCP, APCP, ABA, CBA, CCP, CTP, AMDS, AMD, BMDIC, CDA, GEA, CS, BPS, BF, BS, BB, DN, SY, IG, SS, DF, DO, BO, MMDI, DMD, RRFMD, RP, RI, AI, JF, CV, MTC, ETC, STP, SE, EMDG, EMDI, SMDI, CSDD, STS, CRRT, CLT,CCM,BSM,GPC,IFPC,CRA,USD,DEL,RR -->
   <!-- Commands can be combined using the + sign and some commands can be called multiple times, refer to MDCS document for more help -->
   <ArcGISVersion>
     <!-- Defines Min Max version required. Eg due to know issue in previsous versions -->
@@ -759,6 +759,24 @@
           <in_organization />
           <in_groups />
         </UploadServiceDefinition_server>
+        <!-- Deletes the mosaic dataset from the disk -->
+        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/delete.htm -->
+        <Delete>
+          <in_data>#</in_data>
+          <data_type>#</data_type>
+        </Delete>
+        <!-- RR Automatically aligns a raster to a reference image or uses a control point file for georegistration. -->
+        <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/register-raster.htm -->
+        <RegisterRaster>
+          <register_mode>REGISTER;REGISTER_MS;RESET;CREATE_LINKS</register_mode>
+          <reference_raster>#</reference_raster>
+          <input_link_file>#</input_link_file>
+          <transformation_type>POLYORDER0;POLYSIMILARITY;POLYORDER1;POLYORDER2;ADJUST;SPLINE;PROJECTIVE</transformation_type>
+          <output_cpt_link_file>#</output_cpt_link_file>
+          <maximum_rms_value>#</maximum_rms_value>
+          <query>#</query>
+          <!--To be provided only when input is a mosaic dataset and the tool is to be run only on the selected items in the MD. e.g.OBJECTID&gt;100(OBJECTID>100),Name='Tile01'-->
+        </RegisterRaster>
       </Processes>
     </MosaicDataset>
   </Workspace>
