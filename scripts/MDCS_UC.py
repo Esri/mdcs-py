@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: MDCS_UC.py
 # Description: A class to implement all user functions or to extend the built in MDCS functions/commands chain.
-# Version: 20170425
+# Version: 20171217
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -25,6 +25,9 @@ import arcpy
 
 
 class UserCode:
+
+    def __init__(self):
+        pass    # initialize variables that need to be shared between multiple user commands.
 
     def sample00(self, data):
         base = data['base']         # using Base class for its XML specific common functions. (getXMLXPathValue, getXMLNodeValue, getXMLNode)
