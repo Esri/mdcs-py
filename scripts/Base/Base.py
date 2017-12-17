@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright 2013 Esri
+# Copyright 2017 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
-# Version: 20170223
+# Version: 20171217
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -180,9 +180,15 @@ class Base(object):
         self.m_cli_callback_ptr = None
         self.m_cli_msg_callback_ptr = None
         # ends
+        self.m_userClassInstance = None
 
     def init(self):  # return (status [true|false], reason)
-
+        try:
+            frame = sys._getframe(0).f_globals
+            module = frame[self.CMODULE_NAME]
+            self.m_userClassInstance = getattr(module, self.CCLASS_NAME)()
+        except:
+            self.log('{}/{} not found. Users commands disabled!'.format(self.CMODULE_NAME, self.CCLASS_NAME), self.const_warning_text)
         if (self.m_doc is None):
             return False
         # version check.
@@ -355,26 +361,19 @@ class Base(object):
 # user defined functions implementation code
     def isUser_Function(self, name):
         try:
-            frame = sys._getframe(0).f_globals
-
-            module = frame[self.CMODULE_NAME]
-            cls = getattr(module, self.CCLASS_NAME)
-            instance = cls()
-            fnc = getattr(instance, name)
+            if (self.m_userClassInstance is None):
+                return None
+            fnc = getattr(self.m_userClassInstance, name)
         except:
             return False
-
         return True
 
-    def invoke_user_function(self, name, data):       # MDCS is always passed on which is the MD Configuration Script XML DOM
+    def invoke_user_function(self, name, data):
         ret = False
         try:
-            frame = sys._getframe(0).f_globals  # default to first stack.
-
-            module = frame[self.CMODULE_NAME]
-            cls = getattr(module, self.CCLASS_NAME)
-            instance = cls()
-            fnc = getattr(instance, name)
+            if (self.m_userClassInstance is None):
+                return False
+            fnc = getattr(self.m_userClassInstance, name)
             try:
                 ret = fnc(data)
             except Exception as inf:
@@ -382,10 +381,9 @@ class Base(object):
                 self.log(str(inf), self.const_critical_text)
                 return False
         except Exception as inf:
-            self.log('Error: please check if user function (%s) is found in class (%s) of MDCS_UC module.' % (name, CCLASS_NAME), self.const_critical_text)
+            self.log('Please check if user function (%s) is found in class (%s) of MDCS_UC module.' % (name, self.CCLASS_NAME), self.const_critical_text)
             self.log(str(inf), self.const_critical_text)
             return False
-
         return ret
 # ends
 
