@@ -28,6 +28,17 @@ set id=10.4
 goto :RunReplace
 
 )
+IF EXIST c:\python27\arcgis10.5\python.exe (
+
+set id=10.5
+goto :RunReplace
+) 
+IF EXIST c:\python27\arcgis10.6\python.exe (
+
+set id=10.6
+goto :RunReplace
+) 
+
 goto :ShowError
 
 :RunReplace
