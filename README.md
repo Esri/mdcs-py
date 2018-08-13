@@ -10,6 +10,7 @@ If you want to try out MDCS, review the documentation included in the repo for i
 * Configure multiple mosaic datasets using XML files
 * Built-in verbose reporting and logging system
 * Command line usage via batch files 
+* Compatible with ArcMap 10.1 - 10.6.1 and ArcGIS Pro 1.0 - 2.2
 
 ## Instructions
 
