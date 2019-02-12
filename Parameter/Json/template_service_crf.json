@@ -1,0 +1,39 @@
+{
+ "serviceName": "",
+ "type": "ImageServer",
+ "description": "g",
+ "capabilities": "Image",
+ "provider": "ArcObjectsRasterRendering",
+ "clusterName": "default",
+ "minInstancesPerNode": 0,
+ "maxInstancesPerNode": 0,
+ "instancesPerContainer": 1,
+ "maxWaitTime": 60,
+ "maxStartupTime": 300,
+ "maxIdleTime": 1800,
+ "maxUsageTime": 600,
+ "loadBalancing": "ROUND_ROBIN",
+ "isolationLevel": "HIGH",
+ "configuredState": "STARTED",
+ "recycleInterval": 24,
+ "recycleStartTime": "00:00",
+ "keepAliveInterval": -1,
+ "private": false,
+ "isDefault": false,
+ "maxUploadFileSize": 0,
+ "allowedUploadFileTypes": "",
+ "properties": {
+  "path": "",
+  "description": "g",
+  "copyright": "",
+  "cacheControlMaxAge": "43200",
+  "isHosted": "true"
+ },
+ "portalProperties": {
+  "isHosted": true,
+  "portalItems": []
+ },
+ "extensions": [],
+ "frameworkProperties": {},
+ "datasets": []
+}
