@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: SolutionsLib.py
 # Description: To map MDCS command codes to GP Tool functions.
-# Version: 20170223
+# Version: 20171217
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -904,7 +904,8 @@ class Solutions(Base.Base):
                 if (isQuery == True):
                     expression += ' AND %s' % (query)
                 try:
-                    arcpy.MakeMosaicLayer_management(fullPath, lyrName, expression)
+                    arcpy.MakeMosaicLayer_management(fullPath, lyrName)
+                    arcpy.SelectLayerByAttribute_management(lyrName,"NEW_SELECTION",expression)
                     lyrName_footprint = lyrName + "/Footprint"
                     arcpy.CalculateField_management(lyrName_footprint,
                                                     self.getProcessInfoValue(processKey, 'fieldname', index, indx),
@@ -1174,7 +1175,7 @@ class Solutions(Base.Base):
                 'sourcePath': self.m_base.m_sources,
                 'base': self.m_base    # pass in the base object to allow access to common functions.
             }
-            bSuccess = self.invoke_user_function(com, data)
+            bSuccess = self.m_base.invoke_user_function(com, data)
             if (bSuccess):
                 ParentRoot = 'Application/Workspace'
                 mosaicDataset = self.m_base.getXMLXPathValue('{}/MosaicDataset/Name'.format(ParentRoot), 'Name')
@@ -1564,7 +1565,7 @@ class Solutions(Base.Base):
                     self.log("Command/Err: Invalid command index:" + command, self.const_warning_text)
                     # catch any float values entered, e.t.c
             if ((cmd in self.commands.keys()) == False):
-                if (self.isUser_Function(ucCommand) == True):
+                if (self.m_base.isUser_Function(ucCommand) == True):
                     try:
                         self.commands[ucCommand] = {}
                         self.commands[ucCommand]['desc'] = 'User defined command (%s)' % (ucCommand)
