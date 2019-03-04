@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: SolutionsLib.py
 # Description: To map MDCS command codes to GP Tool functions.
-# Version: 20171217
+# Version: 20190303
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -904,7 +904,8 @@ class Solutions(Base.Base):
                 if (isQuery == True):
                     expression += ' AND %s' % (query)
                 try:
-                    arcpy.MakeMosaicLayer_management(fullPath, lyrName, expression)
+                    arcpy.MakeMosaicLayer_management(fullPath, lyrName)
+                    arcpy.SelectLayerByAttribute_management(lyrName,"NEW_SELECTION",expression)
                     lyrName_footprint = lyrName + "/Footprint"
                     arcpy.CalculateField_management(lyrName_footprint,
                                                     self.getProcessInfoValue(processKey, 'fieldname', index, indx),
