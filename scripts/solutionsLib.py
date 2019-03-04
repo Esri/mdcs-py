@@ -1597,4 +1597,4 @@ class Solutions(Base.Base):
                  cmd == 'CM' or
                  is_user_cmd == True)):
                 return False
-        return True
+        return True 
