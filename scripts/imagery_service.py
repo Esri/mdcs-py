@@ -578,7 +578,7 @@ class ImageryServices(object):
                             return self._get_result_status(
                                 success=False,
                                 message="Could not stop service")
-                if path and delete_old_source and old_path:
+                if path and delete_old_source and old_path and path != old_path:
                     try:
                         arcpy.Delete_management(old_path)
                     except Exception as e:
