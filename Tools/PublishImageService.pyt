@@ -135,7 +135,7 @@ class PublishImageService(object):
                          enabled=False)
         update_data_path = arcpy.Parameter(displayName="Data path",
                                            name="update_data_path",
-                                           datatype="GPString",
+                                           datatype=["DEMosaicDataset", "DEFile", "GPString"],
                                            parameterType="Optional",
                                            direction="Input",
                                            enabled=False)
@@ -161,11 +161,11 @@ class PublishImageService(object):
         for param in all_parameters:
             if param in enable_list:
                 param.enabled = True
-                if param.datatype == 'String' and param.parameterType == 'Required':
-                    if param.value == "None":
+                if 'String' in param.datatype and param.parameterType == 'Required':
+                    if param.valueAsText == "None":
                         param.value = ""
             else:
-                if param.datatype == 'String' and param.parameterType == 'Required':
+                if 'String' in param.datatype and param.parameterType == 'Required':
                     if not param.value:
                         param.value = "None"
                 param.enabled = False
@@ -324,21 +324,27 @@ class PublishImageService(object):
             return '3'
         else:
             return '1'
+    
+    def get_service_param_right_format(self, service_param):
+        if type(service_param) == str:
+            return ','.join(service_param.split(';'))
+        return service_param
 
     def get_service_parameters(self, raster_url):
         try:
             data_describe = arcpy.Describe(raster_url)
             service_params =  {
-                       "availableMensurationCapabilities": data_describe.availableMensurationCapabilities,
-                       "allowedMensurationCapabilities": data_describe.allowedMensurationCapabilities,
+                       "availableMensurationCapabilities": self.get_service_param_right_format(data_describe.availableMensurationCapabilities),
+                       "allowedMensurationCapabilities": self.get_service_param_right_format(data_describe.allowedMensurationCapabilities),
                        "maxImageHeight": data_describe.maxImageHeight,
-                       "allowedMosaicMethods": data_describe.allowedMosaicMethods,
-                       "availableFields": data_describe.allowedFields,
+                       "allowedMosaicMethods": self.get_service_param_right_format(data_describe.allowedMosaicMethods),
+                       "availableFields": self.get_service_param_right_format(data_describe.allowedFields),
                        "defaultCompressionQuality": data_describe.defaultCompressionQuality,
                        "defaultResamplingMethod": self.get_resampling_method_int(data_describe.defaultResamplingMethod),
-                       "availableCompressions": data_describe.allowedCompressions,
-                       "availableMosaicMethods": data_describe.availableMosaicMethods,
-                       "allowedCompressions": data_describe.allowedCompressions
+                       "availableCompressions": self.get_service_param_right_format(data_describe.allowedCompressions),
+                       "availableMosaicMethods": self.get_service_param_right_format(data_describe.availableMosaicMethods),
+                       "allowedCompressions": self.get_service_param_right_format(data_describe.allowedCompressions),
+                       "allowedFields": self.get_service_param_right_format(data_describe.allowedFields)
 
                    }
             return service_params
