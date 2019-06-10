@@ -5,7 +5,6 @@
     "VersionMessage": "Added runtime source version check support.", 
     "LastChecked": "", 
     "CheckForUpdate": "Monthly", 
-    "LastUpdated": "20190610", 
     "CurrentVersion": "20190610", 
     "NewVersion": ""
 }

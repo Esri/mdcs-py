@@ -34,7 +34,7 @@ sys.path.append(os.path.join(solutionLib_path, 'SolutionsLog'))
 import logger
 import solutionsLib  # import Raster Solutions library
 import Base
-from ProgramCheckandUpdate import ProgramCheckandUpdate
+from ProgramCheckAndUpdate import ProgramCheckAndUpdate
 
 # cli callback ptrs
 g_cli_callback = None
@@ -196,7 +196,7 @@ def main(argc, argv):
     log.SetLogFolder(log_output_folder)
     # ends
     # Source version check.
-    versionCheck = ProgramCheckandUpdate()
+    versionCheck = ProgramCheckAndUpdate()
     log.Message('Checking for updates..', logger.Logger.const_general_text)
     verMessage = versionCheck.run(solutionLib_path)
     if (verMessage is not None):

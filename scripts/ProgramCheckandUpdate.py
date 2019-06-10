@@ -30,7 +30,7 @@ import zipfile
 from dateutil.relativedelta import *
 
 
-class ProgramCheckandUpdate(object):
+class ProgramCheckAndUpdate(object):
 
     def readCheckForUpdate(self, filepath):
         dict_check = {}
@@ -124,20 +124,27 @@ class ProgramCheckandUpdate(object):
                 if versionJSON is None:
                     return "Unable to read VersionJSON"
                 [update_available, dict_check] = self.checkUpdate(chkupdate, versionJSON)
-                if(update_available):
-                    self.WriteNewCheckForUpdate(dict_check, checkUpdateFilePath)
-                    if(dict_check['OnNewVersion'] == "Warn"):
-                        return("Update Available, but not updating")
-                    elif(dict_check['OnNewVersion'] == "Ignore"):
-                        return("Ignore")
-                    elif(dict_check['OnNewVersion'] == "Update"):
-                        self.UpdateLocalRepo(versionJSON['Install'], path=os.path.join((os.path.dirname(localrepo_path)), "Updated"))
-                    else:
-                        return("Incorrect Parameter. Please check OnNewVersion Parameter in CheckForUpdate.txt")
+                self.WriteNewCheckForUpdate(dict_check, checkUpdateFilePath)
+                if(dict_check['OnNewVersion'] == "Warn"):
+                    return("Update Available, but not updating")
+                elif(dict_check['OnNewVersion'] == "Ignore"):
+                    return("Ignore")
+                elif(dict_check['OnNewVersion'] == "Update"):
+                    self.UpdateLocalRepo(versionJSON['Install'], path=os.path.join((os.path.dirname(localrepo_path)), "Updated"))
+                else:
+                    return("Incorrect Parameter. Please check OnNewVersion Parameter in CheckForUpdate.txt")
+            else:
+                try:
+                    current_date = datetime.today().strftime('%Y-%m-%d')
+                    chkupdate['LastChecked'] = current_date
+                    self.WriteNewCheckForUpdate(chkupdate, checkUpdateFilePath)
+                except Exception as e:
+                    return(str(e))
+
         except Exception as e:
             return str(e)
 
 
 # ExampleImplementation
-#a = ProgramCheckandUpdate()
-#x = a.run("C:\\Image_Mgmt_Workflows\\mdcs-py-master")
+a = ProgramCheckAndUpdate()
+x = a.run("C:\\Image_Mgmt_Workflows\\mdcs-py-master")
