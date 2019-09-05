@@ -569,6 +569,14 @@ class Solutions(Base.Base):
                 index
             )
 
+        elif (com == 'CPCSLP'):
+            self.m_log.Message("\t{}".format(self.commands[com]['desc']", self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'analyzemosaicdataset',
+                'arcpy.management.CreatePointCloudSceneLayerPackage',
+                index
+            )
         elif(com == 'JF'):
             fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             try:
@@ -1403,6 +1411,10 @@ class Solutions(Base.Base):
             {'desc': 'Uploads and publishes a service definition to a specified server.',
              'fnc': executeCommand
              },
+            'CPCSLP':
+            {'desc': 'Creates a point cloud scene layer package (.slpk file) from LAS, zLAS, LAZ, or LAS dataset input.',
+             'fnc': executeCommand
+             },
             'CRTT':
             {'desc': 'Delete records from the Raster Type table.',
              'fnc': executeCommand
@@ -1597,4 +1609,4 @@ class Solutions(Base.Base):
                  cmd == 'CM' or
                  is_user_cmd == True)):
                 return False
-        return True 
+        return True

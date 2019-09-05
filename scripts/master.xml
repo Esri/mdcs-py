@@ -678,6 +678,20 @@
           <public>MYGROUPS</public>
           <groups>#</groups>
         </SharePackage>
+		<!-- CPCSLP Create Point Cloud Scene Layer Package -->
+        <!-- https://pro.arcgis.com/en/pro-app/tool-reference/data-management/create-point-cloud-scene-layer-package.htm -->
+		<CreatePointCloudSceneLayerPackage>
+			<in_dataset>LAS_zLAS_LAZ_LAS_dataset</in_dataset>
+			<out_slpk>output_scene_layer_package</out_slpk>
+			<out_coor_system>coordinate_system_of_the_output_scene_layer_package</out_coor_system>
+			<transform_method>datum_transformation_method</transform_method>
+			<attributes>INTENSITY;RGB;FLAGS;CLASS_CODE,RETURNS,USER_DATA;POINT_SRC_ID;GPS_TIME;SCAN_ANGLE;NEAR_INFRARED</attributes>
+			<point_size_m>point size of the lidar data</point_size_m>
+			<xy_max_error_m>Maximum_x_y_error_tolerated</xy_max_error_m>
+			<z_max_error_m>Maximum_z-error_tolerated</z_max_error_m>
+			<in_coor_system>Coordinate_system_of_the_input_LAZ_files.</in_coor_system>
+			<scene_layer_version>1.X;2.X</scene_layer_version>			
+		</CreatePointCloudSceneLayerPackage>
         <!-- SE     Set Environments -->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/environments/an-overview-of-raster-storage-settings.htm -->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/environments/parallel-processing-factor.htm -->
