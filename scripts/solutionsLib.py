@@ -570,7 +570,7 @@ class Solutions(Base.Base):
             )
 
         elif (com == 'CPCSLP'):
-            self.m_log.Message("\t{}".format(self.commands[com]['desc']", self.m_log.const_general_text)
+            self.m_log.Message("\t{}".format(self.commands[com]['desc']), self.m_log.const_general_text)
             return self.__invokeDynamicFn(
                 [],
                 'analyzemosaicdataset',
