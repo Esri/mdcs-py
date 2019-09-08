@@ -997,6 +997,10 @@ class Solutions(Base.Base):
             mdName = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             processKey = 'managetilecache'
             self.log("Building cache for:" + mdName, self.m_log.const_general_text)
+            self.log("Getting tiling Schema : ", self.m_log.const_general_text)
+            tile_scheme_mtc = self.m_base.getAbsPath(self.getProcessInfoValue(processKey, 'import_tiling_scheme', index))
+            if tile_scheme_mtc != '#' and tile_scheme_mtc != '':
+                tile_scheme_mtc = self.prefixFolderPath(self.getProcessInfoValue(processKey, 'import_tiling_scheme', index), os.path.dirname(self.config))
 
             try:
                 arcpy.ManageTileCache_management(
@@ -1005,10 +1009,12 @@ class Solutions(Base.Base):
                     self.getProcessInfoValue(processKey, 'in_cache_name', index),
                     mdName,
                     self.getProcessInfoValue(processKey, 'tiling_scheme', index),
-                    self.getProcessInfoValue(processKey, 'import_tiling_scheme', index),
+                    tile_scheme_mtc,
                     self.getProcessInfoValue(processKey, 'scales', index),
                     self.getProcessInfoValue(processKey, 'area_of_interest', index),
-                    self.getProcessInfoValue(processKey, 'max_cell_size', index))
+                    self.getProcessInfoValue(processKey, 'max_cell_size', index),
+                    self.getProcessInfoValue(processKey, 'min_cached_scale', index),
+                    self.getProcessInfoValue(processKey, 'max_cached_scale', index))
 
                 return True
             except:
