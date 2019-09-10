@@ -4,7 +4,7 @@ The Mosaic Dataset Configuration Script (MDCS) is a Python script that reads par
 
 If you want to try out MDCS, review the documentation included in the repo for instructions, and download the suggested sample data from [ArcGIS Online](http://pm.maps.arcgis.com/home/item.html?id=5f6c9a157ffc45c4863996c2987f4ac9). 
 
-This repo also contains MDTools, a command line tool that simplifies some common management tasks when working with rasters in a mosaic dataset.
+This repo also contains [MDTools](https://github.com/Esri/mdcs-py/blob/master/Documentation/MDTools_ReadMe.pdf), a command line tool that simplifies some common management tasks when working with rasters in a mosaic dataset.
 
 ## Features
 
@@ -12,7 +12,7 @@ This repo also contains MDTools, a command line tool that simplifies some common
 * Configure multiple mosaic datasets using XML files
 * Built-in verbose reporting and logging system
 * Command line usage via batch files 
-* Compatible with ArcMap 10.1+ and ArcGIS Pro 1.0+
+* Compatible with ArcMap 10.1+ and ArcGIS Pro 1.0+ (MDTools requires ArcMap 10.6.1+ or ArcGIS Pro 2.2+)
 * Use MDTools to do the following: 
 	- Embed raster proxies in a mosaic dataset
 	- Perform search and replace for embedded raster proxy strings
@@ -25,6 +25,7 @@ This repo also contains MDTools, a command line tool that simplifies some common
 3. Unzip the contents of the MDCS ZIP file into the Image_Mgmt_Workflows folder
 
 To get started with MDTools:
+
 4. Navigate to C:/Image_Mgmt_Workflows/mdcs-py/MDTools_Setup.zip
 5. Unzip the contents, then double-click MDTools_Setup.exe to install the tools.
 6. Refer to the [MDTools documentation](https://github.com/Esri/mdcs-py/blob/master/Documentation/MDTools_ReadMe.pdf) to get started.
@@ -32,7 +33,7 @@ To get started with MDTools:
 ## Suggested Requirements
 
 * Notepad / XML Editor
-* Knowledge of [Mosaic Datasets](http://desktop.arcgis.com/en/arcmap/10.3/manage-data/raster-and-images/what-is-a-mosaic-dataset.htm)
+* Knowledge of [Mosaic Datasets](https://pro.arcgis.com/en/pro-app/help/data/imagery/mosaic-datasets.htm)
 * Knowledge of Python
 
 ## Resources
