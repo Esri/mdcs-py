@@ -147,8 +147,8 @@ class PublishImageService(object):
                          direction="Input",
                          enabled=True)
         add_item_to_AGOL.value=False
-        instance_type.filter.list = ['Shared Instance', 'Reserved Instance']
-        instance_type.value = 'Reserved Instance'
+        instance_type.filter.list = ['Shared Instance', 'Dedicated Instance']
+        instance_type.value = 'Dedicated Instance'
         action.filter.list = self.actions_list
         action.value = 'Create Image Service'
         params = [server, action, folder_name, service_name, raster_url,
@@ -221,11 +221,11 @@ class PublishImageService(object):
         data_type = self.get_data_type(params['raster_url'].value)
         if data_type == 'md':
             if  not  params['instance_type'].altered:
-                params['instance_type'].filter.list = ['Shared Instance', 'Reserved Instance']
+                params['instance_type'].filter.list = ['Shared Instance', 'Dedicated Instance']
                 params['instance_type'].value = 'Shared Instance'
         else:
-            params['instance_type'].filter.list = ['Reserved Instance']
-            params['instance_type'].value = 'Reserved Instance'
+            params['instance_type'].filter.list = ['Dedicated Instance']
+            params['instance_type'].value = 'Dedicated Instance'
             if params['raster_url'].value.lower().endswith('.crf'):
                 params['instance_type'].filter.list = ['Shared Instance']
                 params['instance_type'].value = 'Shared Instance'
