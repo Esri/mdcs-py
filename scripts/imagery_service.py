@@ -1779,6 +1779,16 @@ class ImageryServices(object):
                 directory_name])
             log.Message(err_message, log.const_critical_text)
 
+    def _get_float_version(self):
+        get_version_url = "{}/rest/services".format(self._serverurl.strip('/'))
+        params = {
+            'f': 'pjson'
+        }
+        response = requests.get(get_version_url, params=params, verify=False)
+        version = response.json()['currentVersion']
+        version = float(version)
+        return version
+
     def create_service(self,
                         folder_name,
                         service_name,
@@ -1826,8 +1836,12 @@ class ImageryServices(object):
             service_def['provider'] = 'ArcObjectsRasterRendering'
             service_def['minInstancesPerNode'] = 0
             service_def['maxInstancesPerNode'] = 0
-        elif instance_type == 'reserved':
-            service_def['provider'] = 'ArcObjects'
+        elif instance_type == 'dedicated':
+            version = self._get_float_version()
+            if version >= 10.71:
+                service_def['provider'] = 'ArcObjects11'
+            else:
+                service_def['provider'] = 'ArcObjects'
             service_def['minInstancesPerNode'] = 1
             service_def['maxInstancesPerNode'] = 2
         arcgiscache_path, arcgiscache_virtual_path = self._get_directory_path(
@@ -1919,9 +1933,3 @@ class ImageryServices(object):
     def close(self):
         log.Message("Done", log.const_general_text)
         log.WriteLog('#all')
-#i = ImageryServices()
-#i.get_all_server_folders()
-#service_params = {'availableMensurationCapabilities': 'None,Basic,Base-Top Height,Top-Top Shadow Height,Base-Top Shadow Height,3D', 'allowedMensurationCapabilities': 'Basic', 'maxImageHeight': '4000', 'allowedMosaicMethods': 'ByAttribute;Seamline;NorthWest;Center;LockRaster;Nadir;None', 'availableFields': 'Name;MinPS;MaxPS;LowPS;HighPS;ProductName;CenterX;CenterY;SensorName;AcquisitionDate;SunAzimuth;SunElevation;CloudCover;Best;PR;Month;DayOfYear;WRS_Path;WRS_Row;Latest;DateUpdated;GroupName;dataset_id;Shape_Area;Shape_Length', 'defaultCompressionQuality': '85', 'availableCompressions': 'JPEG,NONE,LERC,LZ77', 'availableMosaicMethods': 'NorthWest,Center,LockRaster,ByAttribute,Nadir,Viewpoint,Seamline,None', 'allowedCompressions': 'JPEG,NONE,LERC,LZ77'}
-#i.create_service('test', 'ss3', r'c:\temp\LandsatGLS.gdb\GLS_PS_4b16b', 'description', 'copyright', 
-                #'md',# service_params=service_params, 
-                #instance_type='shared')
