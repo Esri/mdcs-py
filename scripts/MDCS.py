@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: MDCS.py
 # Description: This is the main program entry point to MDCS.
-# Version: 20190610
+# Version: 20191031
 # Requirements: ArcGIS 10.1 SP1
 # Required Arguments: -i:<config_file>
 # Usage: python.exe MDCS.py -c:<Optional:command(s)> -i:<config_file>
@@ -216,10 +216,10 @@ def main(argc, argv):
     if (com == ''):
         com = base.const_cmd_default_text
     solutions = solutionsLib.Solutions(base)
-    success = solutions.run(config, com, comInfo)
+    results = solutions.run(config, com, comInfo)
     log.Message("Done...", log.const_general_text)
     log.WriteLog('#all')  # persist information/errors collected.
-
+    return results
 
 if __name__ == '__main__':
     main(len(sys.argv), sys.argv)

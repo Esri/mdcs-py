@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: ProgramCheckandUpdate.py
 # Description: Checks and Updates workflow from Github if required.
-# Version: 20190106
+# Version: 20191117
 # Requirements:
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -125,16 +125,21 @@ class ProgramCheckAndUpdate(object):
                     return "Unable to read VersionJSON"
                 [update_available, dict_check] = self.checkUpdate(chkupdate, versionJSON)
                 self.WriteNewCheckForUpdate(dict_check, checkUpdateFilePath)
-                if(dict_check['OnNewVersion'] == "Warn"):
-                    return("Update Available, but not updating")
-                elif(dict_check['OnNewVersion'] == "Ignore"):
-                    return("Ignore")
-                elif(dict_check['OnNewVersion'] == "Update"):
-                    self.UpdateLocalRepo(versionJSON['Install'], path=os.path.join((os.path.dirname(localrepo_path)), "Updated"))
+                if(update_available):
+                    if(dict_check['OnNewVersion'] == "Warn"):
+                        return("Update Available. Please read " + str(checkUpdateFilePath))
+                    elif(dict_check['OnNewVersion'] == "Ignore"):
+                        return("Ignore")
+                    elif(dict_check['OnNewVersion'] == "Update"):
+                        self.UpdateLocalRepo(versionJSON['Install'], path=os.path.join((os.path.dirname(localrepo_path)), "Updated"))
+                    else:
+                        return("Incorrect Parameter. Please check OnNewVersion Parameter in " + str(checkUpdateFilePath))
                 else:
-                    return("Incorrect Parameter. Please check OnNewVersion Parameter in CheckForUpdate.txt")
+                    return("Installed version is the latest version.")
             else:
                 try:
+                    if(chkupdate['NewVersion'] is not (None or '')):
+                        return("Update Available. Please read "+ str(checkUpdateFilePath))
                     current_date = datetime.today().strftime('%Y-%m-%d')
                     chkupdate['LastChecked'] = current_date
                     self.WriteNewCheckForUpdate(chkupdate, checkUpdateFilePath)
@@ -143,8 +148,3 @@ class ProgramCheckAndUpdate(object):
 
         except Exception as e:
             return str(e)
-
-
-# ExampleImplementation
-a = ProgramCheckAndUpdate()
-x = a.run("C:\\Image_Mgmt_Workflows\\mdcs-py-master")
