@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Copyright 2013 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,13 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Name: MDCS_UC.py
 # Description: A class to implement all user functions or to extend the built in MDCS functions/commands chain.
 # Version: 20171217
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 #!/usr/bin/env python
 import os
 import sys
@@ -42,7 +42,15 @@ class UserCode:
     def sample01(self, data):
         log = data['log']           # How to use logging within the user function.
         log.Message('hello world', 0)
-        return True
+        return True    
+
+    def sample02(self, data):
+        log = data['log']           # How to use logging within the user function.
+        log.Message('Returning multiple values', 0)
+        data['useResponse'] = True
+        data['response'] = ['msg0', 'msg1', 'msg2']
+        data['status'] = True   # overall function status
+        return True    # True must be returned if data['useResponse'] is required. data['response'] can be used to return multiple values.
 
     def customCV(self, data):
         workspace = data['workspace']
@@ -75,4 +83,4 @@ class UserCode:
                 ds_cursor.updateRow(row)
                 row = ds_cursor.next()
             del ds_cursor
-        return True 
+        return True

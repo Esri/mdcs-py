@@ -27,9 +27,8 @@ import arcpy
 import sys
 import os
 
-solutionLib_path = os.path.dirname(__file__)  # set the location to the solutionsLib path
+solutionLib_path = os.path.dirname(os.path.abspath(__file__))  # set the location to the solutionsLib path
 sys.path.append(solutionLib_path)
-
 sys.path.append(os.path.join(solutionLib_path, 'SolutionsLog'))
 import logger
 import solutionsLib  # import Raster Solutions library
@@ -150,6 +149,8 @@ def main(argc, argv):
         elif(subCode == 'p'):
             pMax = value.rfind('$')
             if (pMax == -1):
+                pMax = value.rfind('@')
+            if (pMax == -1):
                 argIndx += 1
                 continue
             dynamic_var = value[pMax + 1:].upper()
@@ -220,6 +221,7 @@ def main(argc, argv):
     log.Message("Done...", log.const_general_text)
     log.WriteLog('#all')  # persist information/errors collected.
     return results
+
 
 if __name__ == '__main__':
     main(len(sys.argv), sys.argv)
