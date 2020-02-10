@@ -66,11 +66,9 @@ class DynaInvoke:
             return False
         len_args = len(self.m_args)
         if (len_args < arg_count):
-##            self._message('Args less than required, filling with default (#)', self.const_warning_text)
             for i in range(len_args, arg_count):
                 self.m_args.append('#')
         elif (len_args > arg_count):
-##            self._message('More args supplied than required to function (%s)' % (self.m_name), self.const_warning_text)
             self.m_args = self.m_args[:arg_count]
         return True
 
@@ -83,7 +81,6 @@ class DynaInvoke:
                     return True
                 if (usr_args is not None and
                         len(usr_args) == len(self.m_args)):      # user is only able to update the contents, not to trim or expand args.
-##                    self._message('Original args may have been updated through custom code.', self.const_warning_text)
                     self.m_args = usr_args
             self._message('Calling (%s)' % (self.m_name), self.const_general_text)
             ret = eval('%s(*self.m_args)' % (self.m_name))     # gp-tools return NULL?
