@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: SolutionsLib.py
 # Description: To map MDCS command codes to GP Tool functions.
-# Version: 20191204
+# Version: 20200409
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -1154,6 +1154,15 @@ class Solutions(Base.Base):
                 'arcpy.Delete_management',
                 index
             )
+        elif (com == 'BMI'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            return self.__invokeDynamicFn(
+                [fullPath],
+                'buildmultidimensionalinfo',
+                'arcpy.management.BuildMultidimensionalInfo',
+                index
+            )
         elif (com == 'RR'):
             self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
             fullPath = fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
@@ -1476,6 +1485,10 @@ class Solutions(Base.Base):
              },
             'RR':
             {'desc': 'Register Raster.',
+             'fnc': executeCommand
+             },
+            'BMI':
+            {'desc': 'Build Multidimensional Info.',
              'fnc': executeCommand
              },
             'CPCSLP':
