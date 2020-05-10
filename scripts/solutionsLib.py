@@ -1,4 +1,4 @@
-# ------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Copyright 2017 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,13 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# ------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Name: SolutionsLib.py
 # Description: To map MDCS command codes to GP Tool functions.
-# Version: 20200409
+# Version: 20171217
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
-# ------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 #!/usr/bin/env python
 
 import arcpy
@@ -25,8 +25,9 @@ import sys
 import os
 from xml.dom import minidom
 from string import ascii_letters, digits
+from datetime import datetime
 
-scriptPath = os.path.dirname(os.path.abspath(__file__))
+scriptPath = os.path.dirname(__file__)
 sys.path.append(os.path.join(scriptPath, 'Base'))
 
 import Base
@@ -60,14 +61,14 @@ class Solutions(Base.Base):
                 CONST_OUTPUT_FOLDER_INDX = 1
                 get_output_folder = args[CONST_OUTPUT_FOLDER_INDX]  # let's create the output folder before invoking the function call.
                 os.makedirs(get_output_folder)
-            except BaseException:
+            except:
                 pass    # pass onto default error handler.
         elif(fn == 'arcpy.stageservice_server'):
             try:
                 CONST_OUT_SRV_INDX = 1
                 if (os.path.exists(args[CONST_OUT_SRV_INDX])):
                     os.remove(args[CONST_OUT_SRV_INDX])
-            except BaseException:
+            except:
                 pass
         return args
 
@@ -85,7 +86,7 @@ class Solutions(Base.Base):
             if (setExportMosaicDatasetGeometry.init() == False):
                 return False
             return setExportMosaicDatasetGeometry.invoke()
-        except BaseException:
+        except:
             self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
             return False
 
@@ -153,7 +154,7 @@ class Solutions(Base.Base):
                                                            self.getProcessInfoValue(processKey, 'block_field', index)
                                                            )
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -168,7 +169,7 @@ class Solutions(Base.Base):
                                              )
                 self.log(arcpy.GetMessages())
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -188,7 +189,7 @@ class Solutions(Base.Base):
                                                                 self.getProcessInfoValue(processKey, 'update_cellsize_ranges', index)
                                                                 )
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -203,7 +204,7 @@ class Solutions(Base.Base):
                                                      self.getProcessInfoValue(processKey, 'delete_item_cache', index)
                                                      )
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -219,7 +220,7 @@ class Solutions(Base.Base):
                                                          self.getProcessInfoValue(processKey, 'max_rows_per_merged_items', index)
                                                          )
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -247,7 +248,7 @@ class Solutions(Base.Base):
                 arcpy.Delete_management(lyrName)
 
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -371,7 +372,7 @@ class Solutions(Base.Base):
                                                      self.getProcessInfoValue(processKey, 'area_of_interest', index)
                                                      )
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -406,7 +407,7 @@ class Solutions(Base.Base):
                 arcpy.Delete_management(lyrName)
 
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -423,7 +424,7 @@ class Solutions(Base.Base):
                                                self.getProcessInfoValue(processKey, 'compression_quality', index),
                                                self.getProcessInfoValue(processKey, 'skip_existing', index))
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -466,7 +467,7 @@ class Solutions(Base.Base):
                 if (setBuitFootprints.init() == False):
                     return False
                 return setBuitFootprints.invoke()
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -497,7 +498,7 @@ class Solutions(Base.Base):
                 if (setBuitSeamlines.init() == False):
                     return False
                 return setBuitSeamlines.invoke()
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -569,14 +570,6 @@ class Solutions(Base.Base):
                 index
             )
 
-        elif (com == 'CPCSLP'):
-            self.m_log.Message("\t{}".format(self.commands[com]['desc']), self.m_log.const_general_text)
-            return self.__invokeDynamicFn(
-                [],
-                'analyzemosaicdataset',
-                'arcpy.management.CreatePointCloudSceneLayerPackage',
-                index
-            )
         elif(com == 'JF'):
             fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             try:
@@ -587,7 +580,7 @@ class Solutions(Base.Base):
                                            self.getProcessInfoValue(processKey, 'join_field', index),
                                            self.getProcessInfoValue(processKey, 'fields', index))
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -611,7 +604,7 @@ class Solutions(Base.Base):
                 arcpy.Delete_management(lyrName)
                 return True
 
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
 
         elif(com == 'IG'):
@@ -634,7 +627,7 @@ class Solutions(Base.Base):
                     self.getProcessInfoValue(processKey, 'input_join_field', index)
                 )
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
 
         elif(com == 'IF'):
@@ -668,11 +661,11 @@ class Solutions(Base.Base):
                         try:
                             arcpy.CalculateField_management(mlayerJoin, fieldcal, fromfield)
                             self.log("\t\tDone calculating values for the Field :" + fieldcal, self.m_log.const_general_text)
-                        except BaseException:
+                        except:
                             self.log("Failed to calculate values for the field : " + fieldcal, self.m_log.const_warning_text)
                             self.log(arcpy.GetMessages(), self.m_log.const_warning_text)
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
 
         elif(com == 'BB'):
@@ -687,7 +680,7 @@ class Solutions(Base.Base):
                     self.getProcessInfoValue(processKey, 'simplification_method', index)
                 )
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -704,7 +697,7 @@ class Solutions(Base.Base):
                 )
                 self.log(arcpy.GetMessages())
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -719,7 +712,7 @@ class Solutions(Base.Base):
                     self.getProcessInfoValue(processKey, 'where_clause', index)
                 )
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -740,7 +733,7 @@ class Solutions(Base.Base):
                     self.getProcessInfoValue(processKey, 'nodata', index)
                 )
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -760,7 +753,7 @@ class Solutions(Base.Base):
                     self.getProcessInfoValue(processKey, 'update_missing_only', index),
                 )
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -779,7 +772,7 @@ class Solutions(Base.Base):
                     self.getProcessInfoValue(processKey, 'regenerate_stale_images', index)
                 )
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -805,7 +798,7 @@ class Solutions(Base.Base):
                     self.getProcessInfoValue(processKey, 'compression_quality', index)
                 )
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -825,7 +818,7 @@ class Solutions(Base.Base):
                                               self.getProcessInfoValue(processKey, 'unique', index, indx),
                                               self.getProcessInfoValue(processKey, 'ascending', index, indx)
                                               )
-                except BaseException:
+                except:
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                     isError = True
 
@@ -859,7 +852,7 @@ class Solutions(Base.Base):
 
             try:
                 arcpy.FeatureClassToFeatureClass_conversion(seamlineFC_Path, outCFC_wrk, outCFC_name, "#", "#", "#")
-            except BaseException:
+            except:
                 self.log('Failed to create the output featue class (%s): (%s)' % (outCFC, arcpy.GetMessages()), self.m_log.const_critical_text)
                 return False
             try:
@@ -870,7 +863,7 @@ class Solutions(Base.Base):
                         dropFList.remove(sfield.name)
 
                 arcpy.DeleteField_management(outCFC, dropFList)
-            except BaseException:
+            except:
                 self.log('Failed to delete the fields: ' + arcpy.GetMessages(), self.m_log.const_critical_text)
 
             catfieldList = []
@@ -882,7 +875,7 @@ class Solutions(Base.Base):
 
             try:
                 arcpy.JoinField_management(outCFC, "RasterID", fullPath, "OBJECTID", importField)
-            except BaseException:
+            except:
                 self.log("Failed to import metadata fields:" + arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -904,7 +897,7 @@ class Solutions(Base.Base):
             for indx in range(0, maxValues):
                 isQuery = False
                 query = self.getProcessInfoValue(processKey, 'query', index, indx)
-                lyrName = 'lyr_%s' % str(self.m_base.m_last_AT_ObjectID)
+                lyrName = 'lyr_%s_%s' % (str(self.m_base.m_last_AT_ObjectID),datetime.strftime(datetime.now(),"%Y%d%d%H%M%S"))
                 if (query != '#'):
                     isQuery = True
 
@@ -912,8 +905,7 @@ class Solutions(Base.Base):
                 if (isQuery == True):
                     expression += ' AND %s' % (query)
                 try:
-                    arcpy.MakeMosaicLayer_management(fullPath, lyrName)
-                    arcpy.SelectLayerByAttribute_management(lyrName, "NEW_SELECTION", expression)
+                    arcpy.MakeMosaicLayer_management(fullPath, lyrName, expression)
                     lyrName_footprint = lyrName + "/Footprint"
                     arcpy.CalculateField_management(lyrName_footprint,
                                                     self.getProcessInfoValue(processKey, 'fieldname', index, indx),
@@ -921,12 +913,12 @@ class Solutions(Base.Base):
                                                     self.getProcessInfoValue(processKey, 'expression_type', index, indx),
                                                     self.getProcessInfoValue(processKey, 'code_block', index, indx)
                                                     )
-                except BaseException:
+                except:
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                     isError = True
                 try:
                     arcpy.Delete_management(lyrName)     # passes for unknown/uncreated layer names
-                except BaseException:
+                except:
                     self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                     isError = True
 
@@ -938,7 +930,7 @@ class Solutions(Base.Base):
             try:
                 arcpy.Compact_management(self.m_base.m_geoPath)
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
@@ -997,48 +989,31 @@ class Solutions(Base.Base):
             mdName = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             processKey = 'managetilecache'
             self.log("Building cache for:" + mdName, self.m_log.const_general_text)
-            self.log("Getting tiling Schema : ", self.m_log.const_general_text)
-            tileSchemeMtc = self.m_base.getAbsPath(self.getProcessInfoValue(processKey, 'import_tiling_scheme', index))
-            if tileSchemeMtc != '#' and tileSchemeMtc != '':
-                tileSchemeMtc = self.prefixFolderPath(self.getProcessInfoValue(processKey, 'import_tiling_scheme', index), os.path.dirname(self.config))
-            self.log(tileSchemeMtc, self.m_log.const_general_text)
+
             try:
-                cacheLocation = self.getProcessInfoValue(processKey, 'in_cache_location', index)
-                if (os.path.exists(cacheLocation)) == False:
-                    os.makedirs(cacheLocation)
                 arcpy.ManageTileCache_management(
-                    cacheLocation,
+                    self.getProcessInfoValue(processKey, 'in_cache_location', index),
                     self.getProcessInfoValue(processKey, 'manage_mode', index),
                     self.getProcessInfoValue(processKey, 'in_cache_name', index),
                     mdName,
                     self.getProcessInfoValue(processKey, 'tiling_scheme', index),
-                    tileSchemeMtc,
+                    self.getProcessInfoValue(processKey, 'import_tiling_scheme', index),
                     self.getProcessInfoValue(processKey, 'scales', index),
                     self.getProcessInfoValue(processKey, 'area_of_interest', index),
-                    self.getProcessInfoValue(processKey, 'max_cell_size', index),
-                    self.getProcessInfoValue(processKey, 'min_cached_scale', index),
-                    self.getProcessInfoValue(processKey, 'max_cached_scale', index))
-                if os.path.isfile(tileSchemeMtc):
-                    cachepath = os.path.join(self.getProcessInfoValue(processKey, 'in_cache_location', index), self.getProcessInfoValue(processKey, 'in_cache_name', index))
-                    lodNodesList = returnLevelDetails(os.path.join(cachepath, 'conf.xml'))
-                    lodNodesList = sorted(lodNodesList, key=lambda k: int(k['level']))
-                    maxLODNode = lodNodesList[-1]
-                    maxScale = maxLODNode['scale']
-                    modifyConfProperties(os.path.join(cachepath, 'conf.properties'), maxScale)
+                    self.getProcessInfoValue(processKey, 'max_cell_size', index))
+
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
-                return False
 
         elif (com == 'ETC'):
             processKey = 'exporttilecache'
             try:
                 self.log("Exporting cache for:" + self.getProcessInfoValue(processKey, 'in_target_cache_name', index), self.m_log.const_general_text)
-                targetLocation = self.getProcessInfoValue(processKey, 'in_target_cache_folder', index)
-                os.makedirs(targetLocation)
+
                 arcpy.ExportTileCache_management(
                     self.getProcessInfoValue(processKey, 'in_cache_source', index),
-                    targetLocation,
+                    self.getProcessInfoValue(processKey, 'in_target_cache_folder', index),
                     self.getProcessInfoValue(processKey, 'in_target_cache_name', index),
                     self.getProcessInfoValue(processKey, 'export_cache_type', index),
                     self.getProcessInfoValue(processKey, 'storage_format_type', index),
@@ -1046,9 +1021,8 @@ class Solutions(Base.Base):
                     self.getProcessInfoValue(processKey, 'area_of_interest', index))
 
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
-                return False
 
         elif (com == 'STP'):
             processKey = 'sharepackage'
@@ -1066,7 +1040,7 @@ class Solutions(Base.Base):
                     self.getProcessInfoValue(processKey, 'groups', index))
 
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
         elif (com == 'CRTT'):
@@ -1098,7 +1072,7 @@ class Solutions(Base.Base):
                     self.getProcessInfoValue(processKey, 'where_clause', index)
                 )
                 return True
-            except BaseException:
+            except:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
         elif (com == 'CCM'):
@@ -1152,15 +1126,6 @@ class Solutions(Base.Base):
                 [],
                 'delete',
                 'arcpy.Delete_management',
-                index
-            )
-        elif (com == 'BMI'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
-            return self.__invokeDynamicFn(
-                [fullPath],
-                'buildmultidimensionalinfo',
-                'arcpy.management.BuildMultidimensionalInfo',
                 index
             )
         elif (com == 'RR'):
@@ -1221,16 +1186,7 @@ class Solutions(Base.Base):
                 self.m_base.m_workspace = workspace
                 data['mosaicdataset'] = self.m_base.m_mdName = mosaicDataset
                 data['workspace'] = self.m_base.m_geoPath = mkGeoPath
-                ret = self.processInfo.init(self.config)   # Update internal data structures if user function has modifield the in-memory xml dom.
-                if ('useResponse' in data and
-                        data['useResponse']):
-                    response = {'response': data['response']}
-                    if ('code' in data):
-                        response['code'] = data['code']  # Optional, any user defined code regardless of the function status.
-                    if ('status' in data):
-                        response['status'] = data['status']  # Overall function status, i.e. True or False
-                    return response
-                return ret
+                return self.processInfo.init(self.config)   # Update internal data structures if user function has modifield the in-memory xml dom.
         return False            # main function body return, no matching command found!
 
     commands = \
@@ -1486,26 +1442,18 @@ class Solutions(Base.Base):
             'RR':
             {'desc': 'Register Raster.',
              'fnc': executeCommand
-             },
-            'BMI':
-            {'desc': 'Build Multidimensional Info.',
-             'fnc': executeCommand
-             },
-            'CPCSLP':
-            {'desc': 'Creates a point cloud scene layer package (.slpk file) from LAS, zLAS, LAZ, or LAS dataset input.',
-             'fnc': executeCommand
              }
         }
 
     # mapping of config/component paths.
 
-    base_path_ = scriptPath + '/'
+    base_path_ = scriptPath + '\\'
 
     com_locations = \
         {
             'CreateMD':
             {
-                'pyc': base_path_ + 'CreateMD/',
+                'pyc': base_path_ + 'CreateMD',
             },
             'AddFields':
             {
@@ -1594,7 +1542,7 @@ class Solutions(Base.Base):
             try:
                 com_ = self.getXMLNodeValue(self.m_base.m_doc, "Command")  # gets command defaults.
                 self.log('Using default command(s):' + com_)
-            except BaseException:
+            except:
                 self.log("Error: Reading input config file:" + self.config + "\nQuitting...",
                          self.const_critical_text)
                 return False
@@ -1604,7 +1552,6 @@ class Solutions(Base.Base):
                 return False
         self.log('Processing command(s):' + com_.upper(), self.const_general_text)
         aryCmds = com_.split('+')
-        cmdResults = []
         for command in aryCmds:
             ucCommand = command
             command = command.upper()
@@ -1614,7 +1561,7 @@ class Solutions(Base.Base):
             if (len(command) > len(cmd)):
                 try:
                     index = int(command[len(cmd):])
-                except BaseException:
+                except:
                     self.log("Command/Err: Invalid command index:" + command, self.const_warning_text)
                     # catch any float values entered, e.t.c
             if ((cmd in self.commands.keys()) == False):
@@ -1623,9 +1570,9 @@ class Solutions(Base.Base):
                         self.commands[ucCommand] = {}
                         self.commands[ucCommand]['desc'] = 'User defined command (%s)' % (ucCommand)
                         self.commands[ucCommand]['fnc'] = self.commands['CM']['fnc']        # can't use self.executeCommand directly here. Need to check.
-                        cmd = ucCommand     # preserve user defined function case.
+                        cmd = ucCommand     # preseve user defined function case.
                         is_user_cmd = True
-                    except BaseException:
+                    except:
                         self.log('Unabled to add user defined function/command (%s) to command chain.' % (ucCommand), self.const_warning_text)
                         return False    # return to prevent further processing.
                 else:
@@ -1639,14 +1586,7 @@ class Solutions(Base.Base):
             if (indexed_cmd):
                 self.log('Using parameter values at index (%s)' % index, self.const_general_text)
             success = 'OK'
-            response = self.commands[cmd]['fnc'](self, cmd, index)
-            cmdResults.append({'cmd': cmd, 'value': response})
-            if (isinstance(response, bool)):
-                status = response
-            elif (isinstance(response, dict)):
-                status = False
-                if ('status' in response):
-                    status = self.m_base.getBooleanValue(response['status'])
+            status = self.commands[cmd]['fnc'](self, cmd, index)
             if (status == False):
                 success = 'Failed!'
             self.log(success, self.const_status_text)
@@ -1656,5 +1596,5 @@ class Solutions(Base.Base):
                 (cmd == 'AR' or
                  cmd == 'CM' or
                  is_user_cmd == True)):
-                break
-        return cmdResults
+                return False
+        return True
