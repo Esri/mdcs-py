@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: SolutionsLib.py
 # Description: To map MDCS command codes to GP Tool functions.
-# Version: 20200409
+# Version: 20200510
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -25,6 +25,7 @@ import sys
 import os
 from xml.dom import minidom
 from string import ascii_letters, digits
+from datetime import datetime
 
 scriptPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(scriptPath, 'Base'))
@@ -904,7 +905,7 @@ class Solutions(Base.Base):
             for indx in range(0, maxValues):
                 isQuery = False
                 query = self.getProcessInfoValue(processKey, 'query', index, indx)
-                lyrName = 'lyr_%s' % str(self.m_base.m_last_AT_ObjectID)
+                lyrName = 'lyr_%s_%s' % (str(self.m_base.m_last_AT_ObjectID),datetime.strftime(datetime.now(),"%Y%d%d%H%M%S"))
                 if (query != '#'):
                     isQuery = True
 
