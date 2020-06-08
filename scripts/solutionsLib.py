@@ -915,7 +915,7 @@ class Solutions(Base.Base):
                 try:
                     arcpy.MakeMosaicLayer_management(fullPath, lyrName)
                     arcpy.SelectLayerByAttribute_management(lyrName, "NEW_SELECTION", expression)
-                    lyrName_footprint = lyrName + "/Footprint"
+                    lyrName_footprint = lyrName #+ "/Footprint"
                     arcpy.CalculateField_management(lyrName_footprint,
                                                     self.getProcessInfoValue(processKey, 'fieldname', index, indx),
                                                     self.getProcessInfoValue(processKey, 'expression', index, indx),
