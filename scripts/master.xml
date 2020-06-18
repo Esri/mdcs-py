@@ -3,7 +3,7 @@
   <!-- Support for Dynamic Variable <Name>$xyz$</Name> or <Name>DefaultValue;$xyz$</Name> The variable value can be passed from the command line -->
   <Name>Name_of_Project</Name>
   <Command>DefaultCommand</Command>
-  <!-- Commands avaiable CM, AR, SP, BP, CBMD, ERF, ANCP, APCP, ABA, CBA, CCP, CTP, AMDS, AMD, BMDIC, CDA, GEA, CS, BPS, BF, BS, BB, DN, SY, IG, SS, DF, DO, BO, MMDI, DMD, RRFMD, RP, RI, AI, JF, CV, MTC, ETC, STP, SE, EMDG, EMDI, SMDI, CSDD, STS, CRRT, CLT,CCM,BSM,GPC,IFPC,CRA,USD,DEL,BMI,RR,CPCSLP -->
+  <!-- Commands avaiable CM, AR, CR, SP, BP, AF, CFC, CC, CBMD, ERF, ANCP, APCP, ABA, SMDI, CBA, CCP, CTP, AMDS, AMD, BMDIC, CDA, GEA, CS, BPS, BF, BS, BB, DN, SY, IG, SS, DF, DO, BO, MMDI, DMD, RRFMD, RP, RI, AI, JF, CV, MTC, ETC, STP, SE, EMDG, EMDI, SMDI, CSDD, STS, CRTT, CLT,CCM,BSM,GPC,IFPC,CRA,USD,DEL,BMI,RR,CPCSLP -->
   <!-- Commands can be combined using the + sign and some commands can be called multiple times, refer to MDCS document for more help -->
   <ArcGISVersion>
     <!-- Defines Min Max version required. Eg due to know issue in previsous versions -->
@@ -198,7 +198,8 @@
           <function_chain_definition>path_to_rft_file</function_chain_definition>
           <location_function_name>Place_to_insert_replace_or_remove_the_function_chain</location_function_name>
         </EditRasterFunction>
-        <!-- ANCP     Analyze Control Points -->
+        <!-- AN
+		Analyze Control Points -->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/analyze-control-points.htm -->
         <AnalyzeControlPoints>
           <in_control_points>#</in_control_points>
@@ -781,13 +782,13 @@
           <in_organization />
           <in_groups />
         </UploadServiceDefinition_server>
-        <!-- Deletes the mosaic dataset from the disk -->
+        <!-- DEL Deletes data from the disk -->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/delete.htm -->
         <Delete>
           <in_data>#</in_data>
           <data_type>#</data_type>
         </Delete>
-		<!-- Builds mulitdimensional info in the mosiac dataset -->
+		<!-- BMI Builds mulitdimensional info in the mosiac dataset -->
 		<!--https://pro.arcgis.com/en/pro-app/tool-reference/data-management/build-multidimensional-info.htm -->
 		<BuildMultiDimensionalInfo>			
 			<variable_field></variable_field>
