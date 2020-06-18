@@ -198,8 +198,7 @@
           <function_chain_definition>path_to_rft_file</function_chain_definition>
           <location_function_name>Place_to_insert_replace_or_remove_the_function_chain</location_function_name>
         </EditRasterFunction>
-        <!-- AN
-		Analyze Control Points -->
+        <!-- ANCP Analyze Control Points -->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/analyze-control-points.htm -->
         <AnalyzeControlPoints>
           <in_control_points>#</in_control_points>
