@@ -128,6 +128,8 @@ class AddRasters(Base.Base):
                     args.append(self.GetValue(hshAddRaster, 'force_spatial_reference'))
                     args.append(self.GetValue(hshAddRaster, 'estimate_statistics'))
                     args.append(self.GetValue(hshAddRaster, 'aux_inputs'))
+                    args.append(self.GetValue(hshAddRaster, 'enable_pixel_cache'))
+                    args.append(self.GetValue(hshAddRaster, 'cache_location'))
                     if (self.m_base.m_art_apply_changes and
                             not enabledARTEdit):
                         args[len(args) - 1] += ';DEM {}'.format(os.path.join(self.m_base.m_art_ws, self.m_base.m_art_ds))
@@ -239,4 +241,4 @@ class AddRasters(Base.Base):
             self.log("Err. Workspace not found!:" + self.m_base.m_workspace, self.const_critical_text)
             self.log(arcpy.GetMessages(), self.const_critical_text)
             return False
-        return True 
+        return True
