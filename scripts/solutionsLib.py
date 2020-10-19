@@ -1164,24 +1164,6 @@ class Solutions(Base.Base):
                 'arcpy.management.BuildMultidimensionalInfo',
                 index
             )
-        elif (com == 'SPO'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
-            return self.__invokeDynamicFn(
-                [],
-                'simplifypolygon',
-                'arcpy.cartography.SimplifyPolygon',
-                index
-            )
-        elif (com == 'BU'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
-            return self.__invokeDynamicFn(
-                [],
-                'buffer',
-                'arcpy.analysis.Buffer',
-                index
-            )
         elif (com == 'RR'):
             self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
             fullPath = fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
@@ -1236,7 +1218,6 @@ class Solutions(Base.Base):
                 workspace = self.m_base.getXMLXPathValue('{}/WorkspacePath'.format(ParentRoot), 'WorkspacePath')
                 geoDatabase = self.m_base.getXMLXPathValue('{}/Geodatabase'.format(ParentRoot), 'Geodatabase')
                 mkGeoPath = '{}{}'.format(os.path.join(workspace, geoDatabase), self.m_base.const_geodatabase_ext.lower() if (not geoDatabase.lower().endswith(self.m_base.const_geodatabase_ext.lower()) and not geoDatabase.lower().endswith('sde'))  else '').replace('\\', '/')
-##                mkGeoPath = '{}{}'.format(os.path.join(workspace, geoDatabase), self.m_base.const_geodatabase_ext.lower() if not geoDatabase.lower().endswith(self.m_base.const_geodatabase_ext.lower()) else '').replace('\\', '/') #wrong
                 self.m_base.m_geodatabase = geoDatabase
                 self.m_base.m_workspace = workspace
                 data['mosaicdataset'] = self.m_base.m_mdName = mosaicDataset
@@ -1509,14 +1490,6 @@ class Solutions(Base.Base):
              },
             'BMI':
             {'desc': 'Build Multidimensional Info.',
-             'fnc': executeCommand
-             },
-             'SPO':
-            {'desc': 'Simplify Polygon.',
-             'fnc': executeCommand
-             },
-             'BU':
-            {'desc': 'Buffer.',
              'fnc': executeCommand
              },
             'CPCSLP':
