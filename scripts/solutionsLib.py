@@ -1217,7 +1217,7 @@ class Solutions(Base.Base):
                 mosaicDataset = self.m_base.getXMLXPathValue('{}/MosaicDataset/Name'.format(ParentRoot), 'Name')
                 workspace = self.m_base.getXMLXPathValue('{}/WorkspacePath'.format(ParentRoot), 'WorkspacePath')
                 geoDatabase = self.m_base.getXMLXPathValue('{}/Geodatabase'.format(ParentRoot), 'Geodatabase')
-                mkGeoPath = '{}{}'.format(os.path.join(workspace, geoDatabase), self.m_base.const_geodatabase_ext.lower() if not geoDatabase.lower().endswith(self.m_base.const_geodatabase_ext.lower()) else '').replace('\\', '/')
+                mkGeoPath = '{}{}'.format(os.path.join(workspace, geoDatabase), self.m_base.const_geodatabase_ext.lower() if (not geoDatabase.lower().endswith(self.m_base.const_geodatabase_ext.lower()) and not geoDatabase.lower().endswith('sde'))  else '').replace('\\', '/')
                 self.m_base.m_geodatabase = geoDatabase
                 self.m_base.m_workspace = workspace
                 data['mosaicdataset'] = self.m_base.m_mdName = mosaicDataset
