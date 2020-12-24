@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: SolutionsLib.py
 # Description: To map MDCS command codes to GP Tool functions.
-# Version: 20200510
+# Version: 20201214
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ class Solutions(Base.Base):
                 pass
         return args
 
-    def __invokeDynamicFn(self, args, processKey, fn_name, index):
+    def __invokeDynamicFn(self, args, processKey, fn_name, index): # chs
         try:
             varnames = eval('%s.__code__.co_varnames' % (fn_name))
             varcount = eval('%s.__code__.co_argcount' % (fn_name))
@@ -82,10 +82,36 @@ class Solutions(Base.Base):
             for i in range(0, len(varnames)):
                 if (args[i] == '#'):    # the default marker (#) as returned by (getProcessInfoValue) gets replaced with (None)
                     args[i] = None
-            setExportMosaicDatasetGeometry = Base.DynaInvoke(fn_name, args, self.__invokeDynamicFnCallback, self.m_log.Message)
-            if (setExportMosaicDatasetGeometry.init() == False):
+            dynCall = Base.DynaInvoke(fn_name, args, self.__invokeDynamicFnCallback, self.m_log.Message)
+            respInfo = self.getProcessInfoValue(processKey, 'returnvalue', index)
+            kwargs = {}
+            FnPntrPrefix = '('
+            FnPntrSuffix = ')'
+            if (-1 != respInfo.find(FnPntrPrefix)):
+                fn, args = respInfo.split(FnPntrPrefix)
+                fnArgs = args.split(',')        # scan for multi-args
+                if (fnArgs[-1][-1] != FnPntrSuffix):
+                    self.m_log.Message('Syntax error for sub->method calls.', self.m_log.const_critical_text)
+                    return False
+                fnArgs[-1] = fnArgs[-1][:-1]
+                for i in range(0, len(fnArgs)):
+                    types = [float, int, str]
+                    while(types):
+                        try:
+                            val = types[0](fnArgs[i])
+                            if (isinstance(val, float)):
+                                if (-1 == fnArgs[i].find('.')):     # int values w/o the decimal point'll be ignored as floats.
+                                    types.pop(0)
+                                    continue
+                            fnArgs[i] = val
+                            break
+                        except:
+                            types.pop(0)
+                kwargs['sArgs'] = [[fn, *fnArgs]]
+            if (dynCall.init(**kwargs) == False):
                 return False
-            return setExportMosaicDatasetGeometry.invoke()
+            response = dynCall.invoke()
+            return response
         except BaseException:
             self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
             return False
@@ -1164,6 +1190,98 @@ class Solutions(Base.Base):
                 'arcpy.management.BuildMultidimensionalInfo',
                 index
             )
+        elif (com == 'AMR'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'aggregatemultidimensionalraster',
+                'arcpy.ia.AggregateMultidimensionalRaster',
+                index
+            )
+        elif (com == 'ACUC'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'analyzechangesusingccdc',
+                'arcpy.ia.AnalyzeChangesUsingCCDC',
+                index
+            )
+        elif (com == 'DCUCAR'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'detectchangeusingchangeanalysis',
+                'arcpy.ia.DetectChangeUsingChangeAnalysis',
+                index
+            )
+        elif (com == 'FAS'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'findargumentstatistics',
+                'arcpy.ia.FindArgumentStatistics',
+                index
+            )
+        elif (com == 'GMA'):    # chs
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'generatemultidimensionalanomaly',
+                'arcpy.ia.GenerateMultidimensionalAnomaly',
+                index
+            )
+        elif (com == 'CF'):    # chs
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            return self.__invokeDynamicFn(
+                [fullPath],
+                'computefiducials',
+                'arcpy.ComputeFiducials_management',
+                index
+            )
+        elif (com == 'UIO'):    # chs
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            return self.__invokeDynamicFn(
+                [fullPath],
+                'updateinteriororientation',
+                'arcpy.UpdateInteriorOrientation_management',
+                index
+            )
+        elif (com == 'EFACP'):    # chs
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            return self.__invokeDynamicFn(
+                [fullPath],
+                'exportframeandcameraparameters',
+                'arcpy.management.ExportFrameAndCameraParameters',
+                index
+            )
+        elif (com == 'GBAR'):    # chs
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            return self.__invokeDynamicFn(
+                [fullPath],
+                'generateblockadjustmentreport',
+                'arcpy.GenerateBlockAdjustmentReport_management',
+                index
+            )
+        elif (com == 'GTR'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'generatetrendraster',
+                'arcpy.ia.GenerateTrendRaster',
+                index
+            )
+        elif (com == 'PUTR'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'predictusingtrendraster',
+                'arcpy.ia.PredictUsingTrendRaster',
+                index
+            )
         elif (com == 'RR'):
             self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
             fullPath = fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
@@ -1490,6 +1608,54 @@ class Solutions(Base.Base):
              },
             'BMI':
             {'desc': 'Build Multidimensional Info.',
+             'fnc': executeCommand
+             },
+            'AMR':
+            {'desc': 'Aggregate Multidimensional Raster.',
+             'fnc': executeCommand
+             },
+            'ACUC':
+            {'desc': 'Analyze Changes Using CCDC.',
+             'fnc': executeCommand
+             },
+            'DCUCAR':
+            {'desc': 'Detect Change Using Change Analysis Raster.',
+             'fnc': executeCommand
+             },
+            'FAS':
+            {'desc': 'Find Argument Statistics.',
+             'fnc': executeCommand
+             },
+            'GMA':
+            {'desc': 'Generate Multidimensional Anomaly.',
+             'fnc': executeCommand
+             },
+             'CF':
+             {
+              'desc': 'Compute Fiducials.',
+             'fnc': executeCommand   
+             },
+             'UIO':
+             {
+              'desc': 'Update Interior Orientation.',
+             'fnc': executeCommand   
+             },
+             'EFACP':
+             {
+              'desc': 'Export Frame And Camera Parameters.',
+             'fnc': executeCommand   
+             },
+             'GBAR':
+             {
+              'desc': 'Generate Block Adjustment Report.',
+             'fnc': executeCommand   
+             },
+            'GTR':
+            {'desc': 'Generate Trend Raster.',
+             'fnc': executeCommand
+             },
+            'PUTR':
+            {'desc': 'Predict Using Trend Raster.',
              'fnc': executeCommand
              },
             'CPCSLP':

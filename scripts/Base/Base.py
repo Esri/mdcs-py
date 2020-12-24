@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright 2017 Esri
+# Copyright 2020 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
-# Version: 20191204
+# Version: 20201207
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -23,21 +23,23 @@
 import os
 import sys
 import arcpy
-
 if (sys.version_info[0] < 3):           # _winreg has been renamed as (winreg) in python3+
     from _winreg import *
 else:
     from winreg import *
 
 from datetime import datetime
-
 from xml.dom import minidom
 
 try:
     import MDCS_UC
-except Exception as inf:
+except:
     print ('User-Code functions disabled.')
-
+try:
+    from arcpy.ia import *
+    arcpy.CheckOutExtension("ImageAnalyst")
+except:
+   print ('arcpy.ia is not available.')
 
 class DynaInvoke:
     # log status types enums
@@ -52,13 +54,21 @@ class DynaInvoke:
         self.m_args = args
         self.m_evnt_update_args = evnt_fnc_update_args
         self.m_log = log
+        self._sArgs = []
 
     def _message(self, msg, msg_type):
         if (self.m_log):
             return self.m_log(msg, msg_type)
         print (msg)
 
-    def init(self):
+    def init(self, **kwargs):
+        if ('sArgs' in kwargs):
+            self._sArgs = kwargs['sArgs']
+            if (isinstance(self._sArgs, list)):
+                if (self._sArgs):
+                    if (isinstance(self._sArgs[0], list)):
+                            self._sArgs = self._sArgs[0]        # handles only 1 sub method on the parent object for now.
+                                                                # sub args to use in a method of the main function object. e.g. X = a->fn1(args) X->fn2(sargs)
         try:
             arg_count = eval('%s.__code__.co_argcount' % (self.m_name))
         except Exception as exp:
@@ -74,7 +84,7 @@ class DynaInvoke:
             self.m_args = self.m_args[:arg_count]
         return True
 
-    def invoke(self):
+    def invoke(self):   # chs
         result = 'OK'
         try:
             if (self.m_evnt_update_args is not None):
@@ -87,6 +97,10 @@ class DynaInvoke:
                     self.m_args = usr_args
             self._message('Calling (%s)' % (self.m_name), self.const_general_text)
             ret = eval('%s(*self.m_args)' % (self.m_name))     # gp-tools return NULL?
+            if (self._sArgs):
+                fn = self._sArgs.pop(0)
+                if (hasattr(ret, fn)):
+                    ret = eval('ret.{}(*self._sArgs)'.format(fn))
             return True
         except Exception as exp:
             result = 'FAILED'

@@ -3,7 +3,7 @@
   <!-- Support for Dynamic Variable <Name>$xyz$</Name> or <Name>DefaultValue;$xyz$</Name> The variable value can be passed from the command line -->
   <Name>Name_of_Project</Name>
   <Command>DefaultCommand</Command>
-  <!-- Commands avaiable CM, AR, CR, SP, BP, AF, CFC, CC, CBMD, ERF, ANCP, APCP, ABA, SMDI, CBA, CCP, CTP, AMDS, AMD, BMDIC, CDA, GEA, CS, BPS, BF, BS, BB, DN, SY, IG, SS, DF, DO, BO, MMDI, DMD, RRFMD, RP, RI, AI, JF, CV, MTC, ETC, STP, SE, EMDG, EMDI, SMDI, CSDD, STS, CRTT, CLT,CCM,BSM,GPC,IFPC,CRA,USD,DEL,BMI,RR,CPCSLP -->
+  <!-- Commands avaiable CM, AR, CR, SP, BP, AF, CFC, CC, CBMD, ERF, ANCP, APCP, ABA, SMDI, CBA, CCP, CTP, AMDS, AMD, BMDIC, CDA, GEA, CS, BPS, BF, BS, BB, DN, SY, IG, SS, DF, DO, BO, MMDI, DMD, RRFMD, RP, RI, AI, JF, CV, MTC, ETC, STP, SE, EMDG, EMDI, SMDI, CSDD, STS, CRTT, CLT,CCM,BSM,GPC,IFPC,CRA,USD,DEL,BMI,GMA,AMR,CF,UIO,EFACP,GBAR,RR,CPCSLP -->
   <!-- Commands can be combined using the + sign and some commands can be called multiple times, refer to MDCS document for more help -->
   <ArcGISVersion>
     <!-- Defines Min Max version required. Eg due to know issue in previsous versions -->
@@ -99,6 +99,14 @@
       </AddRasters>
       <!-- SP    Set Properties -->
       <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/set-mosaic-dataset-properties.htm -->
+      <!-- sp_flag can take setpropertybyjson;setpropertybymosiac;extractproperty;compareproperty -->
+      <!-- sp_flag, if no flag is given, default set property is applied -->
+      <SetProperty>
+          <sp_inputjson>#;$sp_inputjson$</sp_inputjson>
+			    <sp_mosaic>#;$sp_mosaic$</sp_mosaic>
+          <sp_outputjson>#;$sp_outputjson$</sp_outputjson>
+          <sp_flag>#;$sp_flag$</sp_flag>
+		  </SetProperty>
       <DefaultProperties>
         <max_num_per_mosaic>50</max_num_per_mosaic>
         <rows_maximum_imagesize>4000</rows_maximum_imagesize>
@@ -794,6 +802,64 @@
 			<dimension_fields></dimension_fields>
 			<variable_desc_units></variable_desc_units>
 		</BuildMultiDimensionalInfo>
+    <!-- GMA Generate Multidimensional Anomaly (Spatial Analyst)  -->
+    <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/spatial-analyst/generate-multidimensional-anomaly.htm -->
+    <GenerateMultidimensionAlanomaly>
+      <in_multidimensional_raster></in_multidimensional_raster>
+      <variables></variables>
+      <method></method>
+      <calculation_interval></calculation_interval>
+      <reference_mean_raster></reference_mean_raster>
+      <ignore_nodata></ignore_nodata>
+	    <ReturnValue>save(c:\output\folder\must\exists\GMA.crf)</ReturnValue>            	
+    </GenerateMultidimensionAlanomaly>
+    <!-- AMR Aggregate Multidimensional Raster (Spatial Analyst)  -->
+    <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/spatial-analyst/aggregate-multidimensional-raster.htm -->
+    <AggregateMultidimensionalRaster>
+      <in_multidimensional_raster></in_multidimensional_raster>
+      <dimension></dimension>
+      <aggregation_method></aggregation_method>
+      <variables></variables>
+      <aggregation_def></aggregation_def>
+      <interval_keyword></interval_keyword>
+      <interval_value></interval_value>
+      <interval_unit></interval_unit>
+      <interval_ranges></interval_ranges>
+      <aggregation_function></aggregation_function>
+      <ignore_nodata></ignore_nodata>
+      <ReturnValue>save(c:\output\folder\must\exists\AMR.crf)</ReturnValue> 
+    </AggregateMultidimensionalRaster>
+    <!-- CF Compute Fiducials (Data Management)  -->
+    <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/compute-fiducials.htm -->
+    <ComputeFiducials>
+      <out_fiducial_table>#</out_fiducial_table>
+      <where_clause>#</where_clause>
+      <fiducial_templates>#</film_coordinate_system>
+      <film_coordinate_system>NO_CHANGE;X_RIGHT_Y_UP;X_UP_Y_LEFT;X_LEFT_Y_DOWN;X_DOWN_Y_RIGHT</film_coordinate_system>        	
+    </ComputeFiducials>
+    <!-- UIO Update Interior Orientation (Data Management)  -->
+    <!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/update-interior-orientation-tool.htm -->
+    <UpdateInteriorOrientation>
+      <fiducial_table>#</fiducial_table>
+      <where_clause>#</where_clause>
+      <update_footprints>UPDATE;NO_UPDATE</update_footprints>
+      <film_coordinate_system>NO_CHANGE;X_RIGHT_Y_UP;X_UP_Y_LEFT;X_LEFT_Y_DOWN;X_DOWN_Y_RIGHT</film_coordinate_system>        	
+    </UpdateInteriorOrientation>
+    <!-- EFACP Export Frame And Camera Parameters (Data Management)  -->
+    <!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/export-frame-and-camera-parameters.htm -->
+    <ExportFrameAndCameraParameters>
+      <output_file>#</output_file>
+      <output_format>ESRI_FRAME_AND_CAMERA_TABLE;PIX4D_CALIBRATED_CAMERA_PARAMETERS</output_format>       	
+    </ExportFrameAndCameraParameters>
+    <!-- GBAR Generate Block Adjustment Report (Data Management)  -->
+    <!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/generate-block-adjustment-report.htm -->
+    <GenerateBlockAdjustmentReport>
+      <input_solution_table>#</input_solution_table>
+      <input_solution_point>#</input_solution_point>
+      <output_report>#</output_report>
+      <input_control_point_for_adjustment>#</input_control_point_for_adjustment>
+      <report_format>HTML;PDF</report_format>
+    </GenerateBlockAdjustmentReport>
         <!-- RR Automatically aligns a raster to a reference image or uses a control point file for georegistration. -->
         <!-- http://desktop.arcgis.com/en/arcmap/latest/tools/data-management-toolbox/register-raster.htm -->
         <RegisterRaster>
