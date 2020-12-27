@@ -61,13 +61,13 @@ class SetMDProperties(Base.Base):
             args[CONST_ORDER_FIELD_POS] = 'MinPS'
         return args
     
-    # update code
-    # write json
+
+    # write json from dictionary object
     def writeJson(self,filename,jsonData):
         log = self.m_base.m_log
         try:
             with open(filename, "w") as fp:
-                json.dump(jsonData,fp)
+                json.dump(jsonData,fp) #dump the dictionary to the json file 
             return True
 
         except Exception as exp:
@@ -75,19 +75,19 @@ class SetMDProperties(Base.Base):
             return False
 
             
-   # read json
+   # read json file and create dictionary object
     def readJson(self,jsonData):
         log = self.m_base.m_log
         try:
-            jsData = json.load(open(jsonData))
+            jsData = json.load(open(jsonData)) #read json file and load it to dictionary object
             return jsData
 
         except Exception as exp:
             log.Message(str(exp),log.const_critical_text)
             return False
 
-    # Compare Dictionary
-    def compare_dict(self, a, b,outputJson):
+    # Compare two dictionary and dump the difference in dictionary to json file
+    def compare_dict(self, fist_dict, second_dict,outputJson):
         log = self.m_base.m_log
         # Compared two dictionaries..
         # Posts things that are not equal..
@@ -97,18 +97,19 @@ class SetMDProperties(Base.Base):
             log.Message("Differences",log.const_general_text)
             mDifferences["Attribute"]="First Property | Second Property"
             
-            common_keys = a.keys() & b.keys()
+            #getting the comman keys in between two dictionaries
+            common_keys = fist_dict.keys() & second_dict.keys()
             for k in set(common_keys):
-                if isinstance(a[k], dict):
-                    z0 = self.compare_dict(a[k], b[k])
+                if isinstance(fist_dict[k], dict):
+                    z0 = self.compare_dict(fist_dict[k], second_dict[k])
                 else:
-                    z0 = a[k] == b[k]
+                    z0 = fist_dict[k] == second_dict[k]
 
                 z0_bool = np.all(z0)
                 res_compare.append(z0_bool)
                 if not z0_bool:
-                    mDifferences[k]= str(a[k])+ " | "+str(b[k])
-                    message = "Property:"+str(k)+" --->>> First Mosaic:"+str(a[k])+ "  |||  Second Mosaic:"+str(b[k])
+                    mDifferences[k]= str(fist_dict[k])+ " | "+str(second_dict[k])
+                    message = "Property:"+str(k)+" --->>> First Mosaic:"+str(fist_dict[k])+ "  |||  Second Mosaic:"+str(second_dict[k])
                     log.Message(message,log.const_general_text)
 
             self.writeJson(outputJson,mDifferences)
@@ -120,9 +121,10 @@ class SetMDProperties(Base.Base):
             return False
     
 
-    #Property of mosaic
+    #Extracting the property of mosaic and dumping properties to dictionar file
     def mosaicProperty(self,mdObj):
         log = self.m_base.m_log
+        # dictionary to match the name between MDCS config nodes and arcpy descripe mosaic properties
         propertyDict = {
             "rows_maximum_imagesize":"maxRequestSizeY",
             "columns_maximum_imagesize":"maxRequestSizeX",
@@ -177,7 +179,7 @@ class SetMDProperties(Base.Base):
             log.Message(str(exp),log.const_critical_text)
             return False
 
-    #set property of the Mosaic
+    #set property of the Mosaic using json 
     def setPropertybyJson(self,inputJson):
         log = self.m_base.m_log
         try:
@@ -185,7 +187,7 @@ class SetMDProperties(Base.Base):
             try:
                 if len(jsData)>0:
                     for attribute in jsData:
-                        self.dic_properties_lst[attribute] = jsData[attribute]
+                        self.dic_properties_lst[attribute] = jsData[attribute] #assign the each property of mosaic with dictionary
             except Exception as exp:
                 log.Message(str(exp),self.const_critical_text)
                 return False
@@ -195,11 +197,11 @@ class SetMDProperties(Base.Base):
             return False
     
     
-    #extract property of the Mosaic
+    #extract property of the Mosaic and dump to json 
     def extractPropertytoJson(self,mdObj,outputJson):
         log = self.m_base.m_log
         try:
-            dictObj = self.mosaicProperty(mdObj)
+            dictObj = self.mosaicProperty(mdObj) #read mosaic property
             self.writeJson(outputJson,dictObj)
             return True
 
@@ -209,7 +211,7 @@ class SetMDProperties(Base.Base):
 
 
 
-    #set property of the Mosaic
+    #set property of the Mosaic by reference mosaic
     def setPropertyByMosaic(self,external_mosaic):
         log = self.m_base.m_log
         try:
@@ -219,7 +221,7 @@ class SetMDProperties(Base.Base):
                     if len(jsData)>0:
                         for attribute in jsData:
                             
-                            self.dic_properties_lst[attribute] = jsData[attribute]
+                            self.dic_properties_lst[attribute] = jsData[attribute] #assign the each property of mosaic with dictionary
 
                 except Exception as exp:
                     log.Message(str(exp),log.const_critical_text)
@@ -232,6 +234,8 @@ class SetMDProperties(Base.Base):
             log.Message(str(exp),self.const_critical_text)
             return False
     
+
+    #compare properties of two mosiac
     def comparePropertyByMosiac(self,internal_mosaic,external_mosaic,outputJson):
         log = self.m_base.m_log
         try:
@@ -252,6 +256,7 @@ class SetMDProperties(Base.Base):
             log.Message(str(exp),self.const_critical_text)
             return False
     
+    #compare properties of a mosaic and json (userinput)
     def comparePropertyByJson(self,internal_mosaic,inputJson,outputJson):
         log = self.m_base.m_log
         try:
@@ -270,8 +275,9 @@ class SetMDProperties(Base.Base):
             log.Message(str(exp),self.const_critical_text)
             return False
     
-    def setProperty(self, mdPath):
-        
+
+    #set property of the mosaic 
+    def setProperty(self, mdPath):  
         args = []
         mdName = os.path.basename(mdPath).upper()
         args.append(mdPath)
@@ -320,8 +326,8 @@ class SetMDProperties(Base.Base):
         if (setProperties.init() == False):
             return False
         return setProperties.invoke()
-    # end of code
-
+    
+    #set property of the mosaic based on the user defined flag
     def setMDProperties(self, mdPath):
         base = self.m_base
         xmlDOM = self.m_base.m_doc
