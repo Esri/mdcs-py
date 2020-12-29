@@ -87,7 +87,7 @@ class SetMDProperties(Base.Base):
             return False
 
     # Compare two dictionary and dump the difference in dictionary to json file
-    def compare_dict(self, fist_dict, second_dict,outputJson):
+    def compare_dict(self, first_dict, second_dict, outputJson):
         log = self.m_base.m_log
         # Compared two dictionaries..
         # Posts things that are not equal..
@@ -98,18 +98,18 @@ class SetMDProperties(Base.Base):
             mDifferences["Attribute"]="First Property | Second Property"
             
             #getting the comman keys in between two dictionaries
-            common_keys = fist_dict.keys() & second_dict.keys()
+            common_keys = first_dict.keys() & second_dict.keys()
             for k in set(common_keys):
-                if isinstance(fist_dict[k], dict):
-                    z0 = self.compare_dict(fist_dict[k], second_dict[k])
+                if isinstance(first_dict[k], dict):
+                    z0 = self.compare_dict(first_dict[k], second_dict[k])
                 else:
-                    z0 = fist_dict[k] == second_dict[k]
+                    z0 = first_dict[k] == second_dict[k]
 
                 z0_bool = np.all(z0)
                 res_compare.append(z0_bool)
                 if not z0_bool:
-                    mDifferences[k]= str(fist_dict[k])+ " | "+str(second_dict[k])
-                    message = "Property:"+str(k)+" --->>> First Mosaic:"+str(fist_dict[k])+ "  |||  Second Mosaic:"+str(second_dict[k])
+                    mDifferences[k]= str(first_dict[k])+ " | "+str(second_dict[k])
+                    message = "Property:"+str(k)+" --->>> First Mosaic:"+str(first_dict[k])+ "  |||  Second Mosaic:"+str(second_dict[k])
                     log.Message(message,log.const_general_text)
 
             self.writeJson(outputJson,mDifferences)
