@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: MDCS_UC.py
 # Description: A class to implement all user functions or to extend the built in MDCS functions/commands chain.
-# Version: 20171217
+# Version: 20201230
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -42,7 +42,7 @@ class UserCode:
     def sample01(self, data):
         log = data['log']           # How to use logging within the user function.
         log.Message('hello world', 0)
-        return True    
+        return True
 
     def sample02(self, data):
         log = data['log']           # How to use logging within the user function.

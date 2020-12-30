@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: imagery_service.py
 # Description: Utility class for publish, share, update, delete imagery services
-# Version: 20180920
+# Version: 20201230
 # Requirements: python.exe 3.6, arcpy library, solutionlog
 # Required Arguments: N/A
 # Optional Arguments: N/A
@@ -1053,7 +1053,7 @@ class ImageryServices(object):
             log.Message("Error sharing item with group " + str(e),
                                 log.const_critical_text)
             return self._get_result_status(success=False,
-                                           message="Error sharing item with group")    
+                                           message="Error sharing item with group")
 
     def _update_service_item_id(self,
                                 token,
@@ -1329,7 +1329,7 @@ class ImageryServices(object):
                 "Error while adding item "+str(e),
                 log.const_critical_text)
             return self._get_result_status(success=False,
-                                            message="Error while adding item ")            
+                                            message="Error while adding item ")
 
     def _move_items(self, folder_id, item_ids, token, portalurl, username):
         move_item_url = (portalurl +
@@ -1807,7 +1807,7 @@ class ImageryServices(object):
                                           "/admin/services/",
                                           folder_name,
                                           '/createService'])
-            self.create_server_folder(folder_name)            
+            self.create_server_folder(folder_name)
         else:
             create_service_url = ''.join([serverurl,
                                           "/admin/services/",

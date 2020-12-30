@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: AddRasters.py
 # Description: Add rasters/data to existing mosaic datasets.
-# Version: 20170222
+# Version: 20201230
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------

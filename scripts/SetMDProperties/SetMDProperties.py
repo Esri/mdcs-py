@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: SetMDProperties.py
 # Description: To set mosaic dataset properties
-# Version: 20170222
+# Version: 20201230
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -60,21 +60,21 @@ class SetMDProperties(Base.Base):
         if (self.is101SP1() == False):  # OrderField set to 'BEST' would fail in 10.1 without SP1
             args[CONST_ORDER_FIELD_POS] = 'MinPS'
         return args
-    
+
 
     # write json from dictionary object
     def writeJson(self,filename,jsonData):
         log = self.m_base.m_log
         try:
             with open(filename, "w") as fp:
-                json.dump(jsonData,fp) #dump the dictionary to the json file 
+                json.dump(jsonData,fp) #dump the dictionary to the json file
             return True
 
         except Exception as exp:
             log.Message(str(exp),log.const_critical_text)
             return False
 
-            
+
    # read json file and create dictionary object
     def readJson(self,jsonData):
         log = self.m_base.m_log
@@ -96,7 +96,7 @@ class SetMDProperties(Base.Base):
         try:
             log.Message("Differences",log.const_general_text)
             mDifferences["Attribute"]="First Property | Second Property"
-            
+
             #getting the comman keys in between two dictionaries
             common_keys = first_dict.keys() & second_dict.keys()
             for k in set(common_keys):
@@ -113,13 +113,13 @@ class SetMDProperties(Base.Base):
                     log.Message(message,log.const_general_text)
 
             self.writeJson(outputJson,mDifferences)
-            log.Message("Completed",log.const_general_text)        
+            log.Message("Completed",log.const_general_text)
             return np.all(res_compare)
 
         except Exception as exp:
             log.Message(str(exp),log.const_critical_text)
             return False
-    
+
 
     #Extracting the property of mosaic and dumping properties to dictionar file
     def mosaicProperty(self,mdObj):
@@ -174,12 +174,12 @@ class SetMDProperties(Base.Base):
                     dictObj[key] = getattr(MosaicObj, value)
 
             return dictObj
-        
+
         except Exception as exp:
             log.Message(str(exp),log.const_critical_text)
             return False
 
-    #set property of the Mosaic using json 
+    #set property of the Mosaic using json
     def setPropertybyJson(self,inputJson):
         log = self.m_base.m_log
         try:
@@ -195,9 +195,9 @@ class SetMDProperties(Base.Base):
         except Exception as exp:
             log.Message(str(exp),self.const_critical_text)
             return False
-    
-    
-    #extract property of the Mosaic and dump to json 
+
+
+    #extract property of the Mosaic and dump to json
     def extractPropertytoJson(self,mdObj,outputJson):
         log = self.m_base.m_log
         try:
@@ -220,7 +220,7 @@ class SetMDProperties(Base.Base):
                 try:
                     if len(jsData)>0:
                         for attribute in jsData:
-                            
+
                             self.dic_properties_lst[attribute] = jsData[attribute] #assign the each property of mosaic with dictionary
 
                 except Exception as exp:
@@ -233,7 +233,7 @@ class SetMDProperties(Base.Base):
         except Exception as exp:
             log.Message(str(exp),self.const_critical_text)
             return False
-    
+
 
     #compare properties of two mosiac
     def comparePropertyByMosiac(self,internal_mosaic,external_mosaic,outputJson):
@@ -243,7 +243,7 @@ class SetMDProperties(Base.Base):
                 firstMosaicProperty = self.mosaicProperty(internal_mosaic)
             else:
                 log.Message("Given Mosaic is not found or invalid",self.const_critical_text)
-        
+
             if arcpy.Exists(external_mosaic):
                 secondMosiacProperty = self.mosaicProperty(external_mosaic)
             else:
@@ -255,7 +255,7 @@ class SetMDProperties(Base.Base):
         except Exception as exp:
             log.Message(str(exp),self.const_critical_text)
             return False
-    
+
     #compare properties of a mosaic and json (userinput)
     def comparePropertyByJson(self,internal_mosaic,inputJson,outputJson):
         log = self.m_base.m_log
@@ -264,8 +264,8 @@ class SetMDProperties(Base.Base):
                 firstMosaicProperty = self.mosaicProperty(internal_mosaic)
             else:
                 log.Message("Given Mosaic is not found or invalid",self.const_critical_text)
-        
-            
+
+
             secondMosiacProperty = self.readJson(inputJson)
 
             self.compare_dict(firstMosaicProperty,secondMosiacProperty,outputJson)
@@ -274,10 +274,10 @@ class SetMDProperties(Base.Base):
         except Exception as exp:
             log.Message(str(exp),self.const_critical_text)
             return False
-    
 
-    #set property of the mosaic 
-    def setProperty(self, mdPath):  
+
+    #set property of the mosaic
+    def setProperty(self, mdPath):
         args = []
         mdName = os.path.basename(mdPath).upper()
         args.append(mdPath)
@@ -322,11 +322,11 @@ class SetMDProperties(Base.Base):
         args.append(self.getInternalPropValue(mdName, 'time_interval'))
         args.append(self.getInternalPropValue(mdName, 'time_interval_units'))
         setProperties = Base.DynaInvoke('arcpy.SetMosaicDatasetProperties_management', args, self.__setpropertiesCallback, self._message)
-        
+
         if (setProperties.init() == False):
             return False
         return setProperties.invoke()
-    
+
     #set property of the mosaic based on the user defined flag
     def setMDProperties(self, mdPath):
         base = self.m_base
@@ -338,7 +338,7 @@ class SetMDProperties(Base.Base):
         sp_outputjson = base.getXMLNodeValue(xmlDOM, 'sp_outputjson')
         sp_flag = base.getXMLNodeValue(xmlDOM, 'sp_flag')
 
-        
+
         try:
             if sp_flag == "setpropertybyjson":
                 if sp_inputjson == "#":
@@ -350,7 +350,7 @@ class SetMDProperties(Base.Base):
                         sp_inputjson = os.path.join(jsonPath,sp_inputjson)
                     self.setPropertybyJson(sp_inputjson)
                     self.setProperty(mdPath)
-               
+
             elif sp_flag == "setpropertybymosiac":
                 if sp_mosaic == "#":
                     log.Message("Error: MosaicDataset not found!",self.const_critical_text)
@@ -358,8 +358,8 @@ class SetMDProperties(Base.Base):
                 else:
                     self.setPropertyByMosaic(sp_mosaic)
                     self.setProperty(mdPath)
-                
-                
+
+
             elif sp_flag == "extractproperty":
                 if sp_outputjson == "#":
                     log.Message("Missing Ouput file to Extract property",self.const_critical_text)
@@ -369,7 +369,7 @@ class SetMDProperties(Base.Base):
                 else:
                     self.extractPropertytoJson(mdPath,sp_outputjson)
 
-                
+
             elif sp_flag == "compareproperty":
                 if sp_mosaic == "#":
                     if sp_inputjson == "#":
@@ -383,15 +383,15 @@ class SetMDProperties(Base.Base):
                             if absPathCheck == False:
                                 sp_inputjson = os.path.join(jsonPath,sp_inputjson)
                         self.comparePropertyByJson(mdPath,sp_inputjson,sp_outputjson)
-                        
-                    
+
+
                 else:
                     if sp_outputjson == "#":
                         log.Message("Missing Ouput file to Extract property",self.const_critical_text)
                         log.Message("Extracting property to Parameter/Json/compare.json",self.const_critical_text)
                         sp_outputjson = os.path.join(jsonPath,"compare"+str(datetime.strftime(datetime.now(),"%Y%m%d%H%M%S"))+".json")
                     self.comparePropertyByMosiac(mdPath,sp_mosaic,sp_outputjson)
-            
+
             else:
                 log.Message("SP flag is not found!",self.const_critical_text)
                 log.Message("Using default for Set property",self.const_critical_text)
@@ -438,4 +438,4 @@ class SetMDProperties(Base.Base):
         except:
             Error = True
 
-        return True 
+        return True

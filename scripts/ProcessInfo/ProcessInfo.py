@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: ProcessInfo.py
 # Description: Class to read in process values from MDCS parameter/configuration XML file.
-# Version: 20170222
+# Version: 20201230
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------

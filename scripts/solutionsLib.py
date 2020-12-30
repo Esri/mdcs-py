@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: SolutionsLib.py
 # Description: To map MDCS command codes to GP Tool functions.
-# Version: 20201214
+# Version: 20201230
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -1633,22 +1633,22 @@ class Solutions(Base.Base):
              'CF':
              {
               'desc': 'Compute Fiducials.',
-             'fnc': executeCommand   
+             'fnc': executeCommand
              },
              'UIO':
              {
               'desc': 'Update Interior Orientation.',
-             'fnc': executeCommand   
+             'fnc': executeCommand
              },
              'EFACP':
              {
               'desc': 'Export Frame And Camera Parameters.',
-             'fnc': executeCommand   
+             'fnc': executeCommand
              },
              'GBAR':
              {
               'desc': 'Generate Block Adjustment Report.',
-             'fnc': executeCommand   
+             'fnc': executeCommand
              },
             'GTR':
             {'desc': 'Generate Trend Raster.',

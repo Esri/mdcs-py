@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: PublishImageService.pyt
 # Description: GP Tool for publish, update, delete imagery services
-# Version: 20190128
+# Version: 20201230
 # Requirements:
 # Author: Esri Imagery Workflows Team
 # ------------------------------------------------------------------------------
@@ -324,7 +324,7 @@ class PublishImageService(object):
             return '3'
         else:
             return '1'
-    
+
     def get_service_param_right_format(self, service_param):
         if type(service_param) == str:
             return ','.join(service_param.split(';'))
@@ -388,7 +388,7 @@ class PublishImageService(object):
                                                                                       params['service_name'].valueAsText)
                         else:
                             service_url = '{}/rest/services/{}/ImageServer'.format(config_json.get('imageserver').get('url'),
-                                                                                   params['service_name'].valueAsText)                            
+                                                                                   params['service_name'].valueAsText)
                         item = {
                                         "type": "Image Service",
                                         "title": params['service_name'].valueAsText,

@@ -1,9 +1,9 @@
 {
-    "UpdateLocation": "https://github.com/Esri/mdcs-py", 
-    "OnNewVersion": "Warn", 
-    "CheckFile": "https://imageryworkflowsversion.geocloud.com/imv/MDCS.json", 
-    "VersionMessage": "Added runtime source version check support.", 
-    "LastChecked": "2019-11-19", 
-    "CheckForUpdate": "Daily", 
-    "CurrentVersion": "20191119"
+    "UpdateLocation": "https://github.com/Esri/mdcs-py",
+    "OnNewVersion": "Warn",
+    "CheckFile": "https://imageryworkflowsversion.geocloud.com/imv/MDCS.json",
+    "VersionMessage": "Added runtime source version check support.",
+    "LastChecked": "2020-12-30",
+    "CheckForUpdate": "Daily",
+    "CurrentVersion": "20201230"
 }
