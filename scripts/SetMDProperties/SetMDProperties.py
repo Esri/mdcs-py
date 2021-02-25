@@ -362,8 +362,8 @@ class SetMDProperties(Base.Base):
 
             elif sp_flag == "extractproperty":
                 if sp_outputjson == "#":
-                    log.Message("Missing Ouput file to Extract property",self.const_critical_text)
-                    log.Message("Extracting property to Parameter/Json/",self.const_critical_text)
+                    log.Message("Missing Ouput file to Extract property",self.const_warning_text)
+                    log.Message("Extracting property to Parameter/Json/",self.const_general_text)
                     sp_outputjson = os.path.join(jsonPath,"mosaicProperty"+str(datetime.strftime(datetime.now(),"%Y%m%d%H%M%S"))+".json")
                     self.extractPropertytoJson(mdPath,sp_outputjson)
                 else:
@@ -376,8 +376,8 @@ class SetMDProperties(Base.Base):
                         log.Message("Error: MosaicDataset / Input Json not found!",self.const_critical_text)
                     else:
                         if sp_outputjson == "#":
-                            log.Message("Missing Ouput file to Extract property",self.const_critical_text)
-                            log.Message("Extracting property to Parameter/Json/",self.const_critical_text)
+                            log.Message("Missing Ouput file to Extract property",self.const_warning_text)
+                            log.Message("Extracting property to Parameter/Json/",self.const_general_text)
                             sp_outputjson = os.path.join(jsonPath,"compare"+str(datetime.strftime(datetime.now(),"%Y%m%d%H%M%S"))+".json")
                             absPathCheck = os.path.isabs(sp_inputjson)
                             if absPathCheck == False:
@@ -387,14 +387,14 @@ class SetMDProperties(Base.Base):
 
                 else:
                     if sp_outputjson == "#":
-                        log.Message("Missing Ouput file to Extract property",self.const_critical_text)
-                        log.Message("Extracting property to Parameter/Json/compare.json",self.const_critical_text)
+                        log.Message("Missing Ouput file to Extract property",self.const_warning_text)
+                        log.Message("Extracting property to Parameter/Json/compare.json",self.const_general_text)
                         sp_outputjson = os.path.join(jsonPath,"compare"+str(datetime.strftime(datetime.now(),"%Y%m%d%H%M%S"))+".json")
                     self.comparePropertyByMosiac(mdPath,sp_mosaic,sp_outputjson)
 
             else:
-                log.Message("SP flag is not found!",self.const_critical_text)
-                log.Message("Using default for Set property",self.const_critical_text)
+                log.Message("SP flag is not found!",self.const_warning_text)
+                log.Message("Using default for Set property",self.const_general_text)
                 self.setProperty(mdPath)
 
             return True
