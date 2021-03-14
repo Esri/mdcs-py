@@ -44,7 +44,7 @@ class ProgramCheckAndUpdate(object):
 
     def readVersionJSON(self, checkFileURL):
         try:
-            f = requests.get(checkFileURL)
+            f = requests.get(checkFileURL, timeout=10)
             x = f.content
             versionJSON = json.loads(x)
             return versionJSON
@@ -68,13 +68,17 @@ class ProgramCheckAndUpdate(object):
             return [False, None]
 
     def UpdateLocalRepo(self, install_url, path):
-        if(install_url.endswith('/')):
-            download_url = install_url + 'archive/master.zip'
-        else:
-            download_url = install_url + '/archive/master.zip'
-        repo_download = requests.get(download_url)
-        zip_repo = zipfile.ZipFile(io.BytesIO(repo_download.content))
-        zip_repo.extractall(path)
+        try:
+            if(install_url.endswith('/')):
+                download_url = install_url + 'archive/master.zip'
+            else:
+                download_url = install_url + '/archive/master.zip'
+            repo_download = requests.get(download_url,timeout=10)
+            zip_repo = zipfile.ZipFile(io.BytesIO(repo_download.content))
+            zip_repo.extractall(path)
+        except Exception as exp:
+            print(str(exp))
+            
 
     def WriteNewCheckForUpdate(self, dict_check, filepath):
         try:
