@@ -56,7 +56,7 @@ class UserCode:
         workspace = data['workspace']
         md = data['mosaicdataset']
         ds = os.path.join(workspace, md)
-        ds_cursor = arcpy.UpdateCursor(ds)
+        ds_cursor = arcpy.da.UpdateCursor(ds)
         if (ds_cursor is not None):
             print ('Calculating values..')
             row = ds_cursor.next()

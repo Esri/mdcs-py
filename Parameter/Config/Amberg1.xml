@@ -38,7 +38,7 @@
         <default_mensuration_capabilities>BASIC</default_mensuration_capabilities>
         <allowed_mosaic_methods>Center;NorthWest;Nadir;LockRaster;ByAttribute;Seamline;None</allowed_mosaic_methods>
         <default_mosaic_method>Center</default_mosaic_method>
-        <Order_field>#</Order_field>
+        <order_field>#</order_field>
         <order_base>0</order_base>
         <sorting_order>Ascending</sorting_order>
         <mosaic_operator>FIRST</mosaic_operator>
