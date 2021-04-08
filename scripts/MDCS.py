@@ -201,7 +201,11 @@ def main(argc, argv):
     log.Message('Checking for updates..', logger.Logger.const_general_text)
     verMessage = versionCheck.run(solutionLib_path)
     if (verMessage is not None):
-        log.Message(verMessage, logger.Logger.const_warning_text)
+        if verMessage is  True:
+           log.Message('Installed version is the latest version', logger.Logger.const_general_text) 
+        else:
+            if verMessage is not 'Ignore':
+                log.Message(verMessage, logger.Logger.const_warning_text)
     # ends
     if (os.path.isfile(config) == False):
         log.Message('Input config file is not specified/not found! ({})'.format(config), logger.Logger.const_critical_text)

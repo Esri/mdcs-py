@@ -834,7 +834,7 @@
     <ComputeFiducials>
       <out_fiducial_table>#</out_fiducial_table>
       <where_clause>#</where_clause>
-      <fiducial_templates>#</film_coordinate_system>
+      <fiducial_templates>#</fiducial_templates>
       <film_coordinate_system>NO_CHANGE;X_RIGHT_Y_UP;X_UP_Y_LEFT;X_LEFT_Y_DOWN;X_DOWN_Y_RIGHT</film_coordinate_system>        	
     </ComputeFiducials>
     <!-- UIO Update Interior Orientation (Data Management)  -->
