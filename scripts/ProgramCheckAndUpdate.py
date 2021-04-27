@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: ProgramCheckandUpdate.py
 # Description: Checks and Updates workflow from Github if required.
-# Version: 20201230
+# Version: 20200408
 # Requirements:
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -104,7 +104,7 @@ class ProgramCheckAndUpdate(object):
             if(checkForUpdate == "Never"):
                 return False
             elif(checkForUpdate == "Daily"):
-                if(current_date > lastChecked):
+                if(current_date >= lastChecked):
                     return True
                 else:
                     return False
@@ -139,7 +139,8 @@ class ProgramCheckAndUpdate(object):
                     else:
                         return("Incorrect Parameter. Please check OnNewVersion Parameter in " + str(checkUpdateFilePath))
                 else:
-                    return("Installed version is the latest version.")
+                    # return("Installed version is the latest version.")
+                    return True
             else:
                 try:
                     if(chkupdate['NewVersion'] is not (None or '')):
