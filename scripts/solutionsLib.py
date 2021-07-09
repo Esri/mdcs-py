@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Copyright 2017 Esri
+# Copyright 2021 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: SolutionsLib.py
 # Description: To map MDCS command codes to GP Tool functions.
-# Version: 20201230
+# Version: 20210708
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -1443,7 +1443,7 @@ class Solutions(Base.Base):
              'fnc': executeCommand
              },
             'RRFMD':
-            {'desc': 'Remove Rasters from Mosaic ataset.',
+            {'desc': 'Remove Rasters from Mosaic Dataset.',
              'fnc': executeCommand
              },
             'DMD':

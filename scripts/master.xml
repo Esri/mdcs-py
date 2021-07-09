@@ -559,9 +559,9 @@
                 <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/remove-rasters-from-mosaic-dataset.htm -->
                 <RemoveRastersFromMosaicDataset>
                     <where_clause></where_clause>
-                    <update_boundary></update_boundary>
-                    <mark_overviews_items>UPDATE_BOUNDARY;NO_BOUNDARY</mark_overviews_items>
-                    <delete_overview_images>MARK_OVERVIEW_ITEMS;NO_MARK_OVERVIEW_ITEMS</delete_overview_images>
+                    <update_boundary>UPDATE_BOUNDARY;NO_BOUNDARY</update_boundary>
+                    <mark_overviews_items>MARK_OVERVIEW_ITEMS;NO_MARK_OVERVIEW_ITEMS</mark_overviews_items>
+                    <delete_overview_images>DELETE_OVERVIEW_IMAGES;NO_DELETE_OVERVIEW_IMAGES</delete_overview_images>
                     <delete_item_cache>DELETE_ITEM_CACHE;NO_DELETE_ITEM_CACHE</delete_item_cache>
                     <remove_items>REMOVE_MOSAICDATASET_ITEMS;NO_REMOVE_MOSAICDATASET_ITEMS</remove_items>
                     <update_cellsize_ranges>UPDATE_CELL_SIZES;NO_CELL_SIZES</update_cellsize_ranges>
