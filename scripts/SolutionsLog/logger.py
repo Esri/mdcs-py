@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Copyright 2016 Esri
+# Copyright 2021 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: logger.py
 # Description: Class to log status from Imagery w/f components to log files.
-# Version: 20201230
+# Version: 20210711
 # Requirements: Python
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -35,7 +35,6 @@ except:
     pass
 const_start_time_node = 'StartTime'
 const_end_time_node = 'EndTime'
-
 
 class Logger(object):
 
@@ -133,7 +132,7 @@ class Logger(object):
             if (messageType == self.const_critical_text):
                 errorTypeText = "critical"
             self.projects[key]['logs']['message'].append({'error': {'type': errorTypeText, 'text': message}})
-        _message = 'log-' + errorTypeText + ': ' + message  # print out error message to console while logging.
+        _message = 'log-{}:{}'.format(errorTypeText, message)  # print out error message to console while logging.
         if (self.isGPRun):
             try:
                 import arcpy
@@ -150,7 +149,10 @@ class Logger(object):
                 print (_message)        # if a client side msgCallback has been set.
             msg_type = 'general'        # msg-code
             if (self.m_base):
-                self.m_base.invoke_cli_msg_callback(msg_type, [_message])
+                if (hasattr(self.m_base, 'invoke_cli_msg_callback')):   # used by MDCS
+                    self.m_base.invoke_cli_msg_callback(msg_type, [_message])
+                elif(hasattr(self.m_base, 'writeToConsole')):  # used by OptimizeRasters
+                    self.m_base.writeToConsole(_message)
         return True
 
     def WriteLog(self, project):
@@ -196,7 +198,7 @@ class Logger(object):
                                 if (msg['type'] == 'status'):
                                     nodeName = 'Status'
                                 eleMessage = doc.createElement(nodeName)
-                                eleText = doc.createTextNode(msg['text'])
+                                eleText = doc.createTextNode(str(msg['text']))
                                 eleMessage.appendChild(eleText)
                                 msgNode = eleMessage
                             elif('error' in msg.keys()):
