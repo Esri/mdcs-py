@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: SolutionsLib.py
 # Description: To map MDCS command codes to GP Tool functions.
-# Version: 20210708
+# Version: 20211006
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -1319,6 +1319,14 @@ class Solutions(Base.Base):
                             continue
                 del sc
                 return True
+        elif (com == 'TF'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'transferfiles',
+                'arcpy.TransferFiles_management',
+                index
+            )
         else:
             # The command could be a user defined function externally defined in the module (MDCS_UC.py). Let's invoke it.
             data = {
@@ -1660,6 +1668,10 @@ class Solutions(Base.Base):
              },
             'CPCSLP':
             {'desc': 'Creates a point cloud scene layer package (.slpk file) from LAS, zLAS, LAZ, or LAS dataset input.',
+             'fnc': executeCommand
+             },
+            'TF':
+            {'desc': 'Transfers files between a file system and a cloud storage workspace.',
              'fnc': executeCommand
              }
         }
