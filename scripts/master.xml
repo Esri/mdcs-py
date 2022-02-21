@@ -844,13 +844,13 @@
 				</ClassifyObjectsUsingDeepLearning>
 				<!-- CPUDL Classify Pixels Using Deep Learning  -->
 				<!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/image-analyst/classify-pixels-using-deep-learning.htm-->
-				<ClassifyObjectsUsingDeepLearning>
+				<ClassifyPixelsUsingDeepLearning>
 						<in_raster>The input raster dataset to classify.</in_raster>
 						<in_model_definition>Deep learning model package (.dlpk)</in_model_definition>
 						<arguments>The function arguments are defined in the Python raster function class. </arguments>
 						<processing_mode>PROCESS_AS_MOSAICKED_IMAGE;PROCESS_ITEMS_SEPARATELY</processing_mode>
 						<out_classified_folder>The folder where the output classified rasters will be stored.</out_classified_folder>
-				</ClassifyObjectsUsingDeepLearning>
+				</ClassifyPixelsUsingDeepLearning>
 				<!-- CAFOD Compute Accuracy for Object Detection  -->
 				<!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/image-analyst/compute-accuracy-for-object-detection.htm-->
 				<ComputeAccuracyForObjectDetection>
@@ -900,7 +900,7 @@
 				<ComputeFiducials>
 					<out_fiducial_table>#</out_fiducial_table>
 					<where_clause>#</where_clause>
-                 <fiducial_templates>#</fiducial_templates>
+					<fiducial_templates>#</fiducial_templates>
 				<film_coordinate_system>NO_CHANGE;X_RIGHT_Y_UP;X_UP_Y_LEFT;X_LEFT_Y_DOWN;X_DOWN_Y_RIGHT</film_coordinate_system>
 			</ComputeFiducials>
 			<!-- UIO Update Interior Orientation (Data Management)  -->
