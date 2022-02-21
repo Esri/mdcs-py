@@ -1214,6 +1214,54 @@ class Solutions(Base.Base):
                 'arcpy.ia.DetectChangeUsingChangeAnalysis',
                 index
             )
+        elif (com == 'COUDL'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'classifyobjectsusingdeepLearning',
+                'arcpy.ia.ClassifyObjectsUsingDeepLearning',
+                index
+            )
+        elif (com == 'CPUDL'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'classifypixelsusingdeepLearning',
+                'arcpy.ia.ClassifyPixelsUsingDeepLearning',
+                index
+            )
+        elif (com == 'CAFOD'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'computeaccuracyforobjectdetection',
+                'arcpy.ia.ComputeAccuracyForObjectDetection',
+                index
+            )
+        elif (com == 'DCUDL'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'detectchangeusingdeeplearning',
+                'arcpy.ia.DetectChangeUsingDeepLearning',
+                index
+            )
+        elif (com == 'DOUDL'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'detectobjectsusingdeeplearning',
+                'arcpy.ia.DetectObjectsUsingDeepLearning',
+                index
+            )
+        elif (com == 'NMS'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'nonmaximumsuppression',
+                'arcpy.ia.NonMaximumSuppression',
+                index
+            )
         elif (com == 'FAS'):
             self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
             return self.__invokeDynamicFn(
@@ -1628,6 +1676,30 @@ class Solutions(Base.Base):
              },
             'DCUCAR':
             {'desc': 'Detect Change Using Change Analysis Raster.',
+             'fnc': executeCommand
+             },
+            'COUDL':
+            {'desc': 'Classify Objects using Deep Learning.',
+             'fnc': executeCommand
+             },
+            'CPUDL':
+            {'desc': 'Classify Pixels using Deep Learning.',
+             'fnc': executeCommand
+             },
+            'CAFOD':
+            {'desc': 'Compute Accuracy for Object Detection.',
+             'fnc': executeCommand
+             },
+            'DCUDL':
+            {'desc': 'Detect Change using Deep Learning.',
+             'fnc': executeCommand
+             },
+            'DOUDL':
+            {'desc': 'Detect Object using Deep Learning.',
+             'fnc': executeCommand
+             },
+            'NMS':
+            {'desc': 'Non Maximum Suppression.',
              'fnc': executeCommand
              },
             'FAS':

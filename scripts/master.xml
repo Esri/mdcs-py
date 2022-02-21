@@ -1,658 +1,658 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Application>
-    <!-- Support for Dynamic Variable <Name>$xyz$</Name> or <Name>DefaultValue;$xyz$</Name> The variable value can be passed from the command line -->
-    <Name>Name_of_Project</Name>
-    <Command>DefaultCommand</Command>
-    <!-- Commands avaiable CM, AR, CR, SP, BP, AF, CFC, CC, CBMD, ERF, ANCP, APCP, ABA, SMDI, CBA, CCP, CTP, AMDS, AMD, BMDIC, CDA, GEA, CS, BPS, BF, BS, BB, DN, SY, IG, SS, DF, DO, BO, MMDI, DMD, RRFMD, RP, RI, AI, JF, CV, MTC, ETC, STP, SE, EMDG, EMDI, SMDI, CSDD, STS, CRTT, CLT,CCM,BSM,GPC,IFPC,CRA,USD,DEL,BMI,GMA,AMR,CF,UIO,EFACP,GBAR,RR,CPCSLP,TF -->
-    <!-- Commands can be combined using the + sign and some commands can be called multiple times, refer to MDCS document for more help -->
-    <ArcGISVersion>
-        <!-- Defines Min Max version required. Eg due to know issue in previsous versions -->
-        <Product>
-            <Min></Min>
+	<!-- Support for Dynamic Variable <Name>$xyz$</Name> or <Name>DefaultValue;$xyz$</Name> The variable value can be passed from the command line -->
+	<Name>Name_of_Project</Name>
+	<Command>DefaultCommand</Command>
+	<!-- Commands avaiable CM, AR, CR, SP, BP, AF, CFC, CC, CBMD, ERF, ANCP, APCP, ABA, SMDI, CBA, CCP, CTP, AMDS, AMD, BMDIC, CDA, GEA, CS, BPS, BF, BS, BB, DN, SY, IG, SS, DF, DO, BO, MMDI, DMD, RRFMD, RP, RI, AI, JF, CV, MTC, ETC, STP, SE, EMDG, EMDI, SMDI, CSDD, STS, CRTT, CLT,CCM,BSM,GPC,IFPC,CRA,USD,DEL,BMI,GMA,AMR,CF,UIO,EFACP,GBAR,RR,CPCSLP,TF -->
+	<!-- Commands can be combined using the + sign and some commands can be called multiple times, refer to MDCS document for more help -->
+	<ArcGISVersion>
+		<!-- Defines Min Max version required. Eg due to know issue in previsous versions -->
+		<Product>
+<Min></Min>
             <Max></Max>
-        </Product>
-    </ArcGISVersion>
-    <Workspace>
-        <!-- CM Create Mosaic Dataset -->
-        <!-- https://pro.arcgis.com/en/pro-app/latest/help/data/imagery/creating-mosaic-datasets-wf.htm -->
-        <WorkspacePath>Path_to_folder_where_GDB_Will_be_stored</WorkspacePath>
-        <Geodatabase>Name_of_Geodatabase</Geodatabase>
-        <MosaicDataset>
-            <MosaicDatasetType>source;derived;referenced</MosaicDatasetType>
-            <Name>Name_of_MosaicDataset</Name>
-            <SRS>PROJCS['WGS_1984_Web_Mercator_Auxiliary_Sphere',GEOGCS['GCS_WGS_1984',DATUM['D_WGS_1984',SPHEROID['WGS_1984',6378137.0,298.257223563]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Mercator_Auxiliary_Sphere'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',0.0],PARAMETER['Standard_Parallel_1',0.0],PARAMETER['Auxiliary_Sphere_Type',0.0],UNIT['Meter',1.0]];-20037700 -30241100 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision</SRS>
-            <num_bands>Number_of_Bands</num_bands>
-            <pixel_type>1_BIT;2_BIT;4_BIT;8_BIT_UNSIGNED;8_BIT_SIGNED;16_BIT_UNSIGNED;16_BIT_SIGNED;32_BIT_UNSIGNED;32_BIT_SIGNED;32_BIT_FLOAT;64_BIT</pixel_type>
-            <product_definition>None;NATURAL_COLOR_RGB;NATURAL_COLOR_RGBI;FALSE_COLOR_IRG;FORMOSAT-2_4BANDS;GEOEYE-1_4BANDS;IKONOS_4BANDS;KOMPSAT-2_4BANDS;LANDSAT_6BANDS;LANDSAT_MSS_4BANDS;QUICKBIRD_4BANDS;RAPIDEYE_5BANDS;SPOT-5_4BANDS;WORLDVIEW-2_8BANDS;CUSTOM</product_definition>
-            <product_band_definitions>Band_and_WaveLength_info</product_band_definitions>
-            <!-- CR  Create Refernce Mosaic Dataset-->
-            <!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/create-referenced-mosaic-dataset.htm -->
-            <CreateReferencedMosaicDataset>
-                <in_dataset>Input_MosaicDataset</in_dataset>
-                <out_mosaic_dataset>Output_MosiacDataset</out_mosaic_dataset>
-                <SRS>PROJCS['WGS_1984_Web_Mercator_Auxiliary_Sphere',GEOGCS['GCS_WGS_1984',DATUM['D_WGS_1984',SPHEROID['WGS_1984',6378137.0,298.257223563]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Mercator_Auxiliary_Sphere'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',0.0],PARAMETER['Standard_Parallel_1',0.0],PARAMETER['Auxiliary_Sphere_Type',0.0],UNIT['Meter',1.0]];-20037700 -30241100 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision</SRS>
-                <number_of_bands>#</number_of_bands>
-                <pixel_type>#</pixel_type>
-                <where_clause>SQL_QUERY</where_clause>
-                <in_template_dataset>RasterLayer_or_FeatureLayer</in_template_dataset>
-                <extent>Envelope</extent>
-                <select_using_features>SELECT_USING_FEATURES;NO_SELECT_USING_FEATURES</select_using_features>
-                <lod_field>Field_defining_mapScale</lod_field>
-                <minPS_field>MinPS_Field</minPS_field>
-                <maxPS_field>MaxPS_Field</maxPS_field>
-                <pixelSize>CellSize</pixelSize>
-                <build_boundary>BUILD_BOUNDARY;NO_BOUNDARY</build_boundary>
-            </CreateReferencedMosaicDataset>
-            <!-- AR   Add Rasters-->
-            <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/add-rasters-to-mosaic-dataset.htm -->
-            <AddRasters>
-                <AddRaster>
-                    <dataset_id>Dataset_ID</dataset_id>
-                    <raster_type>RasterTypeName_or_Path_of_rasterType_file</raster_type>
-                    <Sources>
-                        <data_path>DataPath</data_path>
-                    </Sources>
-                    <filter>Filter</filter>
-                    <update_cellsize_ranges>UPDATE_CELL_SIZES;NO_CELL_SIZES</update_cellsize_ranges>
-                    <update_boundary>UPDATE_BOUNDARY,NO_BOUNDARY</update_boundary>
-                    <update_overviews>UPDATE_OVERVIEWS;No_OVERVIEWS</update_overviews>
-                    <maximum_pyramid_levels></maximum_pyramid_levels>
+		</Product>
+	</ArcGISVersion>
+	<Workspace>
+		<!-- CM Create Mosaic Dataset -->
+		<!-- https://pro.arcgis.com/en/pro-app/latest/help/data/imagery/creating-mosaic-datasets-wf.htm -->
+		<WorkspacePath>Path_to_folder_where_GDB_Will_be_stored</WorkspacePath>
+		<Geodatabase>Name_of_Geodatabase</Geodatabase>
+		<MosaicDataset>
+			<MosaicDatasetType>source;derived;referenced</MosaicDatasetType>
+			<Name>Name_of_MosaicDataset</Name>
+			<SRS>PROJCS['WGS_1984_Web_Mercator_Auxiliary_Sphere',GEOGCS['GCS_WGS_1984',DATUM['D_WGS_1984',SPHEROID['WGS_1984',6378137.0,298.257223563]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Mercator_Auxiliary_Sphere'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',0.0],PARAMETER['Standard_Parallel_1',0.0],PARAMETER['Auxiliary_Sphere_Type',0.0],UNIT['Meter',1.0]];-20037700 -30241100 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision</SRS>
+			<num_bands>Number_of_Bands</num_bands>
+			<pixel_type>1_BIT;2_BIT;4_BIT;8_BIT_UNSIGNED;8_BIT_SIGNED;16_BIT_UNSIGNED;16_BIT_SIGNED;32_BIT_UNSIGNED;32_BIT_SIGNED;32_BIT_FLOAT;64_BIT</pixel_type>
+			<product_definition>None;NATURAL_COLOR_RGB;NATURAL_COLOR_RGBI;FALSE_COLOR_IRG;FORMOSAT-2_4BANDS;GEOEYE-1_4BANDS;IKONOS_4BANDS;KOMPSAT-2_4BANDS;LANDSAT_6BANDS;LANDSAT_MSS_4BANDS;QUICKBIRD_4BANDS;RAPIDEYE_5BANDS;SPOT-5_4BANDS;WORLDVIEW-2_8BANDS;CUSTOM</product_definition>
+			<product_band_definitions>Band_and_WaveLength_info</product_band_definitions>
+			<!-- CR  Create Refernce Mosaic Dataset-->
+			<!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/create-referenced-mosaic-dataset.htm -->
+			<CreateReferencedMosaicDataset>
+				<in_dataset>Input_MosaicDataset</in_dataset>
+				<out_mosaic_dataset>Output_MosiacDataset</out_mosaic_dataset>
+				<SRS>PROJCS['WGS_1984_Web_Mercator_Auxiliary_Sphere',GEOGCS['GCS_WGS_1984',DATUM['D_WGS_1984',SPHEROID['WGS_1984',6378137.0,298.257223563]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Mercator_Auxiliary_Sphere'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',0.0],PARAMETER['Standard_Parallel_1',0.0],PARAMETER['Auxiliary_Sphere_Type',0.0],UNIT['Meter',1.0]];-20037700 -30241100 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision</SRS>
+				<number_of_bands>#</number_of_bands>
+				<pixel_type>#</pixel_type>
+				<where_clause>SQL_QUERY</where_clause>
+				<in_template_dataset>RasterLayer_or_FeatureLayer</in_template_dataset>
+				<extent>Envelope</extent>
+				<select_using_features>SELECT_USING_FEATURES;NO_SELECT_USING_FEATURES</select_using_features>
+				<lod_field>Field_defining_mapScale</lod_field>
+				<minPS_field>MinPS_Field</minPS_field>
+				<maxPS_field>MaxPS_Field</maxPS_field>
+				<pixelSize>CellSize</pixelSize>
+				<build_boundary>BUILD_BOUNDARY;NO_BOUNDARY</build_boundary>
+			</CreateReferencedMosaicDataset>
+			<!-- AR   Add Rasters-->
+			<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/add-rasters-to-mosaic-dataset.htm -->
+			<AddRasters>
+				<AddRaster>
+					<dataset_id>Dataset_ID</dataset_id>
+					<raster_type>RasterTypeName_or_Path_of_rasterType_file</raster_type>
+					<Sources>
+						<data_path>DataPath</data_path>
+					</Sources>
+					<filter>Filter</filter>
+					<update_cellsize_ranges>UPDATE_CELL_SIZES;NO_CELL_SIZES</update_cellsize_ranges>
+					<update_boundary>UPDATE_BOUNDARY,NO_BOUNDARY</update_boundary>
+					<update_overviews>UPDATE_OVERVIEWS;No_OVERVIEWS</update_overviews>
+<maximum_pyramid_levels></maximum_pyramid_levels>
                     <maximum_cell_size></maximum_cell_size>
                     <minimum_dimension></minimum_dimension>
                     <spatial_reference></spatial_reference>
-                    <sub_folder>SUBFOLDERS;NO_SUBFOLDERS</sub_folder>
-                    <duplicate_items_action>ALLOW_DUPLICATES;EXCLUDE_DUPLICATES;OVERWRITE_DUPLICATES</duplicate_items_action>
-                    <build_pyramids>NO_PYRAMIDS;BUILD_PYRAMIDS</build_pyramids>
-                    <calculate_statistics>CALCULATE_STATISTICS;NO_STATISTICS </calculate_statistics>
-                    <build_thumbnails>BUILD_THUMBNAILS;NOTHUMBNAILS</build_thumbnails>
+					<sub_folder>SUBFOLDERS;NO_SUBFOLDERS</sub_folder>
+					<duplicate_items_action>ALLOW_DUPLICATES;EXCLUDE_DUPLICATES;OVERWRITE_DUPLICATES</duplicate_items_action>
+					<build_pyramids>NO_PYRAMIDS;BUILD_PYRAMIDS</build_pyramids>
+					<calculate_statistics>CALCULATE_STATISTICS;NO_STATISTICS </calculate_statistics>
+					<build_thumbnails>BUILD_THUMBNAILS;NOTHUMBNAILS</build_thumbnails>
                     <operation_description></operation_description>
-                    <force_spatial_reference>FORCE_SPATIAL_REFERENCE;NO_FORCE_SPATIAL_REFERENCE</force_spatial_reference>
-                    <estimate_statistics>NO_STATISTICS;ESTIMATE_STATISTICS</estimate_statistics>
-                    <aux_inputs>"FileType1 'path to the file';FileType12 'path to the file'....."</aux_inputs>
-                    <enable_pixel_cache>USE_PIXEL_CACHE;NO_PIXEL_CACHE</enable_pixel_cache>
-                    <cache_location>Path where cache will be stored</cache_location>
-                </AddRaster>
-                <AddRaster>
-                    <dataset_id>ID</dataset_id>
-                    <raster_type>RasterType</raster_type>
-                    <Sources>
-                        <data_path>DataPath</data_path>
-                    </Sources>
-                    <filter>Filter</filter>
-                    <update_cellsize_ranges>UPDATE_CELL_SIZES;NO_CELL_SIZES</update_cellsize_ranges>
-                    <update_boundary>UPDATE_BOUNDARY,NO_BOUNDARY</update_boundary>
-                    <update_overviews>UPDATE_OVERVIEWS;No_OVERVIEWS</update_overviews>
-                    <maximum_pyramid_levels></maximum_pyramid_levels>
+					<force_spatial_reference>FORCE_SPATIAL_REFERENCE;NO_FORCE_SPATIAL_REFERENCE</force_spatial_reference>
+					<estimate_statistics>NO_STATISTICS;ESTIMATE_STATISTICS</estimate_statistics>
+					<aux_inputs>"FileType1 'path to the file';FileType12 'path to the file'....."</aux_inputs>
+					<enable_pixel_cache>USE_PIXEL_CACHE;NO_PIXEL_CACHE</enable_pixel_cache>
+					<cache_location>Path where cache will be stored</cache_location>
+				</AddRaster>
+				<AddRaster>
+					<dataset_id>ID</dataset_id>
+					<raster_type>RasterType</raster_type>
+					<Sources>
+						<data_path>DataPath</data_path>
+					</Sources>
+					<filter>Filter</filter>
+					<update_cellsize_ranges>UPDATE_CELL_SIZES;NO_CELL_SIZES</update_cellsize_ranges>
+					<update_boundary>UPDATE_BOUNDARY,NO_BOUNDARY</update_boundary>
+					<update_overviews>UPDATE_OVERVIEWS;No_OVERVIEWS</update_overviews>
+<maximum_pyramid_levels></maximum_pyramid_levels>
                     <maximum_cell_size></maximum_cell_size>
                     <minimum_dimension></minimum_dimension>
                     <spatial_reference></spatial_reference>
-                    <sub_folder>SUBFOLDERS;NO_SUBFOLDERS</sub_folder>
-                    <duplicate_items_action>ALLOW_DUPLICATES;EXCLUDE_DUPLICATES;OVERWRITE_DUPLICATES</duplicate_items_action>
-                    <build_pyramids>NO_PYRAMIDS;BUILD_PYRAMIDS</build_pyramids>
-                    <calculate_statistics>CALCULATE_STATISTICS;NO_STATISTICS </calculate_statistics>
-                    <build_thumbnails>BUILD_THUMBNAILS;NOTHUMBNAILS</build_thumbnails>
+					<sub_folder>SUBFOLDERS;NO_SUBFOLDERS</sub_folder>
+					<duplicate_items_action>ALLOW_DUPLICATES;EXCLUDE_DUPLICATES;OVERWRITE_DUPLICATES</duplicate_items_action>
+					<build_pyramids>NO_PYRAMIDS;BUILD_PYRAMIDS</build_pyramids>
+					<calculate_statistics>CALCULATE_STATISTICS;NO_STATISTICS </calculate_statistics>
+					<build_thumbnails>BUILD_THUMBNAILS;NOTHUMBNAILS</build_thumbnails>
                     <operation_description></operation_description>
-                    <force_spatial_reference>FORCE_SPATIAL_REFERENCE;NO_FORCE_SPATIAL_REFERENCE</force_spatial_reference>
-                    <enable_pixel_cache>USE_PIXEL_CACHE;NO_PIXEL_CACHE</enable_pixel_cache>
-                    <cache_location>Path where cache will be stored</cache_location>
-                </AddRaster>
-            </AddRasters>
-            <!-- SP    Set Properties -->
-            <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/set-mosaic-dataset-properties.htm -->
-            <!-- sp_flag can take setpropertybyjson;setpropertybymosiac;extractproperty;compareproperty -->
-            <!-- sp_flag, if no flag is given, default set property is applied -->
-            <SetProperty>
-                <sp_inputjson>#;$sp_inputjson$</sp_inputjson>
-                <sp_mosaic>#;$sp_mosaic$</sp_mosaic>
-                <sp_outputjson>#;$sp_outputjson$</sp_outputjson>
-                <sp_flag>#;$sp_flag$</sp_flag>
-            </SetProperty>
-            <DefaultProperties>
-                <max_num_per_mosaic>50</max_num_per_mosaic>
-                <rows_maximum_imagesize>4000</rows_maximum_imagesize>
-                <columns_maximum_imagesize>4000</columns_maximum_imagesize>
-                <allowed_compressions>LZ77;NONE;JPEG;LERC</allowed_compressions>
-                <default_compression_type>None;JPEG</default_compression_type>
-                <JPEG_quality>0-100</JPEG_quality>
-                <LERC_Tolerance>0.01</LERC_Tolerance>
-                <resampling_type>NEAREST;BILINEAR;CUBIC;MAJORITY</resampling_type>
-                <clip_to_footprints>NOT_CLIP;CLIP</clip_to_footprints>
-                <clip_to_boundary>CLIP;NOT_CLIP</clip_to_boundary>
-                <color_correction>NOT_APPLY;APPLY</color_correction>
-                <footprints_may_contain_nodata>FOOTPRINTS_MAY_CONTAIN_NODATA;FOOTPRINTS_DO_NOT_CONTAIN_NODATA</footprints_may_contain_nodata>
-                <allowed_mensuration_capabilities>BASIC;Base-Top Height;Base-Top Shadow Height;Top-Top Shadow Height;3D</allowed_mensuration_capabilities>
-                <default_mensuration_capabilities>BASIC</default_mensuration_capabilities>
-                <allowed_mosaic_methods>Center;NorthWest;Nadir;Viewpoint;LockRaster;ByAttribute;Seamline;None</allowed_mosaic_methods>
-                <default_mosaic_method>ByAttribute</default_mosaic_method>
-                <order_field>Name_of_Field</order_field>
-                <order_base>Base_value</order_base>
-                <sorting_order>ASCENDING;DESCENDING</sorting_order>
-                <mosaic_operator>FIRST;LAST;MIN;MAX;MEAN;BLEND</mosaic_operator>
-                <blend_width>10</blend_width>
-                <view_point_x>300</view_point_x>
-                <view_point_y>300</view_point_y>
-                <max_num_per_mosaic>50</max_num_per_mosaic>
-                <cell_size_tolerance>0.8</cell_size_tolerance>
-                <!-- Increase to enable ordering of images with greater pixel size differentiation-->
-                <cell_size>#</cell_size>
-                <!-- Use to set the smallest pixels size of the mosaic dataset -->
-                <metadata_level>FULL;NONE;BASIC</metadata_level>
-                <transmission_fields>List_of_fields_to_be_transmitted</transmission_fields>
-                <use_time>ENABLED;DISABLED</use_time>
-                <start_time_field>Field_name_for_startTime</start_time_field>
-                <end_time_field>Field_name_for_endTime</end_time_field>
-                <time_format>#</time_format>
-                <geographic_transform>#</geographic_transform>
-                <max_num_of_download_items>50</max_num_of_download_items>
-                <max_num_of_records_returned>2000</max_num_of_records_returned>
-                <data_source_type>GENERIC;THEMATIC;PROCESSED;ELEVATION;SCIENTIFIC;VECTOR_UV;VECTOR_MAGDIR</data_source_type>
-                <minimum_pixel_contribution>#</minimum_pixel_contribution>
-                <processing_templates>#</processing_templates>
-                <default_processing_template>#</default_processing_template>
-                <time_interval>#</time_interval>
-                <time_interval_units>None;Milliseconds;Seconds;Minutes;Hours;Days;Weeks;Months;Years;Decades;Centuries</time_interval_units>
-                <product_definition>None;NATURAL_COLOR_RGB;NATURAL_COLOR_RGBI;FALSE_COLOR_IRG;FORMOSAT-2_4BANDS;GEOEYE-1_4BANDS;IKONOS_4BANDS;KOMPSAT-2_4BANDS;LANDSAT_6BANDS;LANDSAT_MSS_4BANDS;QUICKBIRD_4BANDS;RAPIDEYE_5BANDS;SPOT-5_4BANDS;WORLDVIEW-2_8BANDS;CUSTOM</product_definition>
-                <product_band_definitions>Band_and_WaveLength_info</product_band_definitions>
-            </DefaultProperties>
-            <Table>
-                <!-- AF  Add Fields-->
-                <!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/add-field.htm -->
-                <AddFields>AddFields</AddFields>
-                <Fields>
-                    <Field>
-                        <name>Dataset_ID</name>
-                        <type>TEXT</type>
-                        <length>32</length>
-                    </Field>
-                </Fields>
-            </Table>
-            <Processes>
-                <!-- CC    Calculate Cell Size Ranges -->
-                <!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/calculate-cell-size-ranges.htm -->
-                <CalculateCellSizeRanges>
-                    <where_clause>SQL QUERY</where_clause>
-                    <do_compute_min>NO_MIN_CELL_SIZES</do_compute_min>
-                    <do_compute_max>NO_MAX_CELL_SIZES</do_compute_max>
-                    <max_range_factor>10</max_range_factor>
-                    <cell_size_tolerance_factor>#</cell_size_tolerance_factor>
-                    <update_missing_only>UPDATE_MISSING_ONLY;UPDATE_ALL</update_missing_only>
-                </CalculateCellSizeRanges>
-                <!-- BP    Build Pyramids-->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/build-pyramids.htm -->
-                <BuildPyramids>
-                    <pyramid_level>1-29</pyramid_level>
-                    <SKIP_FIRST>NONE;SKIP_FIRST</SKIP_FIRST>
-                    <resample_technique>NEAREST;BILINEAR;CUBIC</resample_technique>
-                    <compression_type>DEFAULT;JPEG;JPEG_YCbCr;None;LZW</compression_type>
-                    <compression_quality>0-100</compression_quality>
-                    <skip_existing>OVERWRITE;SKIP_EXISTING</skip_existing>
-                </BuildPyramids>
+					<force_spatial_reference>FORCE_SPATIAL_REFERENCE;NO_FORCE_SPATIAL_REFERENCE</force_spatial_reference>
+					<enable_pixel_cache>USE_PIXEL_CACHE;NO_PIXEL_CACHE</enable_pixel_cache>
+					<cache_location>Path where cache will be stored</cache_location>
+				</AddRaster>
+			</AddRasters>
+			<!-- SP    Set Properties -->
+			<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/set-mosaic-dataset-properties.htm -->
+			<!-- sp_flag can take setpropertybyjson;setpropertybymosiac;extractproperty;compareproperty -->
+			<!-- sp_flag, if no flag is given, default set property is applied -->
+			<SetProperty>
+				<sp_inputjson>#;$sp_inputjson$</sp_inputjson>
+				<sp_mosaic>#;$sp_mosaic$</sp_mosaic>
+				<sp_outputjson>#;$sp_outputjson$</sp_outputjson>
+				<sp_flag>#;$sp_flag$</sp_flag>
+			</SetProperty>
+			<DefaultProperties>
+				<max_num_per_mosaic>50</max_num_per_mosaic>
+				<rows_maximum_imagesize>4000</rows_maximum_imagesize>
+				<columns_maximum_imagesize>4000</columns_maximum_imagesize>
+				<allowed_compressions>LZ77;NONE;JPEG;LERC</allowed_compressions>
+				<default_compression_type>None;JPEG</default_compression_type>
+				<JPEG_quality>0-100</JPEG_quality>
+				<LERC_Tolerance>0.01</LERC_Tolerance>
+				<resampling_type>NEAREST;BILINEAR;CUBIC;MAJORITY</resampling_type>
+				<clip_to_footprints>NOT_CLIP;CLIP</clip_to_footprints>
+				<clip_to_boundary>CLIP;NOT_CLIP</clip_to_boundary>
+				<color_correction>NOT_APPLY;APPLY</color_correction>
+				<footprints_may_contain_nodata>FOOTPRINTS_MAY_CONTAIN_NODATA;FOOTPRINTS_DO_NOT_CONTAIN_NODATA</footprints_may_contain_nodata>
+				<allowed_mensuration_capabilities>BASIC;Base-Top Height;Base-Top Shadow Height;Top-Top Shadow Height;3D</allowed_mensuration_capabilities>
+				<default_mensuration_capabilities>BASIC</default_mensuration_capabilities>
+				<allowed_mosaic_methods>Center;NorthWest;Nadir;Viewpoint;LockRaster;ByAttribute;Seamline;None</allowed_mosaic_methods>
+				<default_mosaic_method>ByAttribute</default_mosaic_method>
+				<order_field>Name_of_Field</order_field>
+				<order_base>Base_value</order_base>
+				<sorting_order>ASCENDING;DESCENDING</sorting_order>
+				<mosaic_operator>FIRST;LAST;MIN;MAX;MEAN;BLEND</mosaic_operator>
+				<blend_width>10</blend_width>
+				<view_point_x>300</view_point_x>
+				<view_point_y>300</view_point_y>
+				<max_num_per_mosaic>50</max_num_per_mosaic>
+				<cell_size_tolerance>0.8</cell_size_tolerance>
+				<!-- Increase to enable ordering of images with greater pixel size differentiation-->
+				<cell_size>#</cell_size>
+				<!-- Use to set the smallest pixels size of the mosaic dataset -->
+				<metadata_level>FULL;NONE;BASIC</metadata_level>
+				<transmission_fields>List_of_fields_to_be_transmitted</transmission_fields>
+				<use_time>ENABLED;DISABLED</use_time>
+				<start_time_field>Field_name_for_startTime</start_time_field>
+				<end_time_field>Field_name_for_endTime</end_time_field>
+				<time_format>#</time_format>
+				<geographic_transform>#</geographic_transform>
+				<max_num_of_download_items>50</max_num_of_download_items>
+				<max_num_of_records_returned>2000</max_num_of_records_returned>
+				<data_source_type>GENERIC;THEMATIC;PROCESSED;ELEVATION;SCIENTIFIC;VECTOR_UV;VECTOR_MAGDIR</data_source_type>
+				<minimum_pixel_contribution>#</minimum_pixel_contribution>
+				<processing_templates>#</processing_templates>
+				<default_processing_template>#</default_processing_template>
+				<time_interval>#</time_interval>
+				<time_interval_units>None;Milliseconds;Seconds;Minutes;Hours;Days;Weeks;Months;Years;Decades;Centuries</time_interval_units>
+				<product_definition>None;NATURAL_COLOR_RGB;NATURAL_COLOR_RGBI;FALSE_COLOR_IRG;FORMOSAT-2_4BANDS;GEOEYE-1_4BANDS;IKONOS_4BANDS;KOMPSAT-2_4BANDS;LANDSAT_6BANDS;LANDSAT_MSS_4BANDS;QUICKBIRD_4BANDS;RAPIDEYE_5BANDS;SPOT-5_4BANDS;WORLDVIEW-2_8BANDS;CUSTOM</product_definition>
+				<product_band_definitions>Band_and_WaveLength_info</product_band_definitions>
+			</DefaultProperties>
+			<Table>
+				<!-- AF  Add Fields-->
+				<!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/add-field.htm -->
+				<AddFields>AddFields</AddFields>
+				<Fields>
+					<Field>
+						<name>Dataset_ID</name>
+						<type>TEXT</type>
+						<length>32</length>
+					</Field>
+				</Fields>
+			</Table>
+			<Processes>
+				<!-- CC    Calculate Cell Size Ranges -->
+				<!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/calculate-cell-size-ranges.htm -->
+				<CalculateCellSizeRanges>
+					<where_clause>SQL QUERY</where_clause>
+					<do_compute_min>NO_MIN_CELL_SIZES</do_compute_min>
+					<do_compute_max>NO_MAX_CELL_SIZES</do_compute_max>
+					<max_range_factor>10</max_range_factor>
+					<cell_size_tolerance_factor>#</cell_size_tolerance_factor>
+					<update_missing_only>UPDATE_MISSING_ONLY;UPDATE_ALL</update_missing_only>
+				</CalculateCellSizeRanges>
+				<!-- BP    Build Pyramids-->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/build-pyramids.htm -->
+				<BuildPyramids>
+					<pyramid_level>1-29</pyramid_level>
+					<SKIP_FIRST>NONE;SKIP_FIRST</SKIP_FIRST>
+					<resample_technique>NEAREST;BILINEAR;CUBIC</resample_technique>
+					<compression_type>DEFAULT;JPEG;JPEG_YCbCr;None;LZW</compression_type>
+					<compression_quality>0-100</compression_quality>
+					<skip_existing>OVERWRITE;SKIP_EXISTING</skip_existing>
+				</BuildPyramids>
                 <!-- CBMD    Color Balance Mosaic Dataset -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/color-balance-mosaic-dataset.htm -->
-                <ColorBalanceMosaicDataset>
-                    <balancing_method>DODGING;HISTOGRAM;STANDARD_DEVIATION</balancing_method>
-                    <color_surface_type>SINGLE_COLOR;COLOR_GRID;FIRST_ORDER;SECOND_ORDER;THIRD_ORDER</color_surface_type>
-                    <target_raster>#</target_raster>
-                    <gamma>#</gamma>
-                    <exclude_raster>#</exclude_raster>
-                    <stretch_type>NONE;ADAPTIVE;MINIMUM_MAXIMUM;STANDARD_DEVIATION</stretch_type>
-                    <block_field>#</block_field>
-                </ColorBalanceMosaicDataset>
-                <!-- ERF     Edit Raster Funtion -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/edit-raster-function.htmm -->
-                <EditRasterFunction>
-                    <edit_mosaic_dataset_item>EDIT_MOSAIC_DATASET_ITEM;EDIT_MOSAIC_DATASET</edit_mosaic_dataset_item>
-                    <edit_options>INSERT;REPLACE;REMOVE</edit_options>
-                    <function_chain_definition>path_to_rft_file</function_chain_definition>
-                    <location_function_name>Place_to_insert_replace_or_remove_the_function_chain</location_function_name>
-                </EditRasterFunction>
-                <!-- ANCP Analyze Control Points -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/analyze-control-points.htm -->
-                <AnalyzeControlPoints>
-                    <in_control_points>#</in_control_points>
-                    <out_coverage_table>#</out_coverage_table>
-                    <out_overlap_table>#</out_overlap_table>
-                    <in_mask_dataset>#</in_mask_dataset>
-                    <minimum_area>#</minimum_area>
-                    <maximum_level>#</maximum_level>
-                </AnalyzeControlPoints>
-                <!-- APCP     Append Control Points -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/append-control-points.htm -->
-                <AppendControlPoints>
-                    <in_master_control_points>#</in_master_control_points>
-                    <in_input_control_points>#</in_input_control_points>
-                    <in_z_field>#</in_z_field>
-                    <in_tag_field>#</in_tag_field>
-                    <in_dem>#</in_dem>
-                    <in_xy_accuracy>#</in_xy_accuracy>
-                    <in_z_accuracy>#</in_z_accuracy>
-                </AppendControlPoints>
-                <!-- ABA     Apply Block Adjustment -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/apply-block-adjustment.htm -->
-                <ApplyBlockAdjustment>
-                    <adjustment_operation>ADJUST;RESET</adjustment_operation>
-                    <input_solution_table>#</input_solution_table>
-                    <pan_to_ms_scaling_factor>#</pan_to_ms_scaling_factor>
-                    <DEM>#</DEM>
-                    <zoffset>#</zoffset>
-                    <control_point_table>#</control_point_table>
-                    <adjust_footprints>NO_ADJUST_FOOTPRINTS;ADJUST_FOOTPRINTS</adjust_footprints>
-                </ApplyBlockAdjustment>
-                <!-- CBA     Compute Block Adjustment -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/compute-block-adjustments.htm -->
-                <ComputeBlockAdjustment>
-                    <in_control_points>#</in_control_points>
-                    <transformation_type>POLYORDER0;POLYORDER1;RPC;Frame</transformation_type>
-                    <out_solution_table>#</out_solution_table>
-                    <out_solution_point_table>#</out_solution_point_table>
-                    <maximum_residual_value>2</maximum_residual_value>
-                    <adjustment_options>MinResidual;MaxResidualFactor;_BAO;_BAI</adjustment_options>
-                    <location_accuracy>HIGH;MEDIUM;LOW</location_accuracy>
-                    <out_quality_table>#</out_quality_table>
-                </ComputeBlockAdjustment>
-                <!-- CCP     Compute Control Points -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/compute-control-points.htm -->
-                <ComputeControlPoints>
-                    <in_reference_images>#</in_reference_images>
-                    <out_control_points>#</out_control_points>
-                    <similarity>LOW;MEDIUM;HIGH</similarity>
-                    <out_image_feature_points>#</out_image_feature_points>
-                    <density>LOW;MEDIUM;HIGH</density>
-                    <distribution>RANDOM;REGULAR</distribution>
-                    <area_of_interest>#</area_of_interest>
-                    <location_accuracy>HIGH;MEDIUM;LOW</location_accuracy>
-                </ComputeControlPoints>
-                <!-- CTP     Compute Tie Points -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/compute-tie-points.htm -->
-                <ComputeTiePoints>
-                    <out_control_points>#</out_control_points>
-                    <similarity>LOW;MEDIUM;HIGH</similarity>
-                    <in_mask_dataset>#</in_mask_dataset>
-                    <out_image_features>#</out_image_features>
-                    <density>LOW;MEDIUM;HIGH</density>
-                    <distribution>RANDOM;REGULAR</distribution>
-                    <location_accuracy>HIGH;MEDIUM;LOW</location_accuracy>
-                </ComputeTiePoints>
-                <!-- CCM     Compute Camera Model -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/compute-camera-model.htm -->
-                <!--This tool will work only with 10.5 and above version-->
-                <ComputeCameraModel>
-                    <out_dsm>#</out_dsm>
-                    <gps_accuracy>HIGH;MEDIUM,LOW;VERY_LOW</gps_accuracy>
-                    <estimate>ESTIMATE;NO_ESTIMATE</estimate>
-                    <refine>REFINE;NO_REFINE</refine>
-                    <apply_adjustment>APPLY;NO_APPLY</apply_adjustment>
-                    <maximum_residual>5</maximum_residual>
-                    <initial_tiepoint_resolution>8</initial_tiepoint_resolution>
-                    <out_control_points>#</out_control_points>
-                    <out_solution_table>#</out_solution_table>
-                    <out_solution_point_table>#</out_solution_point_table>
-                    <out_flight_path>#</out_flight_path>
-                    <maximum_overlap>#</maximum_overlap>
-                    <minimum_coverage>0.2</minimum_coverage>
-                    <remove>NO_REMOVE;REMOVE</remove>
-                    <in_control_points>#</in_control_points>
-                    <options>[option1,option2...]</options>
-                </ComputeCameraModel>
-                <!-- BSM    Build Stereo Model -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/build-stereo-model.htm -->
-                <!--This tool will work only with 10.5 and above version-->
-                <BuildStereoModel>
-                    <minimum_angle>10</minimum_angle>
-                    <maximum_angle>70</maximum_angle>
-                    <minimum_overlap>0.5</minimum_overlap>
-                    <maximum_diff_OP>#</maximum_diff_OP>
-                    <maximum_diff_GSD>2</maximum_diff_GSD>
-                </BuildStereoModel>
-                <!-- GPC     Generate Point Cloud -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/generate-point-cloud.htm -->
-                <!--This tool will work only with 10.5 and above version-->
-                <GeneratePointCloud>
-                    <matching_method>ETM;SGM;ESGM</matching_method>
-                    <out_folder>#</out_folder>
-                    <out_base_name>#</out_base_name>
-                    <object_size>50</object_size>
-                    <ground_spacing>#</ground_spacing>
-                    <minimum_pairs>2</minimum_pairs>
-                    <minimum_area>0.6</minimum_area>
-                    <minimum_adjustment_quality>0.2</minimum_adjustment_quality>
-                    <maximum_diff_gsd>2</maximum_diff_gsd>
-                    <maximum_diff_OP>8</maximum_diff_OP>
-                </GeneratePointCloud>
-                <!-- IFPC     Interpolate From Point Cloud -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/interpolate-from-point-cloud.htm -->
-                <!--This tool will work only with 10.5 and above version-->
-                <InterpolateFromPointCloud>
-                    <in_container>#</in_container>
-                    <out_raster>#</out_raster>
-                    <cell_size>#</cell_size>
-                    <interpolation_method>TRIANGULATION;NATURAL_NEIGHBOR;IDW</interpolation_method>
-                    <smooth_method>GAUSS3x3;GAUSS5x5;GAUSS7x7;GAUSS9x9;NONE</smooth_method>
-                    <surface_type>DTM;DSM</surface_type>
-                    <fill_dem>#</fill_dem>
-                </InterpolateFromPointCloud>
-                <!-- AMDS     Alter Mosaic Dataset Schema -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/alter-mosaic-dataset-schema.htm -->
-                <AlterMosaicDatasetSchema>
-                    <side_tables>side_tables</side_tables>
-                    <raster_type_names>raster_types</raster_type_names>
-                    <editor_tracking>NO_EDITOR_TRACKING;EDITOR_TRACKING</editor_tracking>
-                </AlterMosaicDatasetSchema>
-                <!-- AMD     Analyze Mosaic Dataset  -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/analyze-mosaic-dataset.htm -->
-                <AnalyzeMosaicDataset>
-                    <where_clause>#</where_clause>
-                    <checker_keywords>FOOTPRINT;FUNCTION;RASTER;PATHS;SOURCE_VALIDITY;STALE;PYRAMIDS;STATISTICS;PERFORMANCE;INFORMATION</checker_keywords>
-                </AnalyzeMosaicDataset>
-                <!-- BMDIC     Build Mosaic Dataset Item Cache  -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/build-mosaic-dataset-item-cache.htm -->
-                <BuildMosaicDatasetItemCache>
-                    <where_clause>#</where_clause>
-                    <define_cache>DEFINE_CACHE;NO_DEFINE_CACHE</define_cache>
-                    <generate_cache>GENERATE_CACHE;NO_GENERATE_CACHE</generate_cache>
-                    <item_cache_folder>#</item_cache_folder>
-                    <compression_method>LOSSLESS;LOSSY;NONE</compression_method>
-                    <compression_quality>1-100</compression_quality>
-                    <max_allowed_rows>#</max_allowed_rows>
-                    <max_allowed_columns>#</max_allowed_columns>
-                    <request_size_type>PIXEL_SIZE_FACTOR;PIXEL_SIZE</request_size_type>
-                    <request_size>#</request_size>
-                </BuildMosaicDatasetItemCache>
-                <!-- CDA     Compute Dirty Area  -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/compute-dirty-area.htm -->
-                <ComputeDirtyArea>
-                    <where_clause>#</where_clause>
-                    <timestamp>#</timestamp>
-                    <out_feature_class>#</out_feature_class>
-                </ComputeDirtyArea>
-                <!-- GEA     Generate Exclude Area  -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/generate-exclude-area.htm -->
-                <GenerateExcludeArea>
-                    <in_raster>#</in_raster>
-                    <out_raster>#</out_raster>
-                    <pixel_type>8_BIT;11_BIT;12_BIT;16_BIT</pixel_type>
-                    <generate_method>COLOR_MASK;HISTOGRAM_PERCENTAGE</generate_method>
-                    <max_red>255</max_red>
-                    <max_green>255</max_green>
-                    <max_blue>255</max_blue>
-                    <max_white>255</max_white>
-                    <max_black>0</max_black>
-                    <max_magenta>255</max_magenta>
-                    <max_cyan>255</max_cyan>
-                    <max_yellow>255</max_yellow>
-                    <percentage_low>0</percentage_low>
-                    <percentage_high>100</percentage_high>
-                </GenerateExcludeArea>
-                <!-- CS   Calcualate Statistic -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/calculate-statistics.htm -->
-                <CalculateStatistics>
-                    <x_skip_factor>1</x_skip_factor>
-                    <y_skip_factor>1</y_skip_factor>
-                    <ignore_values>#</ignore_values>
-                    <skip_existing>OVERWRITE;SKIP_EXISTING</skip_existing>
-                    <area_of_interest>#</area_of_interest>
-                </CalculateStatistics>
-                <!-- BPS   Build Pyramids and Statistics -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/build-pyramids-and-statistics.htm-->
-                <BuildPyramidsAndStatistics>
-                    <include_subdirectories>NONE;INCLUDE_SUBDIRECTORIES</include_subdirectories>
-                    <build_pyramids>NONE;BUILD_PYRAMIDS</build_pyramids>
-                    <calculate_statistics>NONE;CALCULATE_STATISTICS</calculate_statistics>
-                    <BUILD_ON_SOURCE>NONE;BUILD_ON_SOURCE </BUILD_ON_SOURCE>
-                    <block_field>#</block_field>
-                    <estimate_statistics>NONE;ESTIMATE_STATISTICS</estimate_statistics>
-                    <x_skip_factor>1</x_skip_factor>
-                    <y_skip_factor>1</y_skip_factor>
-                    <ignore_values>#</ignore_values>
-                    <pyramid_level>1-29</pyramid_level>
-                    <SKIP_FIRST>NONE;SKIP_FIRST</SKIP_FIRST>
-                    <resample_technique>NEAREST;BILINEAR;CUBIC</resample_technique>
-                    <compression_type>DEFAULT;JPEG;JPEG_YCbCr;None;LZW</compression_type>
-                    <compression_quality>0-100</compression_quality>
-                    <skip_existing>OVERWRITE;SKIP_EXISTING</skip_existing>
-                </BuildPyramidsAndStatistics>
-                <!-- BF  Build Footprints -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/build-footprints.htm -->
-                <BuildFootprint>
-                    <where_clause>SQL_QUERY</where_clause>
-                    <reset_footprint>RADIOMETRY;GEOMETRY;COPY_FROM_SIBLING;NONE</reset_footprint>
-                    <max_data_value>Highest_value_representing_valid_data</max_data_value>
-                    <min_data_value>1</min_data_value>
-                    <approx_num_vertices>Approximate_number_of_vertices</approx_num_vertices>
-                    <shrink_distance>0</shrink_distance>
-                    <update_boundary>NO_BOUNDARY;UPDATE_BOUNDARY</update_boundary>
-                    <skip_derived_images>SKIP_DERIVED_IMAGES;NO_SKIP_DERIVED_IMAGES</skip_derived_images>
-                    <maintain_edges>NO_MAINTAIN_EDGES;MAINTAIN_EDGES</maintain_edges>
-                    <request_size>2000</request_size>
-                    <min_region_size>#</min_region_size>
-                    <simplification_method>NONE;CONVEX_HULL;ENVELOPE</simplification_method>
-                    <edge_tolerance>#</edge_tolerance>
-                    <max_sliver_size>#</max_sliver_size>
-                    <min_thinness_ratio>0.0-1.0</min_thinness_ratio>
-                </BuildFootprint>
-                <!-- BS  Build Seamlines-->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/build-seamlines.htm -->
-                <BuildSeamlines>
-                    <cell_size>#</cell_size>
-                    <sort_method>NORTH_WEST;CLOSEST_TO_VIEWPOINT;BY_ATTRIBUTE</sort_method>
-                    <sort_order>ASCENDING;DESCENDING</sort_order>
-                    <order_by_attribute>#</order_by_attribute>
-                    <order_by_base_value>#</order_by_base_value>
-                    <view_point>#</view_point>
-                    <computation_method>GEOMETRY;RADIOMETRY;COPY_FOOTPRINT;COPY_TO_SIBLING</computation_method>
-                    <blend_width>#</blend_width>
-                    <blend_type>BOTH;INSIDE;OUTSIDE</blend_type>
-                    <request_size>#</request_size>
-                    <request_size_type>PIXELS;PIXELSIZE_FACTOR</request_size_type>
-                    <blend_width_units>PIXELS;GROUND_UNITS</blend_width_units>
-                    <area_of_interest>#</area_of_interest>
-                    <where_clause>#</where_clause>
-                    <update_existing>IGNORE_EXISTING;UPDATE_EXISTING </update_existing>
-                    <min_region_size>100</min_region_size>
-                    <min_thinness_ratio>#</min_thinness_ratio>
-                    <max_sliver_size>#</max_sliver_size>
-                </BuildSeamlines>
-                <!-- BB  Build Boundary -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/build-boundary.htm -->
-                <BuildBoundary>
-                    <where_clause>SQL_QUERY</where_clause>
-                    <append_to_existing>OVERWRITE;APPEND</append_to_existing>
-                    <simplification_method>NONE;CONVEX_HULL;ENVELOPE</simplification_method>
-                </BuildBoundary>
-                <!-- DN  Defined NoData -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/environment-settings/nodata.htm -->
-                <DefineMosaicDatasetNoData>
-                    <num_bands>No_of_Bands</num_bands>
-                    <bands_for_nodata_value>DefineNOData_value</bands_for_nodata_value>
-                    <where_clause>where_clause</where_clause>
-                    <bands_for_valid_data_range>bands_for_nodata_value</bands_for_valid_data_range>
-                    <Composite_nodata_value>NO_COMPOSITE_NODATA;COMPOSITE_NODATA</Composite_nodata_value>
-                </DefineMosaicDatasetNoData>
-                <!-- SY   Synchronize -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/synchronize-mosaic-dataset.htm -->
-                <SynchronizeMosaicDataset>
-                    <where_clause>SQL_QUERY</where_clause>
-                    <new_items>NO_NEW_ITEMS;UPDATE_WITH_NEW_ITEMS</new_items>
-                    <sync_only_stale>SYNC_STALE;SYNC_ALL</sync_only_stale>
-                    <update_cellsize_ranges>UPDATE_CELL_SIZES;NO_CELL_SIZES</update_cellsize_ranges>
-                    <update_boundary>UPDATE_BOUNDARY;NO_BOUNDARY</update_boundary>
-                    <update_overviews>UPDATE_OVERVIEWS;NO_OVERVIEWS</update_overviews>
-                    <build_pyramids>BUILD_PYRAMIDS;NO_PYRAMIDS</build_pyramids>
-                    <calculate_statistics>CALCULATE_STATISTICS;NO_STATISTICS</calculate_statistics>
-                    <build_thumbnails>NO_THUMBNAILS;BUILD_THUMBNAILS</build_thumbnails>
-                    <build_item_cache>BUILD_ITEM_CACHE;NO_ITEM_CACHE</build_item_cache>
-                    <rebuild_raster>REBUILD_RASTER,NO_RASTER</rebuild_raster>
-                    <update_fields>UPDATE_FIELDS;NO_FIELDS</update_fields>
-                    <fields_to_update>Specify_which_fields_should_be_updated</fields_to_update>
-                    <existing_items>UPDATE_EXISTING_ITEMS;IGNORE_EXISTING_ITEMS</existing_items>
-                    <broken_items>IGNORE_BROKEN_ITEMS;REMOVE_BROKEN_ITEMS</broken_items>
-                    <skip_existing_items>SKIP_EXISTING_ITEMS;OVERWRITE_EXISTING_ITEMS</skip_existing_items>
-                    <refresh_aggregate_info>NO_REFRESH_INFO;REFRESH_INFO</refresh_aggregate_info>
-                    <estimate_statistics>NO_STATISTICS;ESTIMATE_STATISTICS</estimate_statistics>
-                </SynchronizeMosaicDataset>
-                <!-- IG    Import Geometry -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/import-mosaic-dataset-geometry.htm -->
-                <ImportGeometry>
-                    <target_featureclass_type>FOOTPRINT;SEAMLINE;BOUNDARY</target_featureclass_type>
-                    <target_join_field>target_join_field</target_join_field>
-                    <input_featureclass>input_featureclass</input_featureclass>
-                    <input_join_field>input_join_field</input_join_field>
-                </ImportGeometry>
-                <ImportFieldValues>
-                    <target_join_field>target_join_field</target_join_field>
-                    <input_featureclass>input_featureclass</input_featureclass>
-                    <input_join_field>input_join_field</input_join_field>
-                    <fieldNameList>footprint</fieldNameList>
-                </ImportFieldValues>
-                <!-- SS     Set Statistics -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/set-raster-properties.htm -->
-                <SetStatistics>
-                    <data_type>GENERIC;ELEVATION;THEMATIC;PROCESSED</data_type>
-                    <statistics>[[band_index, min, max, mean, std_dev],...]</statistics>
-                    <stats_file>stats_file</stats_file>
-                    <nodata>[[band index, nodata_value],...]</nodata>
-                </SetStatistics>
-                <!-- DF Delete Field -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/delete-field.htm-->
-                <DeleteField>
-                    <drop_field>test1;test2;test3;test4</drop_field>
-                </DeleteField>
-                <!-- DO     Define Overviews -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/define-overviews.htm -->
-                <DefineOverviews>
-                    <overview_image_folder>overview_image_folder</overview_image_folder>
-                    <in_template_dataset>in_template_dataset</in_template_dataset>
-                    <extent>extent</extent>
-                    <pixel_size>pixel_size</pixel_size>
-                    <number_of_levels>number_of_levels</number_of_levels>
-                    <tile_rows>tile_rows</tile_rows>
-                    <tile_cols>tile_cols</tile_cols>
-                    <overview_factor>overview_factor</overview_factor>
-                    <force_overview_tiles>NO_FORCE_OVERVIEW_TILES;FORCE_OVERVIEW_TILES</force_overview_tiles>
-                    <resampling_method>NEAREST;BILINEAR;CUBIC</resampling_method>
-                    <compression_method>JPEG;JPEG_YCbCr;None;LZW</compression_method>
-                    <compression_quality>0-100</compression_quality>
-                </DefineOverviews>
-                <!-- BO     Build Overviews -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/build-overviews.htm -->
-                <BuildOverviews>
-                    <where_clause>where_clause</where_clause>
-                    <define_missing_tiles>DEFINE_MISSING_TILES;NO_DEFINE_MISSING_TILES</define_missing_tiles>
-                    <generate_overviews>GENERATE_OVERVIEWS;NO_GENERATE_OVERVIEWS</generate_overviews>
-                    <generate_missing_images>GENERATE_MISSING_IMAGES;IGNORE_MISSING_IMAGES</generate_missing_images>
-                    <regenerate_stale_images>REGENERATE_STALE_IMAGES;IGNORE_STALE_IMAGES</regenerate_stale_images>
-                </BuildOverviews>
-                <!-- MMDI     Merge Mosaic Dataset Items-->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/merge-mosaic-dataset-items.htm -->
-                <MergeMosaicDatasetItems>
-                    <where_clause>where_clause</where_clause>
-                    <block_field>field_name_to_be_used</block_field>
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/color-balance-mosaic-dataset.htm -->
+				<ColorBalanceMosaicDataset>
+					<balancing_method>DODGING;HISTOGRAM;STANDARD_DEVIATION</balancing_method>
+					<color_surface_type>SINGLE_COLOR;COLOR_GRID;FIRST_ORDER;SECOND_ORDER;THIRD_ORDER</color_surface_type>
+					<target_raster>#</target_raster>
+					<gamma>#</gamma>
+					<exclude_raster>#</exclude_raster>
+					<stretch_type>NONE;ADAPTIVE;MINIMUM_MAXIMUM;STANDARD_DEVIATION</stretch_type>
+					<block_field>#</block_field>
+				</ColorBalanceMosaicDataset>
+				<!-- ERF     Edit Raster Funtion -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/edit-raster-function.htmm -->
+				<EditRasterFunction>
+					<edit_mosaic_dataset_item>EDIT_MOSAIC_DATASET_ITEM;EDIT_MOSAIC_DATASET</edit_mosaic_dataset_item>
+					<edit_options>INSERT;REPLACE;REMOVE</edit_options>
+					<function_chain_definition>path_to_rft_file</function_chain_definition>
+					<location_function_name>Place_to_insert_replace_or_remove_the_function_chain</location_function_name>
+				</EditRasterFunction>
+				<!-- ANCP Analyze Control Points -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/analyze-control-points.htm -->
+				<AnalyzeControlPoints>
+					<in_control_points>#</in_control_points>
+					<out_coverage_table>#</out_coverage_table>
+					<out_overlap_table>#</out_overlap_table>
+					<in_mask_dataset>#</in_mask_dataset>
+					<minimum_area>#</minimum_area>
+					<maximum_level>#</maximum_level>
+				</AnalyzeControlPoints>
+				<!-- APCP     Append Control Points -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/append-control-points.htm -->
+				<AppendControlPoints>
+					<in_master_control_points>#</in_master_control_points>
+					<in_input_control_points>#</in_input_control_points>
+					<in_z_field>#</in_z_field>
+					<in_tag_field>#</in_tag_field>
+					<in_dem>#</in_dem>
+					<in_xy_accuracy>#</in_xy_accuracy>
+					<in_z_accuracy>#</in_z_accuracy>
+				</AppendControlPoints>
+				<!-- ABA     Apply Block Adjustment -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/apply-block-adjustment.htm -->
+				<ApplyBlockAdjustment>
+					<adjustment_operation>ADJUST;RESET</adjustment_operation>
+					<input_solution_table>#</input_solution_table>
+					<pan_to_ms_scaling_factor>#</pan_to_ms_scaling_factor>
+					<DEM>#</DEM>
+					<zoffset>#</zoffset>
+					<control_point_table>#</control_point_table>
+					<adjust_footprints>NO_ADJUST_FOOTPRINTS;ADJUST_FOOTPRINTS</adjust_footprints>
+				</ApplyBlockAdjustment>
+				<!-- CBA     Compute Block Adjustment -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/compute-block-adjustments.htm -->
+				<ComputeBlockAdjustment>
+					<in_control_points>#</in_control_points>
+					<transformation_type>POLYORDER0;POLYORDER1;RPC;Frame</transformation_type>
+					<out_solution_table>#</out_solution_table>
+					<out_solution_point_table>#</out_solution_point_table>
+					<maximum_residual_value>2</maximum_residual_value>
+					<adjustment_options>MinResidual;MaxResidualFactor;_BAO;_BAI</adjustment_options>
+					<location_accuracy>HIGH;MEDIUM;LOW</location_accuracy>
+					<out_quality_table>#</out_quality_table>
+				</ComputeBlockAdjustment>
+				<!-- CCP     Compute Control Points -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/compute-control-points.htm -->
+				<ComputeControlPoints>
+					<in_reference_images>#</in_reference_images>
+					<out_control_points>#</out_control_points>
+					<similarity>LOW;MEDIUM;HIGH</similarity>
+					<out_image_feature_points>#</out_image_feature_points>
+					<density>LOW;MEDIUM;HIGH</density>
+					<distribution>RANDOM;REGULAR</distribution>
+					<area_of_interest>#</area_of_interest>
+					<location_accuracy>HIGH;MEDIUM;LOW</location_accuracy>
+				</ComputeControlPoints>
+				<!-- CTP     Compute Tie Points -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/compute-tie-points.htm -->
+				<ComputeTiePoints>
+					<out_control_points>#</out_control_points>
+					<similarity>LOW;MEDIUM;HIGH</similarity>
+					<in_mask_dataset>#</in_mask_dataset>
+					<out_image_features>#</out_image_features>
+					<density>LOW;MEDIUM;HIGH</density>
+					<distribution>RANDOM;REGULAR</distribution>
+					<location_accuracy>HIGH;MEDIUM;LOW</location_accuracy>
+				</ComputeTiePoints>
+				<!-- CCM     Compute Camera Model -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/compute-camera-model.htm -->
+				<!--This tool will work only with 10.5 and above version-->
+				<ComputeCameraModel>
+					<out_dsm>#</out_dsm>
+					<gps_accuracy>HIGH;MEDIUM,LOW;VERY_LOW</gps_accuracy>
+					<estimate>ESTIMATE;NO_ESTIMATE</estimate>
+					<refine>REFINE;NO_REFINE</refine>
+					<apply_adjustment>APPLY;NO_APPLY</apply_adjustment>
+					<maximum_residual>5</maximum_residual>
+					<initial_tiepoint_resolution>8</initial_tiepoint_resolution>
+					<out_control_points>#</out_control_points>
+					<out_solution_table>#</out_solution_table>
+					<out_solution_point_table>#</out_solution_point_table>
+					<out_flight_path>#</out_flight_path>
+					<maximum_overlap>#</maximum_overlap>
+					<minimum_coverage>0.2</minimum_coverage>
+					<remove>NO_REMOVE;REMOVE</remove>
+					<in_control_points>#</in_control_points>
+					<options>[option1,option2...]</options>
+				</ComputeCameraModel>
+				<!-- BSM    Build Stereo Model -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/build-stereo-model.htm -->
+				<!--This tool will work only with 10.5 and above version-->
+				<BuildStereoModel>
+					<minimum_angle>10</minimum_angle>
+					<maximum_angle>70</maximum_angle>
+					<minimum_overlap>0.5</minimum_overlap>
+					<maximum_diff_OP>#</maximum_diff_OP>
+					<maximum_diff_GSD>2</maximum_diff_GSD>
+				</BuildStereoModel>
+				<!-- GPC     Generate Point Cloud -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/generate-point-cloud.htm -->
+				<!--This tool will work only with 10.5 and above version-->
+				<GeneratePointCloud>
+					<matching_method>ETM;SGM;ESGM</matching_method>
+					<out_folder>#</out_folder>
+					<out_base_name>#</out_base_name>
+					<object_size>50</object_size>
+					<ground_spacing>#</ground_spacing>
+					<minimum_pairs>2</minimum_pairs>
+					<minimum_area>0.6</minimum_area>
+					<minimum_adjustment_quality>0.2</minimum_adjustment_quality>
+					<maximum_diff_gsd>2</maximum_diff_gsd>
+					<maximum_diff_OP>8</maximum_diff_OP>
+				</GeneratePointCloud>
+				<!-- IFPC     Interpolate From Point Cloud -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/interpolate-from-point-cloud.htm -->
+				<!--This tool will work only with 10.5 and above version-->
+				<InterpolateFromPointCloud>
+					<in_container>#</in_container>
+					<out_raster>#</out_raster>
+					<cell_size>#</cell_size>
+					<interpolation_method>TRIANGULATION;NATURAL_NEIGHBOR;IDW</interpolation_method>
+					<smooth_method>GAUSS3x3;GAUSS5x5;GAUSS7x7;GAUSS9x9;NONE</smooth_method>
+					<surface_type>DTM;DSM</surface_type>
+					<fill_dem>#</fill_dem>
+				</InterpolateFromPointCloud>
+				<!-- AMDS     Alter Mosaic Dataset Schema -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/alter-mosaic-dataset-schema.htm -->
+				<AlterMosaicDatasetSchema>
+					<side_tables>side_tables</side_tables>
+					<raster_type_names>raster_types</raster_type_names>
+					<editor_tracking>NO_EDITOR_TRACKING;EDITOR_TRACKING</editor_tracking>
+				</AlterMosaicDatasetSchema>
+				<!-- AMD     Analyze Mosaic Dataset  -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/analyze-mosaic-dataset.htm -->
+				<AnalyzeMosaicDataset>
+					<where_clause>#</where_clause>
+					<checker_keywords>FOOTPRINT;FUNCTION;RASTER;PATHS;SOURCE_VALIDITY;STALE;PYRAMIDS;STATISTICS;PERFORMANCE;INFORMATION</checker_keywords>
+				</AnalyzeMosaicDataset>
+				<!-- BMDIC     Build Mosaic Dataset Item Cache  -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/build-mosaic-dataset-item-cache.htm -->
+				<BuildMosaicDatasetItemCache>
+					<where_clause>#</where_clause>
+					<define_cache>DEFINE_CACHE;NO_DEFINE_CACHE</define_cache>
+					<generate_cache>GENERATE_CACHE;NO_GENERATE_CACHE</generate_cache>
+					<item_cache_folder>#</item_cache_folder>
+					<compression_method>LOSSLESS;LOSSY;NONE</compression_method>
+					<compression_quality>1-100</compression_quality>
+					<max_allowed_rows>#</max_allowed_rows>
+					<max_allowed_columns>#</max_allowed_columns>
+					<request_size_type>PIXEL_SIZE_FACTOR;PIXEL_SIZE</request_size_type>
+					<request_size>#</request_size>
+				</BuildMosaicDatasetItemCache>
+				<!-- CDA     Compute Dirty Area  -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/compute-dirty-area.htm -->
+				<ComputeDirtyArea>
+					<where_clause>#</where_clause>
+					<timestamp>#</timestamp>
+					<out_feature_class>#</out_feature_class>
+				</ComputeDirtyArea>
+				<!-- GEA     Generate Exclude Area  -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/generate-exclude-area.htm -->
+				<GenerateExcludeArea>
+					<in_raster>#</in_raster>
+					<out_raster>#</out_raster>
+					<pixel_type>8_BIT;11_BIT;12_BIT;16_BIT</pixel_type>
+					<generate_method>COLOR_MASK;HISTOGRAM_PERCENTAGE</generate_method>
+					<max_red>255</max_red>
+					<max_green>255</max_green>
+					<max_blue>255</max_blue>
+					<max_white>255</max_white>
+					<max_black>0</max_black>
+					<max_magenta>255</max_magenta>
+					<max_cyan>255</max_cyan>
+					<max_yellow>255</max_yellow>
+					<percentage_low>0</percentage_low>
+					<percentage_high>100</percentage_high>
+				</GenerateExcludeArea>
+				<!-- CS   Calcualate Statistic -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/calculate-statistics.htm -->
+				<CalculateStatistics>
+					<x_skip_factor>1</x_skip_factor>
+					<y_skip_factor>1</y_skip_factor>
+					<ignore_values>#</ignore_values>
+					<skip_existing>OVERWRITE;SKIP_EXISTING</skip_existing>
+					<area_of_interest>#</area_of_interest>
+				</CalculateStatistics>
+				<!-- BPS   Build Pyramids and Statistics -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/build-pyramids-and-statistics.htm-->
+				<BuildPyramidsAndStatistics>
+					<include_subdirectories>NONE;INCLUDE_SUBDIRECTORIES</include_subdirectories>
+					<build_pyramids>NONE;BUILD_PYRAMIDS</build_pyramids>
+					<calculate_statistics>NONE;CALCULATE_STATISTICS</calculate_statistics>
+					<BUILD_ON_SOURCE>NONE;BUILD_ON_SOURCE </BUILD_ON_SOURCE>
+					<block_field>#</block_field>
+					<estimate_statistics>NONE;ESTIMATE_STATISTICS</estimate_statistics>
+					<x_skip_factor>1</x_skip_factor>
+					<y_skip_factor>1</y_skip_factor>
+					<ignore_values>#</ignore_values>
+					<pyramid_level>1-29</pyramid_level>
+					<SKIP_FIRST>NONE;SKIP_FIRST</SKIP_FIRST>
+					<resample_technique>NEAREST;BILINEAR;CUBIC</resample_technique>
+					<compression_type>DEFAULT;JPEG;JPEG_YCbCr;None;LZW</compression_type>
+					<compression_quality>0-100</compression_quality>
+					<skip_existing>OVERWRITE;SKIP_EXISTING</skip_existing>
+				</BuildPyramidsAndStatistics>
+				<!-- BF  Build Footprints -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/build-footprints.htm -->
+				<BuildFootprint>
+					<where_clause>SQL_QUERY</where_clause>
+					<reset_footprint>RADIOMETRY;GEOMETRY;COPY_FROM_SIBLING;NONE</reset_footprint>
+					<max_data_value>Highest_value_representing_valid_data</max_data_value>
+					<min_data_value>1</min_data_value>
+					<approx_num_vertices>Approximate_number_of_vertices</approx_num_vertices>
+					<shrink_distance>0</shrink_distance>
+					<update_boundary>NO_BOUNDARY;UPDATE_BOUNDARY</update_boundary>
+					<skip_derived_images>SKIP_DERIVED_IMAGES;NO_SKIP_DERIVED_IMAGES</skip_derived_images>
+					<maintain_edges>NO_MAINTAIN_EDGES;MAINTAIN_EDGES</maintain_edges>
+					<request_size>2000</request_size>
+					<min_region_size>#</min_region_size>
+					<simplification_method>NONE;CONVEX_HULL;ENVELOPE</simplification_method>
+					<edge_tolerance>#</edge_tolerance>
+					<max_sliver_size>#</max_sliver_size>
+					<min_thinness_ratio>0.0-1.0</min_thinness_ratio>
+				</BuildFootprint>
+				<!-- BS  Build Seamlines-->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/build-seamlines.htm -->
+				<BuildSeamlines>
+					<cell_size>#</cell_size>
+					<sort_method>NORTH_WEST;CLOSEST_TO_VIEWPOINT;BY_ATTRIBUTE</sort_method>
+					<sort_order>ASCENDING;DESCENDING</sort_order>
+					<order_by_attribute>#</order_by_attribute>
+					<order_by_base_value>#</order_by_base_value>
+					<view_point>#</view_point>
+					<computation_method>GEOMETRY;RADIOMETRY;COPY_FOOTPRINT;COPY_TO_SIBLING</computation_method>
+					<blend_width>#</blend_width>
+					<blend_type>BOTH;INSIDE;OUTSIDE</blend_type>
+					<request_size>#</request_size>
+					<request_size_type>PIXELS;PIXELSIZE_FACTOR</request_size_type>
+					<blend_width_units>PIXELS;GROUND_UNITS</blend_width_units>
+					<area_of_interest>#</area_of_interest>
+					<where_clause>#</where_clause>
+					<update_existing>IGNORE_EXISTING;UPDATE_EXISTING </update_existing>
+					<min_region_size>100</min_region_size>
+					<min_thinness_ratio>#</min_thinness_ratio>
+					<max_sliver_size>#</max_sliver_size>
+				</BuildSeamlines>
+				<!-- BB  Build Boundary -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/build-boundary.htm -->
+				<BuildBoundary>
+					<where_clause>SQL_QUERY</where_clause>
+					<append_to_existing>OVERWRITE;APPEND</append_to_existing>
+					<simplification_method>NONE;CONVEX_HULL;ENVELOPE</simplification_method>
+				</BuildBoundary>
+				<!-- DN  Defined NoData -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/environment-settings/nodata.htm -->
+				<DefineMosaicDatasetNoData>
+					<num_bands>No_of_Bands</num_bands>
+					<bands_for_nodata_value>DefineNOData_value</bands_for_nodata_value>
+					<where_clause>where_clause</where_clause>
+					<bands_for_valid_data_range>bands_for_nodata_value</bands_for_valid_data_range>
+					<Composite_nodata_value>NO_COMPOSITE_NODATA;COMPOSITE_NODATA</Composite_nodata_value>
+				</DefineMosaicDatasetNoData>
+				<!-- SY   Synchronize -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/synchronize-mosaic-dataset.htm -->
+				<SynchronizeMosaicDataset>
+					<where_clause>SQL_QUERY</where_clause>
+					<new_items>NO_NEW_ITEMS;UPDATE_WITH_NEW_ITEMS</new_items>
+					<sync_only_stale>SYNC_STALE;SYNC_ALL</sync_only_stale>
+					<update_cellsize_ranges>UPDATE_CELL_SIZES;NO_CELL_SIZES</update_cellsize_ranges>
+					<update_boundary>UPDATE_BOUNDARY;NO_BOUNDARY</update_boundary>
+					<update_overviews>UPDATE_OVERVIEWS;NO_OVERVIEWS</update_overviews>
+					<build_pyramids>BUILD_PYRAMIDS;NO_PYRAMIDS</build_pyramids>
+					<calculate_statistics>CALCULATE_STATISTICS;NO_STATISTICS</calculate_statistics>
+					<build_thumbnails>NO_THUMBNAILS;BUILD_THUMBNAILS</build_thumbnails>
+					<build_item_cache>BUILD_ITEM_CACHE;NO_ITEM_CACHE</build_item_cache>
+					<rebuild_raster>REBUILD_RASTER,NO_RASTER</rebuild_raster>
+					<update_fields>UPDATE_FIELDS;NO_FIELDS</update_fields>
+					<fields_to_update>Specify_which_fields_should_be_updated</fields_to_update>
+					<existing_items>UPDATE_EXISTING_ITEMS;IGNORE_EXISTING_ITEMS</existing_items>
+					<broken_items>IGNORE_BROKEN_ITEMS;REMOVE_BROKEN_ITEMS</broken_items>
+					<skip_existing_items>SKIP_EXISTING_ITEMS;OVERWRITE_EXISTING_ITEMS</skip_existing_items>
+					<refresh_aggregate_info>NO_REFRESH_INFO;REFRESH_INFO</refresh_aggregate_info>
+					<estimate_statistics>NO_STATISTICS;ESTIMATE_STATISTICS</estimate_statistics>
+				</SynchronizeMosaicDataset>
+				<!-- IG    Import Geometry -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/import-mosaic-dataset-geometry.htm -->
+				<ImportGeometry>
+					<target_featureclass_type>FOOTPRINT;SEAMLINE;BOUNDARY</target_featureclass_type>
+					<target_join_field>target_join_field</target_join_field>
+					<input_featureclass>input_featureclass</input_featureclass>
+					<input_join_field>input_join_field</input_join_field>
+				</ImportGeometry>
+				<ImportFieldValues>
+					<target_join_field>target_join_field</target_join_field>
+					<input_featureclass>input_featureclass</input_featureclass>
+					<input_join_field>input_join_field</input_join_field>
+					<fieldNameList>footprint</fieldNameList>
+				</ImportFieldValues>
+				<!-- SS     Set Statistics -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/set-raster-properties.htm -->
+				<SetStatistics>
+					<data_type>GENERIC;ELEVATION;THEMATIC;PROCESSED</data_type>
+					<statistics>[[band_index, min, max, mean, std_dev],...]</statistics>
+					<stats_file>stats_file</stats_file>
+					<nodata>[[band index, nodata_value],...]</nodata>
+				</SetStatistics>
+				<!-- DF Delete Field -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/delete-field.htm-->
+				<DeleteField>
+					<drop_field>test1;test2;test3;test4</drop_field>
+				</DeleteField>
+				<!-- DO     Define Overviews -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/define-overviews.htm -->
+				<DefineOverviews>
+					<overview_image_folder>overview_image_folder</overview_image_folder>
+					<in_template_dataset>in_template_dataset</in_template_dataset>
+					<extent>extent</extent>
+					<pixel_size>pixel_size</pixel_size>
+					<number_of_levels>number_of_levels</number_of_levels>
+					<tile_rows>tile_rows</tile_rows>
+					<tile_cols>tile_cols</tile_cols>
+					<overview_factor>overview_factor</overview_factor>
+					<force_overview_tiles>NO_FORCE_OVERVIEW_TILES;FORCE_OVERVIEW_TILES</force_overview_tiles>
+					<resampling_method>NEAREST;BILINEAR;CUBIC</resampling_method>
+					<compression_method>JPEG;JPEG_YCbCr;None;LZW</compression_method>
+					<compression_quality>0-100</compression_quality>
+				</DefineOverviews>
+				<!-- BO     Build Overviews -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/build-overviews.htm -->
+				<BuildOverviews>
+					<where_clause>where_clause</where_clause>
+					<define_missing_tiles>DEFINE_MISSING_TILES;NO_DEFINE_MISSING_TILES</define_missing_tiles>
+					<generate_overviews>GENERATE_OVERVIEWS;NO_GENERATE_OVERVIEWS</generate_overviews>
+					<generate_missing_images>GENERATE_MISSING_IMAGES;IGNORE_MISSING_IMAGES</generate_missing_images>
+					<regenerate_stale_images>REGENERATE_STALE_IMAGES;IGNORE_STALE_IMAGES</regenerate_stale_images>
+				</BuildOverviews>
+				<!-- MMDI     Merge Mosaic Dataset Items-->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/merge-mosaic-dataset-items.htm -->
+				<MergeMosaicDatasetItems>
+					<where_clause>where_clause</where_clause>
+					<block_field>field_name_to_be_used</block_field>
                     <max_rows_per_merged_items></max_rows_per_merged_items>
-                </MergeMosaicDatasetItems>
-                <!-- DMD     Delete Mosaic Dataset -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/delete-mosaic-dataset.htm -->
-                <DeleteMosaicDataset>
-                    <delete_overview_images>DELETE_OVERVIEW_IMAGES;NO_DELETE_OVERVIEW_IMAGES</delete_overview_images>
-                    <delete_item_cache>DELETE_ITEM_CACHE;NO_DELETE_ITEM_CACHE</delete_item_cache>
-                </DeleteMosaicDataset>
-                <!-- RRFMD     Remove Rasters from Mosaic Dataset -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/remove-rasters-from-mosaic-dataset.htm -->
-                <RemoveRastersFromMosaicDataset>
+				</MergeMosaicDatasetItems>
+				<!-- DMD     Delete Mosaic Dataset -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/delete-mosaic-dataset.htm -->
+				<DeleteMosaicDataset>
+					<delete_overview_images>DELETE_OVERVIEW_IMAGES;NO_DELETE_OVERVIEW_IMAGES</delete_overview_images>
+					<delete_item_cache>DELETE_ITEM_CACHE;NO_DELETE_ITEM_CACHE</delete_item_cache>
+				</DeleteMosaicDataset>
+				<!-- RRFMD     Remove Rasters from Mosaic Dataset -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/remove-rasters-from-mosaic-dataset.htm -->
+				<RemoveRastersFromMosaicDataset>
                     <where_clause></where_clause>
-                    <update_boundary>UPDATE_BOUNDARY;NO_BOUNDARY</update_boundary>
-                    <mark_overviews_items>MARK_OVERVIEW_ITEMS;NO_MARK_OVERVIEW_ITEMS</mark_overviews_items>
-                    <delete_overview_images>DELETE_OVERVIEW_IMAGES;NO_DELETE_OVERVIEW_IMAGES</delete_overview_images>
-                    <delete_item_cache>DELETE_ITEM_CACHE;NO_DELETE_ITEM_CACHE</delete_item_cache>
-                    <remove_items>REMOVE_MOSAICDATASET_ITEMS;NO_REMOVE_MOSAICDATASET_ITEMS</remove_items>
-                    <update_cellsize_ranges>UPDATE_CELL_SIZES;NO_CELL_SIZES</update_cellsize_ranges>
-                </RemoveRastersFromMosaicDataset>
-                <!-- RP     Repairing mosaic dataset paths -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/repair-mosaic-dataset-paths.htm -->
-                <RepairMosaicDatasetPaths>
-                    <where_clause></where_clause>
+					<update_boundary>UPDATE_BOUNDARY;NO_BOUNDARY</update_boundary>
+					<mark_overviews_items>MARK_OVERVIEW_ITEMS;NO_MARK_OVERVIEW_ITEMS</mark_overviews_items>
+					<delete_overview_images>DELETE_OVERVIEW_IMAGES;NO_DELETE_OVERVIEW_IMAGES</delete_overview_images>
+					<delete_item_cache>DELETE_ITEM_CACHE;NO_DELETE_ITEM_CACHE</delete_item_cache>
+					<remove_items>REMOVE_MOSAICDATASET_ITEMS;NO_REMOVE_MOSAICDATASET_ITEMS</remove_items>
+					<update_cellsize_ranges>UPDATE_CELL_SIZES;NO_CELL_SIZES</update_cellsize_ranges>
+				</RemoveRastersFromMosaicDataset>
+				<!-- RP     Repairing mosaic dataset paths -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/repair-mosaic-dataset-paths.htm -->
+				<RepairMosaicDatasetPaths>
+ <where_clause></where_clause>
                     <paths_list></paths_list>
-                </RepairMosaicDatasetPaths>
-                <!-- RI     Remove Attribute Index -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/remove-attribute-index.htm -->
-                <RemoveIndex>
-                    <index_name>index_name;...</index_name>
-                </RemoveIndex>
-                <!-- AI     Add Attribute Index -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/add-attribute-index.htm -->
-                <AddIndex>
-                    <Index>
-                        <fields>name_of_field_to_be_indexed</fields>
-                        <index_name>index_name</index_name>
-                        <unique>unique</unique>
-                        <ascending>ascending</ascending>
-                    </Index>
-                    <Index>
-                        <fields>name_of_field_to_be_indexed</fields>
-                        <index_name>index_name</index_name>
-                        <unique>unique</unique>
-                        <ascending>ascending</ascending>
-                    </Index>
-                </AddIndex>
-                <CacheFeatureClass>
-                    <out_cache_featureclass>path_of_output_FC_with_name</out_cache_featureclass>
-                </CacheFeatureClass>
-                <!-- JF     Joing Fields -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/join-field.htm -->
-                <JoinField>
-                    <in_data>d:\test.gdb\AMD_mdName_SML</in_data>
-                    <in_field>RasterID</in_field>
-                    <join_table>d:\test.gdb\AMD_mdName_CAT</join_table>
-                    <join_field>OBJECTID</join_field>
-                    <fields>list_of_fields_to_joined</fields>
-                </JoinField>
-                <!-- CV     Calculate Values -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/calculate-field.htm -->
-                <CalculateValues>
-                    <CalculateValue>
-                        <query>"Dataset_ID"='IntermapDSM'</query>
-                        <fieldName>MaxPS</fieldName>
-                        <expression>extv(!Dataset_ID!)</expression>
-                        <expression_type>PYTHON</expression_type>
-                        <code_block>"""def extv(value):\n  if value == "mn75_grd_m":\n     extv_ = 463\n     return extv_\n  if value == "mn30_grd_m":\n     extv_ = 7400\n     return extv_\n  if value == "mn15_grd_m":\n     extv_ = 926\n     return extv_\n  if value == "mnGMTED_OV":\n     extv_ = 30000\n     return extv_\n  if value == "mnGMTED_fi":\n     extv_ = 7400\n     return extv_\n  else:   return "7400"/n"""</code_block>
-                    </CalculateValue>
-                    <CalculateValue>
-                        <query>"Dataset_ID=XYZ"</query>
-                        <fieldName>MinPS</fieldName>
-                        <expression>[LowPS]</expression>
-                    </CalculateValue>
-                    <CalculateValue>
-                        <fieldName>DayOfYear</fieldName>
-                        <expression>DatePart ("y",[AcquisitionDate] )</expression>
-                    </CalculateValue>
-                </CalculateValues>
-                <!-- CRTT  Clear Raster Type Table -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/delete-raster-attribute-table.htm -->
-                <ClearRasterTypeTable>
-                    <!-- This tool requires only one input:full path to the MD/AMD_<MDName>_ART which is fetched directly at the run time from -m(if defined) or from the default md location -->
-                </ClearRasterTypeTable>
-                <!-- CLT  Clear Logs Table -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/truncatetable.htm -->
-                <ClearLogsTable>
-                    <!-- This tool requires only one input:full path to the MD/AMD_<MDName>_LOG which is fetched directly at the run time from -m(if defined) or from the default md location -->
-                </ClearLogsTable>
-                <!-- CRA  Copy Raster -->
-                <!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/copy-raster.htm -->
-                <CopyRaster>
-                    <out_rasterdataset>#</out_rasterdataset>
-                    <config_keyword>#</config_keyword>
-                    <background_value>#</background_value>
-                    <nodata_value>#</nodata_value>
-                    <onebit_to_eightbit>NONE;ColormapToRGB</onebit_to_eightbit>
-                    <pixel_type>1_BIT;2_BIT;4_BIT;8_BIT_UNSIGNED;8_BIT_SIGNED;16_BIT_UNSIGNED;16_BIT_SIGNED;32_BIT_UNSIGNED;32_BIT_SIGNED;32_BIT_FLOAT;64_BIT</pixel_type>
-                    <scale_pixel_value>NONE;ScalePixelValue</scale_pixel_value>
-                    <RGB_to_Colormap>NONE;RGBToColormap</RGB_to_Colormap>
-                    <format>TIFF;IMAGINE Image;BMP;GIF;PNG;JPEG;JP2;GRID;BIL;BSQ;BIP;ENVI;CRF;MRF</format>
-                    <transform>NONE;Transform</transform>
-                    <process_as_multidimensional>CURRENT_SLICE;ALL_SLICES</process_as_multidimensional>
-                    <build_multidimensional_transpose>NO_TRANSPOSE;TRANSPOSE</build_multidimensional_transpose>
-                </CopyRaster>
-                <!-- MTC     Manage Tile Cache -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/manage-tile-cache.htm -->
+				</RepairMosaicDatasetPaths>
+				<!-- RI     Remove Attribute Index -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/remove-attribute-index.htm -->
+				<RemoveIndex>
+					<index_name>index_name;...</index_name>
+				</RemoveIndex>
+				<!-- AI     Add Attribute Index -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/add-attribute-index.htm -->
+				<AddIndex>
+					<Index>
+						<fields>name_of_field_to_be_indexed</fields>
+						<index_name>index_name</index_name>
+						<unique>unique</unique>
+						<ascending>ascending</ascending>
+					</Index>
+					<Index>
+						<fields>name_of_field_to_be_indexed</fields>
+						<index_name>index_name</index_name>
+						<unique>unique</unique>
+						<ascending>ascending</ascending>
+					</Index>
+				</AddIndex>
+				<CacheFeatureClass>
+					<out_cache_featureclass>path_of_output_FC_with_name</out_cache_featureclass>
+				</CacheFeatureClass>
+				<!-- JF     Joing Fields -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/join-field.htm -->
+				<JoinField>
+					<in_data>d:\test.gdb\AMD_mdName_SML</in_data>
+					<in_field>RasterID</in_field>
+					<join_table>d:\test.gdb\AMD_mdName_CAT</join_table>
+					<join_field>OBJECTID</join_field>
+					<fields>list_of_fields_to_joined</fields>
+				</JoinField>
+				<!-- CV     Calculate Values -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/calculate-field.htm -->
+				<CalculateValues>
+					<CalculateValue>
+						<query>"Dataset_ID"='IntermapDSM'</query>
+						<fieldName>MaxPS</fieldName>
+						<expression>extv(!Dataset_ID!)</expression>
+						<expression_type>PYTHON</expression_type>
+						<code_block>"""def extv(value):\n  if value == "mn75_grd_m":\n     extv_ = 463\n     return extv_\n  if value == "mn30_grd_m":\n     extv_ = 7400\n     return extv_\n  if value == "mn15_grd_m":\n     extv_ = 926\n     return extv_\n  if value == "mnGMTED_OV":\n     extv_ = 30000\n     return extv_\n  if value == "mnGMTED_fi":\n     extv_ = 7400\n     return extv_\n  else:   return "7400"/n"""</code_block>
+					</CalculateValue>
+					<CalculateValue>
+						<query>"Dataset_ID=XYZ"</query>
+						<fieldName>MinPS</fieldName>
+						<expression>[LowPS]</expression>
+					</CalculateValue>
+					<CalculateValue>
+						<fieldName>DayOfYear</fieldName>
+						<expression>DatePart ("y",[AcquisitionDate] )</expression>
+					</CalculateValue>
+				</CalculateValues>
+				<!-- CRTT  Clear Raster Type Table -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/delete-raster-attribute-table.htm -->
+				<ClearRasterTypeTable>
+					<!-- This tool requires only one input:full path to the MD/AMD_<MDName>_ART which is fetched directly at the run time from -m(if defined) or from the default md location -->
+				</ClearRasterTypeTable>
+				<!-- CLT  Clear Logs Table -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/truncatetable.htm -->
+				<ClearLogsTable>
+					<!-- This tool requires only one input:full path to the MD/AMD_<MDName>_LOG which is fetched directly at the run time from -m(if defined) or from the default md location -->
+				</ClearLogsTable>
+				<!-- CRA  Copy Raster -->
+				<!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/copy-raster.htm -->
+				<CopyRaster>
+					<out_rasterdataset>#</out_rasterdataset>
+					<config_keyword>#</config_keyword>
+					<background_value>#</background_value>
+					<nodata_value>#</nodata_value>
+					<onebit_to_eightbit>NONE;ColormapToRGB</onebit_to_eightbit>
+					<pixel_type>1_BIT;2_BIT;4_BIT;8_BIT_UNSIGNED;8_BIT_SIGNED;16_BIT_UNSIGNED;16_BIT_SIGNED;32_BIT_UNSIGNED;32_BIT_SIGNED;32_BIT_FLOAT;64_BIT</pixel_type>
+					<scale_pixel_value>NONE;ScalePixelValue</scale_pixel_value>
+					<RGB_to_Colormap>NONE;RGBToColormap</RGB_to_Colormap>
+					<format>TIFF;IMAGINE Image;BMP;GIF;PNG;JPEG;JP2;GRID;BIL;BSQ;BIP;ENVI;CRF;MRF</format>
+					<transform>NONE;Transform</transform>
+					<process_as_multidimensional>CURRENT_SLICE;ALL_SLICES</process_as_multidimensional>
+					<build_multidimensional_transpose>NO_TRANSPOSE;TRANSPOSE</build_multidimensional_transpose>
+				</CopyRaster>
+				<!-- MTC     Manage Tile Cache -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/manage-tile-cache.htm -->
                 <ManageTileCache>
                     <in_cache_location></in_cache_location>
                     <manage_mode>RECREATE_ALL_TILES</manage_mode>
@@ -688,25 +688,25 @@
                     <public>MYGROUPS</public>
                     <groups>#</groups>
                 </SharePackage>
-                <!-- CPCSLP Create Point Cloud Scene Layer Package -->
-                <!-- https://pro.arcgis.com/en/pro-app/tool-reference/data-management/create-point-cloud-scene-layer-package.htm -->
-                <CreatePointCloudSceneLayerPackage>
-                    <in_dataset>LAS_zLAS_LAZ_LAS_dataset</in_dataset>
-                    <out_slpk>output_scene_layer_package</out_slpk>
-                    <out_coor_system>coordinate_system_of_the_output_scene_layer_package</out_coor_system>
-                    <transform_method>datum_transformation_method</transform_method>
-                    <attributes>INTENSITY;RGB;FLAGS;CLASS_CODE,RETURNS,USER_DATA;POINT_SRC_ID;GPS_TIME;SCAN_ANGLE;NEAR_INFRARED</attributes>
-                    <point_size_m>point size of the lidar data</point_size_m>
-                    <xy_max_error_m>Maximum_x_y_error_tolerated</xy_max_error_m>
-                    <z_max_error_m>Maximum_z-error_tolerated</z_max_error_m>
-                    <in_coor_system>Coordinate_system_of_the_input_LAZ_files.</in_coor_system>
-                    <scene_layer_version>1.X;2.X</scene_layer_version>
-                </CreatePointCloudSceneLayerPackage>
-                <!-- SE     Set Environments -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/help/analysis/geoprocessing/basics/geoprocessing-environment-settings.htm-->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/environment-settings/an-overview-of-raster-storage-settings.htm -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/environment-settings/parallel-processing-factor.htm -->
-                <Environment>
+				<!-- CPCSLP Create Point Cloud Scene Layer Package -->
+				<!-- https://pro.arcgis.com/en/pro-app/tool-reference/data-management/create-point-cloud-scene-layer-package.htm -->
+				<CreatePointCloudSceneLayerPackage>
+					<in_dataset>LAS_zLAS_LAZ_LAS_dataset</in_dataset>
+					<out_slpk>output_scene_layer_package</out_slpk>
+					<out_coor_system>coordinate_system_of_the_output_scene_layer_package</out_coor_system>
+					<transform_method>datum_transformation_method</transform_method>
+					<attributes>INTENSITY;RGB;FLAGS;CLASS_CODE,RETURNS,USER_DATA;POINT_SRC_ID;GPS_TIME;SCAN_ANGLE;NEAR_INFRARED</attributes>
+					<point_size_m>point size of the lidar data</point_size_m>
+					<xy_max_error_m>Maximum_x_y_error_tolerated</xy_max_error_m>
+					<z_max_error_m>Maximum_z-error_tolerated</z_max_error_m>
+					<in_coor_system>Coordinate_system_of_the_input_LAZ_files.</in_coor_system>
+					<scene_layer_version>1.X;2.X</scene_layer_version>
+				</CreatePointCloudSceneLayerPackage>
+				<!-- SE     Set Environments -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/help/analysis/geoprocessing/basics/geoprocessing-environment-settings.htm-->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/environment-settings/an-overview-of-raster-storage-settings.htm -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/environment-settings/parallel-processing-factor.htm -->
+<Environment>
                     <cellSize></cellSize>
                     <mask></mask>
                     <compression></compression>
@@ -729,12 +729,12 @@
                     <tileSize></tileSize>
                     <parallelProcessingFactor></parallelProcessingFactor>
                 </Environment>
-                <!-- CP Compact File Geodatabase -->
-                <!-- This command does not have any arguments so needs only to be mentioned at command line -->
-                <!--  https://pro.arcgis.com/en/pro-app/latest/help/data/geodatabases/manage-file-gdb/compact-file-and-personal-geodatabases.htm -->
-                <!-- EMDG Exports feature classes for the footprint, boundary, seamline, or resolution levels of a mosaic dataset-->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/export-mosaic-dataset-geometry.htm-->
-                <ExportMosaicDatasetGeometry>
+				<!-- CP Compact File Geodatabase -->
+				<!-- This command does not have any arguments so needs only to be mentioned at command line -->
+				<!--  https://pro.arcgis.com/en/pro-app/latest/help/data/geodatabases/manage-file-gdb/compact-file-and-personal-geodatabases.htm -->
+				<!-- EMDG Exports feature classes for the footprint, boundary, seamline, or resolution levels of a mosaic dataset-->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/export-mosaic-dataset-geometry.htm-->
+				<ExportMosaicDatasetGeometry>
                     <out_feature_class></out_feature_class>
                     <where_clause />
                     <geometry_type />
@@ -830,59 +830,123 @@
                     <ignore_nodata></ignore_nodata>
                     <ReturnValue>save(c:\output\folder\must\exists\AMR.crf)</ReturnValue>
                 </AggregateMultidimensionalRaster>
-                <!-- CF Compute Fiducials (Data Management)  -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/compute-fiducials.htm -->
-                <ComputeFiducials>
-                    <out_fiducial_table>#</out_fiducial_table>
-                    <where_clause>#</where_clause>
-                    <fiducial_templates>#
-                    </film_coordinate_system>
-                    <film_coordinate_system>NO_CHANGE;X_RIGHT_Y_UP;X_UP_Y_LEFT;X_LEFT_Y_DOWN;X_DOWN_Y_RIGHT</film_coordinate_system>
-                </ComputeFiducials>
-                <!-- UIO Update Interior Orientation (Data Management)  -->
-                <!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/update-interior-orientation-tool.htm -->
-                <UpdateInteriorOrientation>
-                    <fiducial_table>#</fiducial_table>
-                    <where_clause>#</where_clause>
-                    <update_footprints>UPDATE;NO_UPDATE</update_footprints>
-                    <film_coordinate_system>NO_CHANGE;X_RIGHT_Y_UP;X_UP_Y_LEFT;X_LEFT_Y_DOWN;X_DOWN_Y_RIGHT</film_coordinate_system>
-                </UpdateInteriorOrientation>
-                <!-- EFACP Export Frame And Camera Parameters (Data Management)  -->
-                <!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/export-frame-and-camera-parameters.htm -->
-                <ExportFrameAndCameraParameters>
-                    <output_file>#</output_file>
-                    <output_format>ESRI_FRAME_AND_CAMERA_TABLE;PIX4D_CALIBRATED_CAMERA_PARAMETERS</output_format>
-                </ExportFrameAndCameraParameters>
-                <!-- GBAR Generate Block Adjustment Report (Data Management)  -->
-                <!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/generate-block-adjustment-report.htm -->
-                <GenerateBlockAdjustmentReport>
-                    <input_solution_table>#</input_solution_table>
-                    <input_solution_point>#</input_solution_point>
-                    <output_report>#</output_report>
-                    <input_control_point_for_adjustment>#</input_control_point_for_adjustment>
-                    <report_format>HTML;PDF</report_format>
-                </GenerateBlockAdjustmentReport>
-                <!-- RR Automatically aligns a raster to a reference image or uses a control point file for georegistration. -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/register-raster.htm -->
-                <RegisterRaster>
-                    <register_mode>REGISTER;REGISTER_MS;RESET;CREATE_LINKS</register_mode>
-                    <reference_raster>#</reference_raster>
-                    <input_link_file>#</input_link_file>
-                    <transformation_type>POLYORDER0;POLYSIMILARITY;POLYORDER1;POLYORDER2;ADJUST;SPLINE;PROJECTIVE</transformation_type>
-                    <output_cpt_link_file>#</output_cpt_link_file>
-                    <maximum_rms_value>#</maximum_rms_value>
-                    <query>#</query>
-                    <!--To be provided only when input is a mosaic dataset and the tool is to be run only on the selected items in the MD. e.g.OBJECTID&gt;100(OBJECTID>100),Name='Tile01'-->
-                </RegisterRaster>
-                <!-- TF Transfers files between a file system and a cloud storage workspace. -->
-                <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/transfer-files.htm -->
-                <TransferFiles>
-                    <input_paths>#</input_paths>
-                    <output_folder>#</output_folder>
-                    <file_filter>#</file_filter>
-                </TransferFiles>
+				<!-- COUDL Classify Objects Using Deep Learning  -->
+				<!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/image-analyst/classify-objects-using-deep-learning.htm-->
+				<ClassifyObjectsUsingDeepLearning>
+						<in_raster>The input image that will be used to detect objects.</in_raster>
+						<out_feature_class>The output feature class that will contain geometries surrounding the objects or feature from the input feature class</out_feature_class>
+						<in_model_definition> A deep learning model package (.dlpk)</in_model_definition>
+						<in_features>The point, line, or polygon input feature class that identifies the location of each object or feature to be classified </in_features>
+						<class_label_field>The name of the field that will contain the class or category label in the output feature class.</class_label_field>
+						<processing_mode>PROCESS_AS_MOSAICKED_IMAGE;PROCESS_ITEMS_SEPARATELY</processing_mode>
+						<model_arguments>The function arguments defined in the Python raster function class</model_arguments>
+						<caption_field>The name of the field that will contain the text or caption in the output feature class.</caption_field>
+				</ClassifyObjectsUsingDeepLearning>
+				<!-- CPUDL Classify Pixels Using Deep Learning  -->
+				<!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/image-analyst/classify-pixels-using-deep-learning.htm-->
+				<ClassifyObjectsUsingDeepLearning>
+						<in_raster>The input raster dataset to classify.</in_raster>
+						<in_model_definition>Deep learning model package (.dlpk)</in_model_definition>
+						<arguments>The function arguments are defined in the Python raster function class. </arguments>
+						<processing_mode>PROCESS_AS_MOSAICKED_IMAGE;PROCESS_ITEMS_SEPARATELY</processing_mode>
+						<out_classified_folder>The folder where the output classified rasters will be stored.</out_classified_folder>
+				</ClassifyObjectsUsingDeepLearning>
+				<!-- CAFOD Compute Accuracy for Object Detection  -->
+				<!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/image-analyst/compute-accuracy-for-object-detection.htm-->
+				<ComputeAccuracyForObjectDetection>
+						<detected_features>The polygon feature class containing the objects detected from the Detect Objects Using Deep Learning tool.</detected_features>
+						<ground_truth_features>The polygon feature class containing ground truth data.</ground_truth_features>
+						<out_accuracy_table>The output accuracy table.</out_accuracy_table>
+						<out_accuracy_report>The name of the output accuracy report. The report is a PDF document containing accuracy metrics and charts.</out_accuracy_report>
+						<detected_class_value_field>The field in the detected objects feature class that contains the class values or class names.</detected_class_value_field>
+						<ground_truth_class_value_field>The field in the ground truth feature class that contains the class values.</ground_truth_class_value_field>
+						<min_iou>The IoU ratio to use as a threshold to evaluate the accuracy of the object-detection model.</min_iou>
+						<mask_features>A polygon feature class that delineates the area or areas where accuracy will be computed.</mask_features>
+				</ComputeAccuracyForObjectDetection>
+				<!-- DCUDL Detect Change Using Deep Learning  -->
+				<!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/image-analyst/detect-change-using-deep-learning.htm-->
+				<DetectChangeUsingDeepLearning>
+						<from_raster>The input images of the previous raster.</from_raster>
+						<to_raster>The input images of the recent raster.</to_raster>
+						<out_classified_raster>The output classified raster that shows the change.</out_classified_raster>
+						<in_model_definition>Deep learning model package (.dlpk)</in_model_definition>
+						<arguments>The function arguments are defined in the Python raster function class. </arguments>
+				</DetectChangeUsingDeepLearning>
+				<!-- DOUDL Detect Objects Using Deep Learning  -->
+				<!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/image-analyst/detect-objects-using-deep-learning.htm-->
+				<DetectObjectsUsingDeepLearning>
+						<in_raster>The input image that will be used to detect objects.</in_raster>
+						<out_detected_objects>The output feature class that will contain geometries circling the object or objects detected in the input image.</out_detected_objects>
+						<in_model_definition> A deep learning model package (.dlpk)</in_model_definition>
+						<model_arguments>The function arguments defined in the Python raster function class</model_arguments>
+						<run_nms>NO_NMS;NMS</run_nms>
+						<confidence_score_field>The name of the field in the feature class that will contain the confidence scores as output by the object detection method.</confidence_score_field>
+						<class_value_field>The name of the field that will contain the class or category label in the output feature class.</class_value_field>
+						<max_overlap_ratio>The maximum overlap ratio for two overlapping features, which is defined as the ratio of intersection area over union area. The default is 0.</max_overlap_ratio>
+						<processing_mode>PROCESS_AS_MOSAICKED_IMAGE;PROCESS_ITEMS_SEPARATELY</processing_mode>
+				</DetectObjectsUsingDeepLearning>
+				<!-- NMS NON Maximum Suppression  -->
+				<!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/image-analyst/non-maximum-suppression.htm-->
+				<NonMaximumSuppression>
+						<in_featureclass>The input feature class or feature layer containing overlapping or duplicate features.</in_featureclass>
+						<confidence_score_field>The field in the feature class that contains the confidence scores as output by the object detection method.</confidence_score_field>
+						<out_featureclass> The output feature class with the duplicate features removed.</out_featureclass>
+						<class_value_field>The name of the field that will contain the class or category label in the output feature class.</class_value_field>
+						<model_arguments>The function arguments defined in the Python raster function class</model_arguments>
+						<max_overlap_ratio>The maximum overlap ratio for two overlapping features. This is defined as the ratio of intersection area over union area. The default is 0.</max_overlap_ratio>
+				</NonMaximumSuppression>
+				<!-- CF Compute Fiducials (Data Management)  -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/compute-fiducials.htm -->
+				<ComputeFiducials>
+					<out_fiducial_table>#</out_fiducial_table>
+					<where_clause>#</where_clause>
+                    <fiducial_templates>#</fiducial_templates>#
 
-            </Processes>
-        </MosaicDataset>
-    </Workspace>
+				<film_coordinate_system>NO_CHANGE;X_RIGHT_Y_UP;X_UP_Y_LEFT;X_LEFT_Y_DOWN;X_DOWN_Y_RIGHT</film_coordinate_system>
+			</ComputeFiducials>
+			<!-- UIO Update Interior Orientation (Data Management)  -->
+			<!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/update-interior-orientation-tool.htm -->
+			<UpdateInteriorOrientation>
+				<fiducial_table>#</fiducial_table>
+				<where_clause>#</where_clause>
+				<update_footprints>UPDATE;NO_UPDATE</update_footprints>
+				<film_coordinate_system>NO_CHANGE;X_RIGHT_Y_UP;X_UP_Y_LEFT;X_LEFT_Y_DOWN;X_DOWN_Y_RIGHT</film_coordinate_system>
+			</UpdateInteriorOrientation>
+			<!-- EFACP Export Frame And Camera Parameters (Data Management)  -->
+			<!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/export-frame-and-camera-parameters.htm -->
+			<ExportFrameAndCameraParameters>
+				<output_file>#</output_file>
+				<output_format>ESRI_FRAME_AND_CAMERA_TABLE;PIX4D_CALIBRATED_CAMERA_PARAMETERS</output_format>
+			</ExportFrameAndCameraParameters>
+			<!-- GBAR Generate Block Adjustment Report (Data Management)  -->
+			<!--https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/generate-block-adjustment-report.htm -->
+			<GenerateBlockAdjustmentReport>
+				<input_solution_table>#</input_solution_table>
+				<input_solution_point>#</input_solution_point>
+				<output_report>#</output_report>
+				<input_control_point_for_adjustment>#</input_control_point_for_adjustment>
+				<report_format>HTML;PDF</report_format>
+			</GenerateBlockAdjustmentReport>
+			<!-- RR Automatically aligns a raster to a reference image or uses a control point file for georegistration. -->
+			<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/register-raster.htm -->
+			<RegisterRaster>
+				<register_mode>REGISTER;REGISTER_MS;RESET;CREATE_LINKS</register_mode>
+				<reference_raster>#</reference_raster>
+				<input_link_file>#</input_link_file>
+				<transformation_type>POLYORDER0;POLYSIMILARITY;POLYORDER1;POLYORDER2;ADJUST;SPLINE;PROJECTIVE</transformation_type>
+				<output_cpt_link_file>#</output_cpt_link_file>
+				<maximum_rms_value>#</maximum_rms_value>
+				<query>#</query>
+				<!--To be provided only when input is a mosaic dataset and the tool is to be run only on the selected items in the MD. e.g.OBJECTID&gt;100(OBJECTID>100),Name='Tile01'-->
+			</RegisterRaster>
+			<!-- TF Transfers files between a file system and a cloud storage workspace. -->
+			<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/transfer-files.htm -->
+			<TransferFiles>
+				<input_paths>#</input_paths>
+				<output_folder>#</output_folder>
+				<file_filter>#</file_filter>
+			</TransferFiles>
+		</Processes>
+	</MosaicDataset>
+</Workspace>
 </Application>
