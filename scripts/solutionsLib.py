@@ -1218,7 +1218,7 @@ class Solutions(Base.Base):
             self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
             return self.__invokeDynamicFn(
                 [],
-                'classifyobjectsusingdeepLearning',
+                'classifyobjectsusingdeeplearning',
                 'arcpy.ia.ClassifyObjectsUsingDeepLearning',
                 index
             )
@@ -1226,7 +1226,7 @@ class Solutions(Base.Base):
             self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
             return self.__invokeDynamicFn(
                 [],
-                'classifypixelsusingdeepLearning',
+                'classifypixelsusingdeeplearning',
                 'arcpy.ia.ClassifyPixelsUsingDeepLearning',
                 index
             )
