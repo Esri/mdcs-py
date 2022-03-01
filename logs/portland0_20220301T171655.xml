@@ -1,0 +1,74 @@
+<?xml version="1.0" ?>
+<Projects>
+	<MDCS>
+		<StartTime>20220301T170817</StartTime>
+		<EndTime>20220301T171655</EndTime>
+		<TotalDuration>517</TotalDuration>
+		<Message>Checking for updates..</Message>
+		<Message>Installed version is the latest version</Message>
+		<Message>Using template:c:\Image_Mgmt_Workflows\GitForWindows\AIDE\MDCS\portland0.xml</Message>
+		<Message>Processing command(s):CM+AF+AR</Message>
+		<Message>Done...</Message>
+		<CM>
+			<Message>Command:CM-&gt;Create a new mosaic dataset.</Message>
+			<Message>Creating Geodatabase: (c:\home\arcgis\output\WorldElevation1.gdb)</Message>
+			<Message>Creating source mosaic datasets:</Message>
+			<Message>	Portland</Message>
+			<Status>OK</Status>
+			<Duration>11</Duration>
+		</CM>
+		<AF>
+			<Message>Command:AF-&gt;Add fields.</Message>
+			<Message>Adding custom fields:</Message>
+			<Message>Using mosaic dataset:Portland</Message>
+			<Message>	Creating fields:</Message>
+			<Message>		BEST</Message>
+			<Message>		Source</Message>
+			<Message>		Dataset_ID</Message>
+			<Message>		LE90</Message>
+			<Message>		CE90</Message>
+			<Message>		DEM_Type</Message>
+			<Message>		Date_Start</Message>
+			<Message>		Date_End</Message>
+			<Message>		Source_URL</Message>
+			<Message>		VerticalDatum</Message>
+			<Message>		Link2Metadata</Message>
+			<Status>OK</Status>
+			<Duration>468</Duration>
+		</AF>
+		<AR>
+			<Message>Command:AR-&gt;Add rasters/data to a mosaic dataset.</Message>
+			<Message>Adding rasters:</Message>
+			<Message>	Using mosaic dataset/ID:Portland/1</Message>
+			<Message>Adding items..</Message>
+			<Message>
+				Calling (arcpy.AddRastersToMosaicDataset_management)
+				<Error>
+					<type>critical</type>
+					<text>Failed to execute. Parameters are not valid.
+ERROR 000732: Input Data: Dataset /input does not exist or is not supported
+Failed to execute (AddRastersToMosaicDataset).
+</text>
+				</Error>
+			</Message>
+			<Message>Status: FAILED</Message>
+			<Message>
+				No new mosaic dataset item was added for Dataset ID (1)
+				<Error>
+					<type>critical</type>
+					<text>No new mosaic dataset items added to dataset (Portland). Verify the input data path/raster type is correct</text>
+				</Error>
+				<Error>
+					<type>critical</type>
+					<text>Start Time: Tuesday, March 1, 2022 17:16:35
+Failed to execute. Parameters are not valid.
+ERROR 000732: Input Data: Dataset /input does not exist or is not supported
+Failed to execute (AddRastersToMosaicDataset).
+Failed at Tuesday, March 1, 2022 17:16:47 (Elapsed Time: 11.76 seconds)</text>
+				</Error>
+			</Message>
+			<Status>Failed!</Status>
+			<Duration>37</Duration>
+		</AR>
+	</MDCS>
+</Projects>

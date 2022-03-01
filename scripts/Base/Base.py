@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright 2020 Esri
+# Copyright 2022 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
-# Version: 20201230
+# Version: 20220228
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -195,17 +195,9 @@ class Base(object):
         self.m_cli_msg_callback_ptr = None
         # ends
         self.m_userClassInstance = None
+        self.m_data = None
 
     def init(self):  # return (status [true|false], reason)
-        try:
-            frame = sys._getframe(0).f_globals
-            module = frame[self.CMODULE_NAME]
-            self.m_userClassInstance = getattr(module, self.CCLASS_NAME)()
-        except:
-            self.log('{}/{} not found. Users commands disabled!'.format(self.CMODULE_NAME, self.CCLASS_NAME), self.const_warning_text)
-        if (self.m_doc is None):
-            return False
-        # version check.
         try:
             # Update in memory parameter DOM to reflect {-m} user values
             if (self.m_workspace):
@@ -274,7 +266,22 @@ class Base(object):
             except Exception as inst:
                 self.log(str(inst), self.const_critical_text)
                 return (False, self.const_init_ret_sde)
-
+        try:
+            self.m_data = {
+                'log': self.m_log,
+                'workspace': self.m_geoPath,
+                'mosaicdataset': self.m_mdName,
+                'mdcs': self.m_doc,
+                'sourcePath': self.m_sources,
+                'base': self    # pass in the base object to allow access to common functions.
+            }
+            frame = sys._getframe(0).f_globals
+            module = frame[self.CMODULE_NAME]
+            self.m_userClassInstance = getattr(module, self.CCLASS_NAME)(self.m_data)
+        except:
+            self.log('{}/{} not found. Users commands disabled!'.format(self.CMODULE_NAME, self.CCLASS_NAME), self.const_warning_text)
+        if (self.m_doc is None):
+            return (False, 'UserCode')
         return (True, 'OK')
 
     def invokeDynamicFnCallback(self, args, fn_name=None):

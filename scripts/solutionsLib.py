@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: SolutionsLib.py
 # Description: To map MDCS command codes to GP Tool functions.
-# Version: 20211006
+# Version: 20220228
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -118,7 +118,6 @@ class Solutions(Base.Base):
 
     # mapping commands to functions
     def executeCommand(self, com, index=0):
-
         # create the geodatabse to hold all relevant mosaic datasets.
         if (com == 'CM'):
             createMD = self.CreateMD.CreateMD(self.m_base)
@@ -1329,14 +1328,7 @@ class Solutions(Base.Base):
             )
         else:
             # The command could be a user defined function externally defined in the module (MDCS_UC.py). Let's invoke it.
-            data = {
-                'log': self.m_log,
-                'workspace': self.m_base.m_geoPath,
-                'mosaicdataset': self.m_base.m_mdName,
-                'mdcs': self.m_base.m_doc,
-                'sourcePath': self.m_base.m_sources,
-                'base': self.m_base    # pass in the base object to allow access to common functions.
-            }
+            data = self.m_base.m_data
             bSuccess = self.m_base.invoke_user_function(com, data)
             if (bSuccess):
                 ParentRoot = 'Application/Workspace'

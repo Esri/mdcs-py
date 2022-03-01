@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Copyright 2013 Esri
+# Copyright 2022 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: MDCS_UC.py
 # Description: A class to implement all user functions or to extend the built in MDCS functions/commands chain.
-# Version: 20201230
+# Version: 20220228
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ import arcpy
 
 class UserCode:
 
-    def __init__(self):
+    def __init__(self, data):
         pass    # initialize variables that need to be shared between multiple user commands.
 
     def sample00(self, data):
