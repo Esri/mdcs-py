@@ -23,18 +23,21 @@
 import os
 import sys
 import arcpy
-if (sys.version_info[0] < 3):           # _winreg has been renamed as (winreg) in python3+
-    from _winreg import *
-else:
-    from winreg import *
+try:
+    if (sys.version_info[0] < 3):           # _winreg has been renamed as (winreg) in python3+
+        from _winreg import *
+    else:
+        from winreg import *
+except ImportError as e:
+    print ('winreg support is disabled!\n{}'.format(e))
 
 from datetime import datetime
 from xml.dom import minidom
 
 try:
     import MDCS_UC
-except:
-    print ('User-Code functions disabled.')
+except Exception as e:
+    print (f'User-Code functions disabled.\n{e}')
 try:
     from arcpy.ia import *
     arcpy.CheckOutExtension("ImageAnalyst")
@@ -310,11 +313,11 @@ class Base(object):
 
         self.m_code_base = path
 
-        self.const_statistics_path_ = os.path.join(self.m_code_base, '..\\..\\parameter\\Statistics')
-        self.const_raster_function_templates_path_ = os.path.join(self.m_code_base, '..\\..\\parameter\\RasterFunctionTemplates')
-        self.const_raster_type_path_ = os.path.join(self.m_code_base, '..\\..\\parameter\\Rastertype')
-        self.const_workspace_path_ = os.path.join(self.m_code_base, '..\\..\\')  # .gdb output
-        self.const_import_geometry_features_path_ = os.path.join(self.m_code_base, '..\\..\\parameter')
+        self.const_statistics_path_ = os.path.join(self.m_code_base, '../../Parameter/Statistics')
+        self.const_raster_function_templates_path_ = os.path.join(self.m_code_base, '../../Parameter/RasterFunctionTemplates')
+        self.const_raster_type_path_ = os.path.join(self.m_code_base, '../../Parameter/RasterType')
+        self.const_workspace_path_ = os.path.join(self.m_code_base, '../../')  # .gdb output
+        self.const_import_geometry_features_path_ = os.path.join(self.m_code_base, '../../Parameter')
 
         return self.m_code_base
 
@@ -508,7 +511,8 @@ class Base(object):
 
         if (iVersion > tVersion):           # the first priority is to check for the patch version against the installed version
             return True                     # if the installed ArcGIS version is greater than the patch's, it's OK to proceed.
-
+        if (self.isLinux()):
+            return True
         # if the installed ArcGIS version is lower than the intended target patch version, continue with the registry key check for the
         # possible patches installed.
         # HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\ESRI\Desktop10.2\Updates
@@ -851,3 +855,39 @@ class Base(object):
                 t0 = datetime.now()
 
         return tot_count_sec_
+
+    @staticmethod
+    def isLinux(self):
+        return sys.platform.lower().startswith(('linux', 'darwin'))
+
+    def getBooleanValue(self, value):
+        if (value is None):
+            return False
+        if (isinstance(value, bool)):
+            return value
+        val = value
+        if (not isinstance(val, str)):
+            val = str(val)
+        val = val.lower()
+        if val in ['true', 'yes', 't', '1', 'y']:
+            return True
+        return False
+
+    def _updateResponse(self, resp, **kwargs):
+        if (resp is None):
+            return resp
+        for k in kwargs:
+            resp[k] = kwargs[k]
+        return resp
+
+    def _getResponseResult(self, resp):
+        if (resp is None):
+            return False
+        if (isinstance(resp, bool)):
+            status = resp
+        elif (isinstance(resp, dict)):
+            status = False
+            if ('status' in resp):
+                status = self.getBooleanValue(resp['status'])
+        return status
+
