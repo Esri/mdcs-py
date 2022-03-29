@@ -930,7 +930,7 @@ class Solutions(Base.Base):
             for indx in range(0, maxValues):
                 isQuery = False
                 query = self.getProcessInfoValue(processKey, 'query', index, indx)
-                lyrName = 'lyr_%s_%s' % (str(self.m_base.m_last_AT_ObjectID),datetime.strftime(datetime.now(),"%Y%d%d%H%M%S"))
+                lyrName = 'lyr_%s_%s' % (str(self.m_base.m_last_AT_ObjectID),datetime.strftime(datetime.now(),"%Y%d%d%H%M%S%f"))
                 if (query != '#'):
                     isQuery = True
 
