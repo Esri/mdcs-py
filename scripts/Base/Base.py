@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright 2020 Esri
+# Copyright 2022 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
-# Version: 20201230
+# Version: 20220228
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -23,18 +23,21 @@
 import os
 import sys
 import arcpy
-if (sys.version_info[0] < 3):           # _winreg has been renamed as (winreg) in python3+
-    from _winreg import *
-else:
-    from winreg import *
+try:
+    if (sys.version_info[0] < 3):           # _winreg has been renamed as (winreg) in python3+
+        from _winreg import *
+    else:
+        from winreg import *
+except ImportError as e:
+    print ('winreg support is disabled!\n{}'.format(e))
 
 from datetime import datetime
 from xml.dom import minidom
 
 try:
     import MDCS_UC
-except:
-    print ('User-Code functions disabled.')
+except Exception as e:
+    print (f'User-Code functions disabled.\n{e}')
 try:
     from arcpy.ia import *
     arcpy.CheckOutExtension("ImageAnalyst")
@@ -195,17 +198,9 @@ class Base(object):
         self.m_cli_msg_callback_ptr = None
         # ends
         self.m_userClassInstance = None
+        self.m_data = None
 
     def init(self):  # return (status [true|false], reason)
-        try:
-            frame = sys._getframe(0).f_globals
-            module = frame[self.CMODULE_NAME]
-            self.m_userClassInstance = getattr(module, self.CCLASS_NAME)()
-        except:
-            self.log('{}/{} not found. Users commands disabled!'.format(self.CMODULE_NAME, self.CCLASS_NAME), self.const_warning_text)
-        if (self.m_doc is None):
-            return False
-        # version check.
         try:
             # Update in memory parameter DOM to reflect {-m} user values
             if (self.m_workspace):
@@ -274,7 +269,22 @@ class Base(object):
             except Exception as inst:
                 self.log(str(inst), self.const_critical_text)
                 return (False, self.const_init_ret_sde)
-
+        try:
+            self.m_data = {
+                'log': self.m_log,
+                'workspace': self.m_geoPath,
+                'mosaicdataset': self.m_mdName,
+                'mdcs': self.m_doc,
+                'sourcePath': self.m_sources,
+                'base': self    # pass in the base object to allow access to common functions.
+            }
+            frame = sys._getframe(0).f_globals
+            module = frame[self.CMODULE_NAME]
+            self.m_userClassInstance = getattr(module, self.CCLASS_NAME)(self.m_data)
+        except:
+            self.log('{}/{} not found. Users commands disabled!'.format(self.CMODULE_NAME, self.CCLASS_NAME), self.const_warning_text)
+        if (self.m_doc is None):
+            return (False, 'UserCode')
         return (True, 'OK')
 
     def invokeDynamicFnCallback(self, args, fn_name=None):
@@ -303,11 +313,11 @@ class Base(object):
 
         self.m_code_base = path
 
-        self.const_statistics_path_ = os.path.join(self.m_code_base, '..\\..\\parameter\\Statistics')
-        self.const_raster_function_templates_path_ = os.path.join(self.m_code_base, '..\\..\\parameter\\RasterFunctionTemplates')
-        self.const_raster_type_path_ = os.path.join(self.m_code_base, '..\\..\\parameter\\Rastertype')
-        self.const_workspace_path_ = os.path.join(self.m_code_base, '..\\..\\')  # .gdb output
-        self.const_import_geometry_features_path_ = os.path.join(self.m_code_base, '..\\..\\parameter')
+        self.const_statistics_path_ = os.path.join(self.m_code_base, '../../Parameter/Statistics')
+        self.const_raster_function_templates_path_ = os.path.join(self.m_code_base, '../../Parameter/RasterFunctionTemplates')
+        self.const_raster_type_path_ = os.path.join(self.m_code_base, '../../Parameter/RasterType')
+        self.const_workspace_path_ = os.path.join(self.m_code_base, '../../')  # .gdb output
+        self.const_import_geometry_features_path_ = os.path.join(self.m_code_base, '../../Parameter')
 
         return self.m_code_base
 
@@ -501,7 +511,8 @@ class Base(object):
 
         if (iVersion > tVersion):           # the first priority is to check for the patch version against the installed version
             return True                     # if the installed ArcGIS version is greater than the patch's, it's OK to proceed.
-
+        if (self.isLinux()):
+            return True
         # if the installed ArcGIS version is lower than the intended target patch version, continue with the registry key check for the
         # possible patches installed.
         # HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\ESRI\Desktop10.2\Updates
@@ -844,3 +855,39 @@ class Base(object):
                 t0 = datetime.now()
 
         return tot_count_sec_
+
+    @staticmethod
+    def isLinux(self):
+        return sys.platform.lower().startswith(('linux', 'darwin'))
+
+    def getBooleanValue(self, value):
+        if (value is None):
+            return False
+        if (isinstance(value, bool)):
+            return value
+        val = value
+        if (not isinstance(val, str)):
+            val = str(val)
+        val = val.lower()
+        if val in ['true', 'yes', 't', '1', 'y']:
+            return True
+        return False
+
+    def _updateResponse(self, resp, **kwargs):
+        if (resp is None):
+            return resp
+        for k in kwargs:
+            resp[k] = kwargs[k]
+        return resp
+
+    def _getResponseResult(self, resp):
+        if (resp is None):
+            return False
+        if (isinstance(resp, bool)):
+            status = resp
+        elif (isinstance(resp, dict)):
+            status = False
+            if ('status' in resp):
+                status = self.getBooleanValue(resp['status'])
+        return status
+
