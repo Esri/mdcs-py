@@ -1794,7 +1794,8 @@ class Solutions(Base.Base):
                 try:
                     index = int(command[len(cmd):])
                 except BaseException:
-                    self.log("Command/Err: Invalid command index:" + command, self.const_warning_text)
+##                    self.log("Command/Err: Invalid command index:" + command, self.const_warning_text)
+                     pass
                     # catch any float values entered, e.t.c
             if ((cmd in self.commands.keys()) == False):
                 if (self.m_base.isUser_Function(ucCommand) == True):
