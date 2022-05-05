@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: SolutionsLib.py
 # Description: To map MDCS command codes to GP Tool functions.
-# Version: 20220228
+# Version: 20211006
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -118,6 +118,7 @@ class Solutions(Base.Base):
 
     # mapping commands to functions
     def executeCommand(self, com, index=0):
+
         # create the geodatabse to hold all relevant mosaic datasets.
         if (com == 'CM'):
             createMD = self.CreateMD.CreateMD(self.m_base)
@@ -930,7 +931,7 @@ class Solutions(Base.Base):
             for indx in range(0, maxValues):
                 isQuery = False
                 query = self.getProcessInfoValue(processKey, 'query', index, indx)
-                lyrName = 'lyr_%s_%s' % (str(self.m_base.m_last_AT_ObjectID),datetime.strftime(datetime.now(),"%Y%d%d%H%M%S%f"))
+                lyrName = 'lyr_%s_%s' % (str(self.m_base.m_last_AT_ObjectID),datetime.strftime(datetime.now(),"%Y%d%d%H%M%S"))
                 if (query != '#'):
                     isQuery = True
 
@@ -1213,54 +1214,6 @@ class Solutions(Base.Base):
                 'arcpy.ia.DetectChangeUsingChangeAnalysis',
                 index
             )
-        elif (com == 'COUDL'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            return self.__invokeDynamicFn(
-                [],
-                'classifyobjectsusingdeeplearning',
-                'arcpy.ia.ClassifyObjectsUsingDeepLearning',
-                index
-            )
-        elif (com == 'CPUDL'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            return self.__invokeDynamicFn(
-                [],
-                'classifypixelsusingdeeplearning',
-                'arcpy.ia.ClassifyPixelsUsingDeepLearning',
-                index
-            )
-        elif (com == 'CAFOD'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            return self.__invokeDynamicFn(
-                [],
-                'computeaccuracyforobjectdetection',
-                'arcpy.ia.ComputeAccuracyForObjectDetection',
-                index
-            )
-        elif (com == 'DCUDL'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            return self.__invokeDynamicFn(
-                [],
-                'detectchangeusingdeeplearning',
-                'arcpy.ia.DetectChangeUsingDeepLearning',
-                index
-            )
-        elif (com == 'DOUDL'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            return self.__invokeDynamicFn(
-                [],
-                'detectobjectsusingdeeplearning',
-                'arcpy.ia.DetectObjectsUsingDeepLearning',
-                index
-            )
-        elif (com == 'NMS'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            return self.__invokeDynamicFn(
-                [],
-                'nonmaximumsuppression',
-                'arcpy.ia.NonMaximumSuppression',
-                index
-            )
         elif (com == 'FAS'):
             self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
             return self.__invokeDynamicFn(
@@ -1376,7 +1329,14 @@ class Solutions(Base.Base):
             )
         else:
             # The command could be a user defined function externally defined in the module (MDCS_UC.py). Let's invoke it.
-            data = self.m_base.m_data
+            data = {
+                'log': self.m_log,
+                'workspace': self.m_base.m_geoPath,
+                'mosaicdataset': self.m_base.m_mdName,
+                'mdcs': self.m_base.m_doc,
+                'sourcePath': self.m_base.m_sources,
+                'base': self.m_base    # pass in the base object to allow access to common functions.
+            }
             bSuccess = self.m_base.invoke_user_function(com, data)
             if (bSuccess):
                 ParentRoot = 'Application/Workspace'
@@ -1670,30 +1630,6 @@ class Solutions(Base.Base):
             {'desc': 'Detect Change Using Change Analysis Raster.',
              'fnc': executeCommand
              },
-            'COUDL':
-            {'desc': 'Classify Objects using Deep Learning.',
-             'fnc': executeCommand
-             },
-            'CPUDL':
-            {'desc': 'Classify Pixels using Deep Learning.',
-             'fnc': executeCommand
-             },
-            'CAFOD':
-            {'desc': 'Compute Accuracy for Object Detection.',
-             'fnc': executeCommand
-             },
-            'DCUDL':
-            {'desc': 'Detect Change using Deep Learning.',
-             'fnc': executeCommand
-             },
-            'DOUDL':
-            {'desc': 'Detect Object using Deep Learning.',
-             'fnc': executeCommand
-             },
-            'NMS':
-            {'desc': 'Non Maximum Suppression.',
-             'fnc': executeCommand
-             },
             'FAS':
             {'desc': 'Find Argument Statistics.',
              'fnc': executeCommand
@@ -1858,7 +1794,8 @@ class Solutions(Base.Base):
                 try:
                     index = int(command[len(cmd):])
                 except BaseException:
-                    self.log("Command/Err: Invalid command index:" + command, self.const_warning_text)
+##                    self.log("Command/Err: Invalid command index:" + command, self.const_warning_text)
+                     pass
                     # catch any float values entered, e.t.c
             if ((cmd in self.commands.keys()) == False):
                 if (self.m_base.isUser_Function(ucCommand) == True):
