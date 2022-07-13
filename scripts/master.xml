@@ -502,7 +502,7 @@
 					<target_join_field>target_join_field</target_join_field>
 					<input_featureclass>input_featureclass</input_featureclass>
 					<input_join_field>input_join_field</input_join_field>
-					<fieldNameList>footprint</fieldNameList>
+					<fieldNameList>field1,field2,..</fieldNameList>
 				</ImportFieldValues>
 				<!-- SS     Set Statistics -->
 				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/set-raster-properties.htm -->

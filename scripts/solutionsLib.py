@@ -670,11 +670,25 @@ class Solutions(Base.Base):
 
             try:
                 j = 0
-                joinTable = self.getProcessInfoValue(processKey, 'input_featureclass', index)
-                confTableName = os.path.basename(joinTable)
 
-                joinFeildList = [f.name for f in arcpy.ListFields(joinTable)]
-                self.log(joinFeildList)
+                joinTable = self.getProcessInfoValue(processKey, 'input_featureclass', index)
+                confTableName = os.path.splitext(os.path.basename(joinTable))[0]
+
+                joinFeildList = [f.name for f in arcpy.ListFields(joinTable) if f.type not in ('OID','Geometry')]
+
+
+                in_fieldNameList = self.getProcessInfoValue(processKey, 'fieldnamelist', index)
+                in_fieldNameList = in_fieldNameList.split(",")
+
+                fieldNameList = []
+                for i in in_fieldNameList:
+                        fieldNameList.append(i)
+
+                for f in fieldNameList:
+                    if f not in joinFeildList:
+                        self.log("Field "+ f + " not found in join table", self.m_log.const_critical_text)
+                        return False
+
                 mlayer = os.path.basename(fullPath) + "layer" + str(j)
                 j = j + 1
                 arcpy.MakeMosaicLayer_management(fullPath, mlayer)
@@ -686,12 +700,14 @@ class Solutions(Base.Base):
                     self.getProcessInfoValue(processKey, 'target_join_field', index),
                     "KEEP_ALL"
                 )
-                for jfl in joinFeildList:
+                #for jfl in joinFeildList:
+                for jfl in fieldNameList:
                     if jfl == "Comments" or jfl == "OBJECTID" or jfl == "Dataset_ID":
                         self.log("\t\tvalues exist for the field : " + jfl, self.m_log.const_general_text)
                     else:
-                        fieldcal = "AMD_" + mdName + "_CAT." + jfl
-                        fromfield = "[" + confTableName + "." + jfl + "]"
+                        fieldcal = "AMD_" + self.m_base.m_mdName + "_CAT." + jfl
+##                        fieldcal = confTableName + "."+ jfl
+                        fromfield = "!" + confTableName + ".{}!".format(jfl)
                         try:
                             arcpy.CalculateField_management(mlayerJoin, fieldcal, fromfield)
                             self.log("\t\tDone calculating values for the Field :" + fieldcal, self.m_log.const_general_text)
@@ -701,6 +717,7 @@ class Solutions(Base.Base):
                 return True
             except BaseException:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                return False
 
         elif(com == 'BB'):
             fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
