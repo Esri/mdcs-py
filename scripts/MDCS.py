@@ -155,6 +155,7 @@ def main(argc, argv):
                 continue
             dynamic_var = value[pMax + 1:].upper()
             v = value[0: pMax]
+            log.Message('User Defined Variable: ' + value[pMax + 1:]+':'+v, log.const_general_text)
             if (dynamic_var.strip() != ''):
                 if ((dynamic_var in base.m_dynamic_params.keys()) == False):
                     base.m_dynamic_params[dynamic_var] = v
