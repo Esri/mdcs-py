@@ -65,6 +65,14 @@ class CreateMD(Base.Base):
         self.log("Creating source mosaic datasets:", self.const_general_text)
         try:
             mdPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            if "/" in self.srs:
+                try:
+                    splitSRS = self.srs.split("/")
+                    hcs = int(splitSRS[0])
+                    vcs = int(splitSRS[1])
+                    self.srs = arcpy.SpatialReference(hcs,vcs)
+                except:
+                    pass
             if not arcpy.Exists(mdPath):
                 self.log("\t" + self.m_base.m_mdName, self.const_general_text)
                 arcpy.CreateMosaicDataset_management(self.m_base.m_geoPath, self.m_base.m_mdName, self.srs, self.num_bands, self.pixel_type, self.product_definition, self.product_band_definitions)
