@@ -32,7 +32,39 @@ sys.path.append(os.path.join(scriptPath, 'Base'))
 
 import Base
 
+def returnLevelDetails(self, tilingSchema):
+        try:
+            doc = minidom.parse(tilingSchema)
+            lodNodesList = []
+            lodNodes = doc.getElementsByTagName('LODInfo')
+            for lodNode in lodNodes:
+                level = lodNode.getElementsByTagName('LevelID')[0].firstChild.data
+                levelDict = {
+                                "level": level,
+                                "scale": lodNode.getElementsByTagName('Scale')[0].firstChild.data,
+                                "resolution": lodNode.getElementsByTagName('Resolution')[0].firstChild.data
+                            }
+                lodNodesList.append(levelDict)
+            return lodNodesList
+        except BaseException:
+            self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+            return False
 
+    def modifyConfProperties(self, properties, maxScale):
+        try:
+            doc = minidom.parse(properties)
+            keys = doc.getElementsByTagName('Key')
+            values = doc.getElementsByTagName('Value')
+            key = [k for k in keys if k.childNodes[0].nodeValue == 'MaxScale'][0]
+            value = [v for v in values if v.parentNode.isSameNode(key.parentNode)][0]
+            value.childNodes[0].replaceWholeText(maxScale)
+            modifiedXML = doc.toxml()
+            with open(properties, 'w') as xmlHandler:
+                xmlHandler.write(modifiedXML)
+        except BaseException:
+            self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+            return False
+        
 class Solutions(Base.Base):
 
     processInfo = None
@@ -1857,36 +1889,3 @@ class Solutions(Base.Base):
                  is_user_cmd == True)):
                 break
         return cmdResults
-
-    def returnLevelDetails(self, tilingSchema):
-        try:
-            doc = minidom.parse(tilingSchema)
-            lodNodesList = []
-            lodNodes = doc.getElementsByTagName('LODInfo')
-            for lodNode in lodNodes:
-                level = lodNode.getElementsByTagName('LevelID')[0].firstChild.data
-                levelDict = {
-                                "level": level,
-                                "scale": lodNode.getElementsByTagName('Scale')[0].firstChild.data,
-                                "resolution": lodNode.getElementsByTagName('Resolution')[0].firstChild.data
-                            }
-                lodNodesList.append(levelDict)
-            return lodNodesList
-        except BaseException:
-            self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
-            return False
-
-    def modifyConfProperties(self, properties, maxScale):
-        try:
-            doc = minidom.parse(properties)
-            keys = doc.getElementsByTagName('Key')
-            values = doc.getElementsByTagName('Value')
-            key = [k for k in keys if k.childNodes[0].nodeValue == 'MaxScale'][0]
-            value = [v for v in values if v.parentNode.isSameNode(key.parentNode)][0]
-            value.childNodes[0].replaceWholeText(maxScale)
-            modifiedXML = doc.toxml()
-            with open(properties, 'w') as xmlHandler:
-                xmlHandler.write(modifiedXML)
-        except BaseException:
-            self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
-            return False
