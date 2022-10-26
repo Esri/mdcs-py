@@ -1063,13 +1063,17 @@ class Solutions(Base.Base):
                     self.getProcessInfoValue(processKey, 'min_cached_scale', index),
                     self.getProcessInfoValue(processKey, 'max_cached_scale', index))
                 if os.path.isfile(tileSchemeMtc):
-                    cachepath = os.path.join(self.getProcessInfoValue(processKey, 'in_cache_location', index), self.getProcessInfoValue(processKey, 'in_cache_name', index))
-                    lodNodesList = self.returnLevelDetails(os.path.join(cachepath, 'conf.xml'))
-                    lodNodesList = sorted(lodNodesList, key=lambda k: int(k['level']))
-                    maxLODNode = lodNodesList[-1]
-                    maxScale = maxLODNode['scale']
-                    self.modifyConfProperties(os.path.join(cachepath, 'conf.properties'), maxScale)
-                return True
+                    try:
+                        cachepath = os.path.join(self.getProcessInfoValue(processKey, 'in_cache_location', index), self.getProcessInfoValue(processKey, 'in_cache_name', index))
+                        lodNodesList = self.returnLevelDetails(os.path.join(cachepath, 'conf.xml'))
+                        lodNodesList = sorted(lodNodesList, key=lambda k: int(k['level']))
+                        maxLODNode = lodNodesList[-1]
+                        maxScale = maxLODNode['scale']
+                        self.modifyConfProperties(os.path.join(cachepath, 'conf.properties'), maxScale)
+                    except BaseException:
+                        self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                        return False
+                    return True
             except BaseException:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
@@ -1856,27 +1860,35 @@ class Solutions(Base.Base):
                 break
         return cmdResults
 
-    def returnLevelDetails(tilingSchema):
-        doc = minidom.parse(tilingSchema)
-        lodNodesList = []
-        lodNodes = doc.getElementsByTagName('LODInfo')
-        for lodNode in lodNodes:
-            level = lodNode.getElementsByTagName('LevelID')[0].firstChild.data
-            levelDict = {
-                            "level": level,
-                            "scale": lodNode.getElementsByTagName('Scale')[0].firstChild.data,
-                            "resolution": lodNode.getElementsByTagName('Resolution')[0].firstChild.data
-                        }
-            lodNodesList.append(levelDict)
-        return lodNodesList
+    def returnLevelDetails(self, tilingSchema):
+        try:
+            doc = minidom.parse(tilingSchema)
+            lodNodesList = []
+            lodNodes = doc.getElementsByTagName('LODInfo')
+            for lodNode in lodNodes:
+                level = lodNode.getElementsByTagName('LevelID')[0].firstChild.data
+                levelDict = {
+                                "level": level,
+                                "scale": lodNode.getElementsByTagName('Scale')[0].firstChild.data,
+                                "resolution": lodNode.getElementsByTagName('Resolution')[0].firstChild.data
+                            }
+                lodNodesList.append(levelDict)
+            return lodNodesList
+        except BaseException:
+            self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+            return False
 
-    def modifyConfProperties(properties, maxScale):
-        doc = minidom.parse(properties)
-        keys = doc.getElementsByTagName('Key')
-        values = doc.getElementsByTagName('Value')
-        key = [k for k in keys if k.childNodes[0].nodeValue == 'MaxScale'][0]
-        value = [v for v in values if v.parentNode.isSameNode(key.parentNode)][0]
-        value.childNodes[0].replaceWholeText(maxScale)
-        modifiedXML = doc.toxml()
-        with open(properties, 'w') as xmlHandler:
-            xmlHandler.write(modifiedXML)
+    def modifyConfProperties(self, properties, maxScale):
+        try:
+            doc = minidom.parse(properties)
+            keys = doc.getElementsByTagName('Key')
+            values = doc.getElementsByTagName('Value')
+            key = [k for k in keys if k.childNodes[0].nodeValue == 'MaxScale'][0]
+            value = [v for v in values if v.parentNode.isSameNode(key.parentNode)][0]
+            value.childNodes[0].replaceWholeText(maxScale)
+            modifiedXML = doc.toxml()
+            with open(properties, 'w') as xmlHandler:
+                xmlHandler.write(modifiedXML)
+        except BaseException:
+            self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+            return False
