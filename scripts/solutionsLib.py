@@ -1037,7 +1037,6 @@ class Solutions(Base.Base):
             return True  # should unable to set environment variables return False?
 
         elif (com == 'MTC'):
-
             mdName = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             processKey = 'managetilecache'
             self.log("Building cache for:" + mdName, self.m_log.const_general_text)
@@ -1062,20 +1061,19 @@ class Solutions(Base.Base):
                     self.getProcessInfoValue(processKey, 'max_cell_size', index),
                     self.getProcessInfoValue(processKey, 'min_cached_scale', index),
                     self.getProcessInfoValue(processKey, 'max_cached_scale', index))
-                if os.path.isfile(tileSchemeMtc):
-                    try:
+                try:
+                    if os.path.isfile(tileSchemeMtc):
                         cachepath = os.path.join(self.getProcessInfoValue(processKey, 'in_cache_location', index), self.getProcessInfoValue(processKey, 'in_cache_name', index))
                         lodNodesList = self.returnLevelDetails(os.path.join(cachepath, 'conf.xml'))
                         lodNodesList = sorted(lodNodesList, key=lambda k: int(k['level']))
                         maxLODNode = lodNodesList[-1]
                         maxScale = maxLODNode['scale']
                         self.modifyConfProperties(os.path.join(cachepath, 'conf.properties'), maxScale)
-                    except BaseException:
-                        self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
-                        return False
-                    return True
-            except BaseException:
-                self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                except BaseException:
+                    self.log(arcpy.GetMessages(), self.m_log.const_critical_text)    
+                return True
+            except Exception as exp:
+                self.log(str(exp), self.m_log.const_critical_text)
                 return False
 
         elif (com == 'ETC'):
