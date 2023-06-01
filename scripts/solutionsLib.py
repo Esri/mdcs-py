@@ -1042,7 +1042,7 @@ class Solutions(Base.Base):
                             if (pIndx == 0):
                                 key_ = k
                                 val_ = v.strip()
-                                if (val_ != ''):
+                                if (val_ not in ['', '#']):
                                     arcpy.env[key_] = val_
                                     self.log('Env[%s]=%s' % (key_, val_), self.m_log.const_general_text)
                                 continue
@@ -1370,6 +1370,62 @@ class Solutions(Base.Base):
                 'arcpy.TransferFiles_management',
                 index
             )
+
+        elif (com == 'CPUDL'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            processKey = 'classifypixelsusingdeeplearning'
+            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+
+            try:
+                out_classified_raster = arcpy.ia.ClassifyPixelsUsingDeepLearning(
+                    fullPath,
+                    os.path.join(self.m_base.const_workspace_path_, 'Parameter/DLPKpackages', self.getProcessInfoValue(processKey, 'in_model_definition', index)),
+                    self.getProcessInfoValue(processKey, 'arguments', index),
+                    self.getProcessInfoValue(processKey, 'processing_mode', index))
+                out_classified_raster.save(os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName + processKey))
+            except Exception as exp:
+                return False
+            return True
+
+        elif (com == 'DOUDL'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            processKey = 'detectobjectsusingdeeplearning'
+            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            in_raster = self.getProcessInfoValue(processKey, 'in_raster', index)
+            if in_raster == '#':
+                in_raster = fullPath
+            return self.__invokeDynamicFn(
+            [
+                in_raster,
+                self.getProcessInfoValue(processKey, 'out_detected_objects', index),
+                os.path.join(self.m_base.const_workspace_path_, 'Parameter/DLPKpackages', self.getProcessInfoValue(processKey, 'in_model_definition', index)),
+                self.getProcessInfoValue(processKey, 'arguments', index),
+                self.getProcessInfoValue(processKey, 'run_nms', index),
+                self.getProcessInfoValue(processKey, 'confidence_score_field', index),
+                self.getProcessInfoValue(processKey, 'class_value_field', index),
+                self.getProcessInfoValue(processKey, 'max_overlap_ratio', index),
+                self.getProcessInfoValue(processKey, 'processing_mode', index)],
+            processKey,
+            'arcpy.ia.DetectObjectsUsingDeepLearning',
+            index
+        )
+
+        elif (com == 'COUDL'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            processKey = 'classifyobjectsusingdeeplearning'
+            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            return self.__invokeDynamicFn(
+            [fullPath,
+                    os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName + processKey),
+                    os.path.join(self.m_base.const_workspace_path_, 'Parameter/DLPKpackages', self.getProcessInfoValue(processKey, 'in_model_definition', index)),
+                    self.getProcessInfoValue(processKey, 'in_features', index),
+                    self.getProcessInfoValue(processKey, 'class_label_field', index),
+                    self.getProcessInfoValue(processKey, 'processing_mode', index),
+                    self.getProcessInfoValue(processKey, 'model_arguments', index)],
+            processKey,
+            'arcpy.ia.ClassifyObjectsUsingDeepLearning',
+            index
+        )
         else:
             # The command could be a user defined function externally defined in the module (MDCS_UC.py). Let's invoke it.
             data = {
@@ -1715,6 +1771,18 @@ class Solutions(Base.Base):
              },
             'TF':
             {'desc': 'Transfers files between a file system and a cloud storage workspace.',
+             'fnc': executeCommand
+             },
+            'CPUDL':
+            {'desc': 'Gives Segmentaed image as output using Deep Learning',
+             'fnc': executeCommand
+             },
+            'COUDL':
+            {'desc': 'Classifying Objects using Deep Learning',
+             'fnc': executeCommand
+             },
+            'DOUDL':
+            {'desc': 'Detecing Objects using Deep Learning',
              'fnc': executeCommand
              }
         }
