@@ -1437,6 +1437,47 @@ class Solutions(Base.Base):
                 'arcpy.ia.ClassifyObjectsUsingDeepLearning',
                 index
             )
+        elif (com == 'EFUAIM'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            processKey = 'extractfeaturesusingaimodels'
+            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            in_raster = self.getProcessInfoValue(processKey, 'in_raster', index)
+            output_path = self.getProcessInfoValue(processKey, 'out_location', index)
+            out_prefix = self.getProcessInfoValue(processKey, 'out_prefix', index)
+            if in_raster == '#':
+                in_raster = fullPath
+            if output_path == '#':
+                output_path = f'{fullPath}{processKey}'
+            if out_prefix == '#':
+                out_prefix = f'{fullPath}{processKey}'
+            return self.__invokeDynamicFn(
+                [in_raster,
+                 self.getProcessInfoValue(processKey, 'mode', index),
+                 output_path,
+                 out_prefix,
+                 self.getProcessInfoValue(processKey, 'area_of_interest', index),
+                 self.getProcessInfoValue(processKey, 'pretrained_models', index),
+                 self.getProcessInfoValue(processKey, 'additional_models', index),
+                 self.getProcessInfoValue(processKey, 'confidence_threshold', index),
+                 self.getProcessInfoValue(processKey, 'save_intermediate_output', index),
+                 self.getProcessInfoValue(processKey, 'test_time_augmentation', index),
+                 self.getProcessInfoValue(processKey, 'buffer_distance', index),
+                 self.getProcessInfoValue(processKey, 'extend_length', index),
+                 self.getProcessInfoValue(processKey, 'smoothing_tolerance', index),
+                 self.getProcessInfoValue(processKey, 'dangle_length', index),
+                 self.getProcessInfoValue(processKey, 'in_road_features', index),
+                 self.getProcessInfoValue(processKey, 'road_buffer_width', index),
+                 self.getProcessInfoValue(processKey, 'regularize_parcels', index),
+                 self.getProcessInfoValue(processKey, 'post_processing_workflow', index),
+                 self.getProcessInfoValue(processKey, 'out_features', index),
+                 self.getProcessInfoValue(processKey, 'parcel_tolerance', index),
+                 self.getProcessInfoValue(processKey, 'regularization_method', index),
+                 self.getProcessInfoValue(processKey, 'poly_tolerance', index)],
+                processKey,
+                'arcpy.geoai.ExtractFeaturesUsingAIModels',
+                index
+            )
+
         else:
             # The command could be a user defined function externally defined in the module (MDCS_UC.py). Let's invoke it.
             data = {
@@ -1794,6 +1835,10 @@ class Solutions(Base.Base):
              },
             'DOUDL':
             {'desc': 'Detecing Objects using Deep Learning',
+             'fnc': executeCommand
+             },
+            'EFUAIM':
+            {'desc': 'Extract Features Using AI Models',
              'fnc': executeCommand
              }
         }
