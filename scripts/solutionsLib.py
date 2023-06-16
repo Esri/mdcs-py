@@ -1370,23 +1370,24 @@ class Solutions(Base.Base):
                 'arcpy.TransferFiles_management',
                 index
             )
+            
         elif (com == 'CPUDL'):
             self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
             processKey = 'classifypixelsusingdeeplearning'
             fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             in_raster = self.getProcessInfoValue(processKey, 'in_raster', index)
-            output_path = self.getProcessInfoValue(processKey, 'out_classified_raster', index)
             if in_raster == '#':
                 in_raster = fullPath
-            if output_path=='#':
-                output_path = f'{fullPath}{processKey}'
+            dlpk_path = self.getProcessInfoValue(processKey, 'in_model_definition', index)
+            if not os.path.isabs(dlpk_path):
+                dlpk_path = os.path.join(self.m_base.const_workspace_path_, 'Parameter/DLPKpackages', dlpk_path)
             try:
                 out_classified_raster = arcpy.ia.ClassifyPixelsUsingDeepLearning(
-                    in_raster,
-                    os.path.join(self.m_base.const_workspace_path_, 'Parameter/DLPKpackages', self.getProcessInfoValue(processKey, 'in_model_definition', index)),
+                    in_raster, 
+                    dlpk_path,
                     self.getProcessInfoValue(processKey, 'arguments', index),
                     self.getProcessInfoValue(processKey, 'processing_mode', index))
-                out_classified_raster.save(output_path)
+                out_classified_raster.save(self.getProcessInfoValue(processKey, 'out_classified_raster', index))
             except Exception as exp:
                 return False
             return True
@@ -1396,21 +1397,15 @@ class Solutions(Base.Base):
             processKey = 'detectobjectsusingdeeplearning'
             fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             in_raster = self.getProcessInfoValue(processKey, 'in_raster', index)
-            output_path = self.getProcessInfoValue(processKey, 'out_detected_objects', index)
             if in_raster == '#':
                 in_raster = fullPath
-            if output_path=='#':
-                output_path = f'{fullPath}{processKey}'
+            dlpk_path = self.getProcessInfoValue(processKey, 'in_model_definition', index)
+            if not os.path.isabs(dlpk_path):
+                dlpk_path = os.path.join(self.m_base.const_workspace_path_, 'Parameter/DLPKpackages', dlpk_path)
             return self.__invokeDynamicFn(
                 [in_raster, 
-                    output_path, 
-                    os.path.join(self.m_base.const_workspace_path_, 'Parameter/DLPKpackages', self.getProcessInfoValue(processKey, 'in_model_definition', index)), 
-                    self.getProcessInfoValue(processKey, 'arguments', index), 
-                    self.getProcessInfoValue(processKey, 'run_nms', index), 
-                    self.getProcessInfoValue(processKey, 'confidence_score_field', index), 
-                    self.getProcessInfoValue(processKey, 'class_value_field', index),
-                    self.getProcessInfoValue(processKey, 'max_overlap_ratio', index), 
-                    self.getProcessInfoValue(processKey, 'processing_mode', index)], 
+                self.getProcessInfoValue(processKey, 'out_detected_objects', index), 
+                dlpk_path], 
                 processKey, 
                 'arcpy.ia.DetectObjectsUsingDeepLearning', 
                 index)
@@ -1420,19 +1415,15 @@ class Solutions(Base.Base):
             processKey = 'classifyobjectsusingdeeplearning'
             fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             in_raster = self.getProcessInfoValue(processKey, 'in_raster', index)
-            output_path = self.getProcessInfoValue(processKey, 'out_feature_class', index)
             if in_raster == '#':
                 in_raster = fullPath
-            if output_path=='#':
-                output_path = f'{fullPath}{processKey}'
+            dlpk_path = self.getProcessInfoValue(processKey, 'in_model_definition', index)
+            if not os.path.isabs(dlpk_path):
+                dlpk_path = os.path.join(self.m_base.const_workspace_path_, 'Parameter/DLPKpackages', dlpk_path)
             return self.__invokeDynamicFn(
                 [in_raster,
-                 output_path,
-                 os.path.join(self.m_base.const_workspace_path_, 'Parameter/DLPKpackages', self.getProcessInfoValue(processKey, 'in_model_definition', index)),
-                 self.getProcessInfoValue(processKey, 'in_features', index),
-                 self.getProcessInfoValue(processKey, 'class_label_field', index),
-                 self.getProcessInfoValue(processKey, 'processing_mode', index),
-                 self.getProcessInfoValue(processKey, 'model_arguments', index)],
+                 self.getProcessInfoValue(processKey, 'out_feature_class', index),
+                 dlpk_path],
                 processKey,
                 'arcpy.ia.ClassifyObjectsUsingDeepLearning',
                 index
@@ -1442,37 +1433,10 @@ class Solutions(Base.Base):
             processKey = 'extractfeaturesusingaimodels'
             fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             in_raster = self.getProcessInfoValue(processKey, 'in_raster', index)
-            output_path = self.getProcessInfoValue(processKey, 'out_location', index)
-            out_prefix = self.getProcessInfoValue(processKey, 'out_prefix', index)
             if in_raster == '#':
                 in_raster = fullPath
-            if output_path == '#':
-                output_path = f'{fullPath}{processKey}'
-            if out_prefix == '#':
-                out_prefix = f'{fullPath}{processKey}'
             return self.__invokeDynamicFn(
-                [in_raster,
-                 self.getProcessInfoValue(processKey, 'mode', index),
-                 output_path,
-                 out_prefix,
-                 self.getProcessInfoValue(processKey, 'area_of_interest', index),
-                 self.getProcessInfoValue(processKey, 'pretrained_models', index),
-                 self.getProcessInfoValue(processKey, 'additional_models', index),
-                 self.getProcessInfoValue(processKey, 'confidence_threshold', index),
-                 self.getProcessInfoValue(processKey, 'save_intermediate_output', index),
-                 self.getProcessInfoValue(processKey, 'test_time_augmentation', index),
-                 self.getProcessInfoValue(processKey, 'buffer_distance', index),
-                 self.getProcessInfoValue(processKey, 'extend_length', index),
-                 self.getProcessInfoValue(processKey, 'smoothing_tolerance', index),
-                 self.getProcessInfoValue(processKey, 'dangle_length', index),
-                 self.getProcessInfoValue(processKey, 'in_road_features', index),
-                 self.getProcessInfoValue(processKey, 'road_buffer_width', index),
-                 self.getProcessInfoValue(processKey, 'regularize_parcels', index),
-                 self.getProcessInfoValue(processKey, 'post_processing_workflow', index),
-                 self.getProcessInfoValue(processKey, 'out_features', index),
-                 self.getProcessInfoValue(processKey, 'parcel_tolerance', index),
-                 self.getProcessInfoValue(processKey, 'regularization_method', index),
-                 self.getProcessInfoValue(processKey, 'poly_tolerance', index)],
+                [in_raster],
                 processKey,
                 'arcpy.geoai.ExtractFeaturesUsingAIModels',
                 index
