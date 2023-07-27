@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Copyright 2019 Esri
+# Copyright 2023 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: MDCS.py
 # Description: This is the main program entry point to MDCS.
-# Version: 20201230
+# Version: 20230726
 # Requirements: ArcGIS 10.1 SP1
 # Required Arguments: -i:<config_file>
 # Usage: python.exe MDCS.py -c:<Optional:command(s)> -i:<config_file>
@@ -26,6 +26,7 @@
 import arcpy
 import sys
 import os
+from importlib import reload
 
 solutionLib_path = os.path.dirname(os.path.abspath(__file__))  # set the location to the solutionsLib path
 sys.path.append(solutionLib_path)
@@ -33,6 +34,9 @@ sys.path.append(os.path.join(solutionLib_path, 'SolutionsLog'))
 import logger
 import solutionsLib  # import Raster Solutions library
 import Base
+logger = reload(logger)
+solutionsLib = reload(solutionsLib)
+Base = reload(Base)
 from ProgramCheckAndUpdate import ProgramCheckAndUpdate
 
 # cli callback ptrs

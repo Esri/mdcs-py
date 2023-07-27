@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright 2022 Esri
+# Copyright 2023 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
-# Version: 20220228
+# Version: 20230726
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
@@ -36,6 +36,8 @@ from xml.dom import minidom
 
 try:
     import MDCS_UC
+    from importlib import reload
+    MDCS_UC = reload(MDCS_UC)
 except Exception as e:
     print (f'User-Code functions disabled.\n{e}')
 try:
