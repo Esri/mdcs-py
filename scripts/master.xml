@@ -3,7 +3,7 @@
 	<!-- Support for Dynamic Variable <Name>$xyz$</Name> or <Name>DefaultValue;$xyz$</Name> The variable value can be passed from the command line -->
 	<Name>Name_of_Project</Name>
 	<Command>DefaultCommand</Command>
-	<!-- Commands avaiable CM, AR, CR, SP, BP, AF, CFC, CC, CBMD, ERF, ANCP, APCP, ABA, SMDI, CBA, CCP, CTP, AMDS, AMD, BMDIC, CDA, GEA, CS, BPS, BF, BS, BB, DN, SY, IG, SS, DF, DO, BO, MMDI, DMD, RRFMD, RP, RI, AI, JF, CV, MTC, ETC, STP, SE, EMDG, EMDI, SMDI, CSDD, STS, CRTT, CLT,CCM,BSM,GPC,IFPC,CRA,USD,DEL,BMI,GMA,AMR,CF,UIO,EFACP,GBAR,RR,CPCSLP,TF -->
+	<!-- Commands avaiable CM, AR, CR, SP, BP, AF, CFC, CC, CBMD, ERF, ANCP, APCP, ABA, SMDI, CBA, CCP, CTP, AMDS, AMD, BMDIC, CDA, GEA, CS, BPS, BF, BS, BB, DN, SY, IG, SS, DF, DO, BO, MMDI, DMD, RRFMD, RP, RI, AI, JF, CV, MTC, ETC, STP, SE, EMDG, EMDI, SMDI, CSDD, STS, CRTT, CLT,CCM,BSM,GPC,IFPC,CRA,USD,DEL,BMI,GMA,AMR,CF,UIO,EFACP,GBAR,RR,CPCSLP,TF,CPUDL,DOUDL,COUDL,EFUAIM -->
 	<!-- Commands can be combined using the + sign and some commands can be called multiple times, refer to MDCS document for more help -->
 	<ArcGISVersion>
 		<!-- Defines Min Max version required. Eg due to know issue in previsous versions -->
@@ -945,6 +945,72 @@
 				<output_folder>#</output_folder>
 				<file_filter>#</file_filter>
 			</TransferFiles>
+			<!-- CPUDL Classify Pixels Using Deep Learning-->
+		        <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/image-analyst/classify-pixels-using-deep-learning.htm -->
+		        <ClassifyPixelsUsingDeepLearning>
+		          <in_raster>#</in_raster>
+		          <in_model_definition>#</in_model_definition>
+		          <arguments>#</arguments>
+		          <processing_mode>PROCESS_AS_MOSAICKED_IMAGE;PROCESS_ITEMS_SEPARATELY</processing_mode>
+		          <out_classified_folder>#</out_classified_folder>
+		          <out_featureclass>#</out_featureclass>
+		          <out_classified_raster>#</out_classified_raster>
+		        </ClassifyPixelsUsingDeepLearning>
+		
+		        <!-- DOUDL Detect Objects Using Deep Learning -->
+		        <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/image-analyst/detect-objects-using-deep-learning.htm -->
+		        <DetectObjectsUsingDeepLearning>
+		          <in_raster>#</in_raster>
+		          <out_detected_objects>#</out_detected_objects>
+		          <in_model_definition>#</in_model_definition>
+		          <arguments>#</arguments>
+		          <run_nms>NO_NMS;NMS</run_nms>
+		          <confidence_score_field>#</confidence_score_field>
+		          <class_value_field>#</class_value_field>
+		          <max_overlap_ratio>#</max_overlap_ratio>
+		          <processing_mode>PROCESS_AS_MOSAICKED_IMAGE;PROCESS_ITEMS_SEPARATELY</processing_mode>
+		        </DetectObjectsUsingDeepLearning>
+		
+		        <!-- COUDL Classify Objects Using Deep Learning-->
+		        <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/image-analyst/classify-objects-using-deep-learning.htm -->
+		        <ClassifyObjectsUsingDeepLearning>
+		          <in_raster>#</in_raster>
+		          <out_feature_class>#</out_feature_class>
+		          <in_model_definition>#</in_model_definition>
+		          <arguments>#</arguments>
+		          <in_features>#</in_features>
+		          <class_label_field>#</class_label_field>
+		          <class_value_field>#</class_value_field>
+		          <processing_mode>PROCESS_AS_MOSAICKED_IMAGE;PROCESS_ITEMS_SEPARATELY</processing_mode>
+		          <model_arguments>#</model_arguments>
+		        </ClassifyObjectsUsingDeepLearning>
+		
+		        <!-- EFUAIM Extract Features Using AI Models -->
+		        <!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/geoai/extract-features-using-ai-models.htm -->
+		        <ExtractFeaturesUsingAIModels>
+		          <in_raster>#</in_raster>
+		          <mode>Infer and Postprocess;Only Postprocess</mode>
+		          <out_location>#</out_location>
+		          <out_prefix>#</out_prefix>
+		          <area_of_interest>#</area_of_interest>
+		          <pretrained_models>#</pretrained_models>
+		          <additional_models>Line Regularization;Parcel Regularization;Polygon Regularization;None</additional_models>
+		          <confidence_threshold>#</confidence_threshold>
+		          <save_intermediate_output>TRUE;FALSE</save_intermediate_output>
+		          <test_time_augmentation>TRUE;FALSE</test_time_augmentation>
+		          <buffer_distance>#</buffer_distance>
+		          <extend_length>#</extend_length>
+		          <smoothing_tolerance>#</smoothing_tolerance>
+		          <dangle_length>#</dangle_length>
+		          <in_road_features>#</in_road_features>
+		          <road_buffer_width>#</road_buffer_width>
+		          <regularize_parcels>TRUE;FALSE</regularize_parcels>
+		          <post_processing_workflow>Line Regularization;Parcel Regularization</post_processing_workflow>
+		          <out_features>#</out_features>
+		          <parcel_tolerance>#</parcel_tolerance>
+		          <regularization_method>Right Angles;Right Angles and Diagonals;Any Angles;Circle</regularization_method>
+		          <poly_tolerance>#</poly_tolerance>
+		        </ExtractFeaturesUsingAIModels>
 		</Processes>
 	</MosaicDataset>
 </Workspace>
