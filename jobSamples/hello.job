@@ -1,0 +1,46 @@
+{
+    "job": {
+        "id": "hello_id",
+        "type": "MDCS",
+        "params": {
+            "output": {
+                "enabled": "true",
+                "path": "notUsed"
+            },
+            "build": {
+                "steps": [
+                    {
+                        "type": "MDCS",
+                        "id": "hello1",
+                        "enabled": 1,
+                        "args": {
+                            "c": "hello1",
+                            "p": [
+                                "7$pixelvalue"
+                            ]
+                        }
+                    },
+                    {
+                        "type": "MDCS",
+                        "id": "hello2",
+                        "enabled": 1,
+                        "args": {
+                            "c": "hello2",
+                            "__pixelval": "@hello1/i/p/pixelvalue",
+                            "__hello1": "@hello1/o/hello1"
+                        }
+                    },
+                    {
+                        "type": "MDCS",
+                        "id": "hello3",
+                        "enabled": 1,
+                        "args": {
+                            "c": "hello3",
+                            "__hello2": "@hello2/o/hello2"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}

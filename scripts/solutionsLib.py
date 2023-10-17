@@ -14,22 +14,23 @@
 # ------------------------------------------------------------------------------
 # Name: SolutionsLib.py
 # Description: To map MDCS command codes to GP Tool functions.
-# Version: 20221027
+# Version: 20230622
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
 #!/usr/bin/env python
 
-import arcpy
-import sys
 import os
-from xml.dom import minidom
-from string import ascii_letters, digits
-from datetime import datetime
-
+import sys
 scriptPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(scriptPath, 'Base'))
 import Base
+import arcpy
+from defusedxml import minidom
+from string import ascii_letters, digits
+from datetime import datetime
+from inspect import signature
+
 
 def returnLevelDetails(tilingSchema):
     doc = minidom.parse(tilingSchema)
@@ -83,7 +84,9 @@ class Solutions(Base.Base):
         if (fn == 'arcpy.exportmosaicdatasetitems_management'):
             try:
                 CONST_OUTPUT_FOLDER_INDX = 1
-                get_output_folder = args[CONST_OUTPUT_FOLDER_INDX]  # let's create the output folder before invoking the function call.
+                # let's create the output folder before invoking the function
+                # call.
+                get_output_folder = args[CONST_OUTPUT_FOLDER_INDX]
                 os.makedirs(get_output_folder)
             except BaseException:
                 pass    # pass onto default error handler.
@@ -96,18 +99,38 @@ class Solutions(Base.Base):
                 pass
         return args
 
-    def __invokeDynamicFn(self, args, processKey, fn_name, index): # chs
+    def __invokeDynamicFn(self, args, processKey, fn_name, index, **kwargs):
         try:
-            varnames = eval('%s.__code__.co_varnames' % (fn_name))
-            varcount = eval('%s.__code__.co_argcount' % (fn_name))
+            fnc_ptr = getattr(sys.modules['arcpy'], fn_name[fn_name.find('.') + 1:])
+            varnames = list(signature(fnc_ptr).parameters)
+            varcount = len(signature(fnc_ptr).parameters)
             varnames = varnames[:varcount]
             for i in range(len(args), len(varnames)):
-                args.append(self.getProcessInfoValue(processKey, varnames[i].lower(), index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        varnames[i].lower(),
+                        index))
             for i in range(0, len(varnames)):
-                if (args[i] == '#'):    # the default marker (#) as returned by (getProcessInfoValue) gets replaced with (None)
+                # the default marker (#) as returned by (getProcessInfoValue)
+                # gets replaced with (None)
+                if (args[i] == '#'):
                     args[i] = None
-            dynCall = Base.DynaInvoke(fn_name, args, self.__invokeDynamicFnCallback, self.m_log.Message)
-            respInfo = self.getProcessInfoValue(processKey, 'returnvalue', index)
+            Info = 'info'
+            if (args[0] is None and
+                Info in kwargs and
+                    'md' in kwargs[Info]):
+                # Use the loaded MosaicDataset as the first argument to the
+                # function if first arg isn't defined/omitted in the config
+                # file.
+                args[0] = kwargs[Info]['md']
+            dynCall = Base.DynaInvoke(
+                fn_name,
+                args,
+                self.__invokeDynamicFnCallback,
+                self.m_log.Message)
+            respInfo = self.getProcessInfoValue(
+                processKey, 'returnvalue', index)
             kwargs = {}
             FnPntrPrefix = '('
             FnPntrSuffix = ')'
@@ -115,7 +138,9 @@ class Solutions(Base.Base):
                 fn, args = respInfo.split(FnPntrPrefix)
                 fnArgs = args.split(',')        # scan for multi-args
                 if (fnArgs[-1][-1] != FnPntrSuffix):
-                    self.m_log.Message('Syntax error for sub->method calls.', self.m_log.const_critical_text)
+                    self.m_log.Message(
+                        'Syntax error for sub->method calls.',
+                        self.m_log.const_critical_text)
                     return False
                 fnArgs[-1] = fnArgs[-1][:-1]
                 for i in range(0, len(fnArgs)):
@@ -124,31 +149,40 @@ class Solutions(Base.Base):
                         try:
                             val = types[0](fnArgs[i])
                             if (isinstance(val, float)):
-                                if (-1 == fnArgs[i].find('.')):     # int values w/o the decimal point'll be ignored as floats.
+                                # int values w/o the decimal point'll be
+                                # ignored as floats.
+                                if (-1 == fnArgs[i].find('.')):
                                     types.pop(0)
                                     continue
                             fnArgs[i] = val
                             break
-                        except:
+                        except BaseException:
                             types.pop(0)
                 kwargs['sArgs'] = [[fn, *fnArgs]]
             if (dynCall.init(**kwargs) == False):
                 return False
             response = dynCall.invoke()
             return response
-        except BaseException:
+        except Exception as exp:
+            self.log(str(exp), self.m_log.const_critical_text)
             self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
             return False
 
     # mapping commands to functions
     def executeCommand(self, com, index=0):
-
         # create the geodatabse to hold all relevant mosaic datasets.
+        fullPath = os.path.join(
+            self.m_base.m_geoPath,
+            self.m_base.m_mdName)        # MD path used in the MDCS w/f
+        invokeDynamicFnInfo = {
+            'md': fullPath
+        }
         if (com == 'CM'):
             createMD = self.CreateMD.CreateMD(self.m_base)
             bSuccess = createMD.init(self.config)
             if (bSuccess):
-                bSuccess = createMD.createGeodataBase()
+                bSuccess = self.m_base._getResponseResult(
+                    createMD.createGeodataBase())
                 if (not bSuccess):
                     return False
                 return createMD.createMD()
@@ -169,7 +203,8 @@ class Solutions(Base.Base):
             if (bSuccess):
                 if (com in self.userInfo.keys()):
                     if ('cb' in self.userInfo[com].keys()):
-                        bSuccess = addRasters.AddCallBack(self.userInfo[com]['cb'])
+                        bSuccess = addRasters.AddCallBack(
+                            self.userInfo[com]['cb'])
                 return addRasters.AddRasters()
             return False
 
@@ -185,24 +220,30 @@ class Solutions(Base.Base):
             setProps = self.SetMDProperties.SetMDProperties(self.m_base)
             bSuccess = setProps.init(self.config)
             if (bSuccess):
-                path = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                path = os.path.join(
+                    self.m_base.m_geoPath,
+                    self.m_base.m_mdName)
                 return setProps.setMDProperties(path)
             return False
 
         elif (com == 'CBMD'):
             try:
-                self.m_log.Message("\tColor Balancing mosaic dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
-                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                self.m_log.Message(
+                    "\tColor Balancing mosaic dataset : " +
+                    self.m_base.m_mdName,
+                    self.m_log.const_general_text)
+                fullPath = os.path.join(
+                    self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'colorbalancemosaicdataset'
-                arcpy.ColorBalanceMosaicDataset_management(fullPath,
-                                                           self.getProcessInfoValue(processKey, 'balancing_method', index),
-                                                           self.getProcessInfoValue(processKey, 'color_surface_type', index),
-                                                           self.getProcessInfoValue(processKey, 'target_raster', index),
-                                                           self.getProcessInfoValue(processKey, 'exclude_raster', index),
-                                                           self.getProcessInfoValue(processKey, 'stretch_type', index),
-                                                           self.getProcessInfoValue(processKey, 'gamma', index),
-                                                           self.getProcessInfoValue(processKey, 'block_field', index)
-                                                           )
+                arcpy.ColorBalanceMosaicDataset_management(
+                    fullPath, self.getProcessInfoValue(
+                        processKey, 'balancing_method', index), self.getProcessInfoValue(
+                        processKey, 'color_surface_type', index), self.getProcessInfoValue(
+                        processKey, 'target_raster', index), self.getProcessInfoValue(
+                        processKey, 'exclude_raster', index), self.getProcessInfoValue(
+                        processKey, 'stretch_type', index), self.getProcessInfoValue(
+                            processKey, 'gamma', index), self.getProcessInfoValue(
+                                processKey, 'block_field', index))
                 return True
             except BaseException:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
@@ -210,13 +251,20 @@ class Solutions(Base.Base):
 
     # Remove Index from Mosaic dataset.
         elif (com == 'RI'):
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             processKey = 'removeindex'
             try:
-                self.log("Removing Index(%s) " % (self.getProcessInfoValue(processKey, 'index_name', index)))
-                arcpy.RemoveIndex_management(fullPath,
-                                             self.getProcessInfoValue(processKey, 'index_name', index)
-                                             )
+                self.log(
+                    "Removing Index(%s) " %
+                    (self.getProcessInfoValue(
+                        processKey,
+                        'index_name',
+                        index)))
+                arcpy.RemoveIndex_management(
+                    fullPath, self.getProcessInfoValue(
+                        processKey, 'index_name', index))
                 self.log(arcpy.GetMessages())
                 return True
             except BaseException:
@@ -226,18 +274,22 @@ class Solutions(Base.Base):
     # Remove raster/Items from Mosaic dataset.
         elif (com == 'RRFMD'):
             try:
-                self.m_log.Message("\tRemove rasters from mosaic dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
-                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                self.m_log.Message(
+                    "\tRemove rasters from mosaic dataset : " +
+                    self.m_base.m_mdName,
+                    self.m_log.const_general_text)
+                fullPath = os.path.join(
+                    self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'removerastersfrommosaicdataset'
-                arcpy.RemoveRastersFromMosaicDataset_management(fullPath,
-                                                                self.getProcessInfoValue(processKey, 'where_clause', index),
-                                                                self.getProcessInfoValue(processKey, 'update_boundary', index),
-                                                                self.getProcessInfoValue(processKey, 'mark_overviews_items', index),
-                                                                self.getProcessInfoValue(processKey, 'delete_overview_images', index),
-                                                                self.getProcessInfoValue(processKey, 'delete_item_cache', index),
-                                                                self.getProcessInfoValue(processKey, 'remove_items', index),
-                                                                self.getProcessInfoValue(processKey, 'update_cellsize_ranges', index)
-                                                                )
+                arcpy.RemoveRastersFromMosaicDataset_management(
+                    fullPath, self.getProcessInfoValue(
+                        processKey, 'where_clause', index), self.getProcessInfoValue(
+                        processKey, 'update_boundary', index), self.getProcessInfoValue(
+                        processKey, 'mark_overviews_items', index), self.getProcessInfoValue(
+                        processKey, 'delete_overview_images', index), self.getProcessInfoValue(
+                        processKey, 'delete_item_cache', index), self.getProcessInfoValue(
+                            processKey, 'remove_items', index), self.getProcessInfoValue(
+                                processKey, 'update_cellsize_ranges', index))
                 return True
             except BaseException:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
@@ -246,13 +298,17 @@ class Solutions(Base.Base):
     # Delete mosaic dataset.
         elif (com == 'DMD'):
             try:
-                self.m_log.Message("\tDelete Mosaic dataset  : " + self.m_base.m_mdName, self.m_log.const_general_text)
-                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                self.m_log.Message(
+                    "\tDelete Mosaic dataset  : " +
+                    self.m_base.m_mdName,
+                    self.m_log.const_general_text)
+                fullPath = os.path.join(
+                    self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'deletemosaicdataset'
-                arcpy.DeleteMosaicDataset_management(fullPath,
-                                                     self.getProcessInfoValue(processKey, 'delete_overview_images', index),
-                                                     self.getProcessInfoValue(processKey, 'delete_item_cache', index)
-                                                     )
+                arcpy.DeleteMosaicDataset_management(
+                    fullPath, self.getProcessInfoValue(
+                        processKey, 'delete_overview_images', index), self.getProcessInfoValue(
+                        processKey, 'delete_item_cache', index))
                 return True
             except BaseException:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
@@ -261,14 +317,18 @@ class Solutions(Base.Base):
     # Merge mosaic dataset
         elif (com == 'MMDI'):
             try:
-                self.m_log.Message("\tMerge mosaic dataset  Items: " + self.m_base.m_mdName, self.m_log.const_general_text)
-                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                self.m_log.Message(
+                    "\tMerge mosaic dataset  Items: " +
+                    self.m_base.m_mdName,
+                    self.m_log.const_general_text)
+                fullPath = os.path.join(
+                    self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'mergemosaicdatasetitems'
-                arcpy.MergeMosaicDatasetItems_management(fullPath,
-                                                         self.getProcessInfoValue(processKey, 'where_clause', index),
-                                                         self.getProcessInfoValue(processKey, 'block_field', index),
-                                                         self.getProcessInfoValue(processKey, 'max_rows_per_merged_items', index)
-                                                         )
+                arcpy.MergeMosaicDatasetItems_management(
+                    fullPath, self.getProcessInfoValue(
+                        processKey, 'where_clause', index), self.getProcessInfoValue(
+                        processKey, 'block_field', index), self.getProcessInfoValue(
+                        processKey, 'max_rows_per_merged_items', index))
                 return True
             except BaseException:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
@@ -276,24 +336,30 @@ class Solutions(Base.Base):
 
         elif (com == 'ERF'):
             try:
-                self.m_log.Message("\tEditing raster function : " + self.m_base.m_mdName, self.m_log.const_general_text)
+                self.m_log.Message(
+                    "\tEditing raster function : " +
+                    self.m_base.m_mdName,
+                    self.m_log.const_general_text)
                 processKey = 'editrasterfunction'
-                rfunction_path = self.getProcessInfoValue(processKey, 'function_chain_definition', index)
-                if (rfunction_path.find('.rft') > -1 and rfunction_path.find('/') == -1):
+                rfunction_path = self.getProcessInfoValue(
+                    processKey, 'function_chain_definition', index)
+                if (rfunction_path.find('.rft') > -
+                        1 and rfunction_path.find('/') == -1):
                     rfunction_path = self.m_base.const_raster_function_templates_path_ + "/" + rfunction_path
 
-                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                fullPath = os.path.join(
+                    self.m_base.m_geoPath, self.m_base.m_mdName)
 
                 lyrName = 'lyr_%s' % str(self.m_base.m_last_AT_ObjectID)
-                expression = "OBJECTID >%s" % (str(self.m_base.m_last_AT_ObjectID))
+                expression = "OBJECTID >%s" % (
+                    str(self.m_base.m_last_AT_ObjectID))
                 arcpy.MakeMosaicLayer_management(fullPath, lyrName, expression)
 
-                arcpy.EditRasterFunction_management(lyrName,
-                                                    self.getProcessInfoValue(processKey, 'edit_mosaic_dataset_item', index),
-                                                    self.getProcessInfoValue(processKey, 'edit_options', index),
-                                                    rfunction_path,
-                                                    self.getProcessInfoValue(processKey, 'location_function_name', index),
-                                                    )
+                arcpy.EditRasterFunction_management(
+                    lyrName, self.getProcessInfoValue(
+                        processKey, 'edit_mosaic_dataset_item', index), self.getProcessInfoValue(
+                        processKey, 'edit_options', index), rfunction_path, self.getProcessInfoValue(
+                        processKey, 'location_function_name', index), )
 
                 arcpy.Delete_management(lyrName)
 
@@ -303,8 +369,14 @@ class Solutions(Base.Base):
                 return False
 
         elif (com == 'ANCP'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'analyzecontrolpoints',
@@ -312,7 +384,11 @@ class Solutions(Base.Base):
                 index
             )
         elif (com == 'APCP'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
             return self.__invokeDynamicFn(
                 [],
                 'appendcontrolpoints',
@@ -321,8 +397,14 @@ class Solutions(Base.Base):
             )
 
         elif (com == 'ABA'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'applyblockadjustment',
@@ -331,8 +413,14 @@ class Solutions(Base.Base):
             )
 
         elif (com == 'CBA'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'computeblockadjustment',
@@ -341,8 +429,14 @@ class Solutions(Base.Base):
             )
 
         elif (com == 'CCP'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'computecontrolpoints',
@@ -351,8 +445,13 @@ class Solutions(Base.Base):
             )
 
         elif (com == 'CTP'):
-            self.m_log.Message("\tCompute Tie Points : " + self.m_base.m_mdName, self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\tCompute Tie Points : " +
+                self.m_base.m_mdName,
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'computetiepoints',
@@ -361,8 +460,13 @@ class Solutions(Base.Base):
             )
 
         elif (com == 'AMDS'):
-            self.m_log.Message("\tAlter Mosaic Dataset Schema : " + self.m_base.m_mdName, self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\tAlter Mosaic Dataset Schema : " +
+                self.m_base.m_mdName,
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'altermosaicdatasetschema',
@@ -371,8 +475,13 @@ class Solutions(Base.Base):
             )
 
         elif (com == 'AMD'):
-            self.m_log.Message("\Analyze Mosaic Dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                r"\Analyze Mosaic Dataset : " +
+                self.m_base.m_mdName,
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'analyzemosaicdataset',
@@ -381,8 +490,13 @@ class Solutions(Base.Base):
             )
 
         elif (com == 'BMDIC'):
-            self.m_log.Message("\Build Mosaic Dataset Item Cache : " + self.m_base.m_mdName, self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                r"\Build Mosaic Dataset Item Cache : " +
+                self.m_base.m_mdName,
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'buildmosaicdatasetitemcache',
@@ -391,8 +505,13 @@ class Solutions(Base.Base):
             )
 
         elif (com == 'CDA'):
-            self.m_log.Message("\Compute Dirty Area : " + self.m_base.m_mdName, self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                r"\Compute Dirty Area : " +
+                self.m_base.m_mdName,
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'computedirtyarea',
@@ -401,7 +520,10 @@ class Solutions(Base.Base):
             )
 
         elif (com == 'GEA'):
-            self.m_log.Message("\Generate Exclude Area : " + self.m_base.m_mdName, self.m_log.const_general_text)
+            self.m_log.Message(
+                r"\Generate Exclude Area : " +
+                self.m_base.m_mdName,
+                self.m_log.const_general_text)
             return self.__invokeDynamicFn(
                 [],
                 'generateexcludearea',
@@ -411,16 +533,20 @@ class Solutions(Base.Base):
 
         elif (com == 'CS'):
             try:
-                self.m_log.Message("\tCalculate statistic for the mosaic dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
-                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                self.m_log.Message(
+                    "\tCalculate statistic for the mosaic dataset : " +
+                    self.m_base.m_mdName,
+                    self.m_log.const_general_text)
+                fullPath = os.path.join(
+                    self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'calculatestatistics'
-                arcpy.CalculateStatistics_management(fullPath,
-                                                     self.getProcessInfoValue(processKey, 'x_skip_factor', index),
-                                                     self.getProcessInfoValue(processKey, 'y_skip_factor', index),
-                                                     self.getProcessInfoValue(processKey, 'ignore_values', index),
-                                                     self.getProcessInfoValue(processKey, 'skip_existing', index),
-                                                     self.getProcessInfoValue(processKey, 'area_of_interest', index)
-                                                     )
+                arcpy.CalculateStatistics_management(
+                    fullPath, self.getProcessInfoValue(
+                        processKey, 'x_skip_factor', index), self.getProcessInfoValue(
+                        processKey, 'y_skip_factor', index), self.getProcessInfoValue(
+                        processKey, 'ignore_values', index), self.getProcessInfoValue(
+                        processKey, 'skip_existing', index), self.getProcessInfoValue(
+                        processKey, 'area_of_interest', index))
                 return True
             except BaseException:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
@@ -428,31 +554,36 @@ class Solutions(Base.Base):
 
         elif (com == 'BPS'):
             try:
-                self.m_log.Message("\tBuilding Pyramids and Calculating Statistic for the mosaic dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
-                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                self.m_log.Message(
+                    "\tBuilding Pyramids and Calculating Statistic for the mosaic dataset : " +
+                    self.m_base.m_mdName,
+                    self.m_log.const_general_text)
+                fullPath = os.path.join(
+                    self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'buildpyramidsandstatistics'
 
                 lyrName = 'lyr_%s' % str(self.m_base.m_last_AT_ObjectID)
-                expression = "OBJECTID >%s" % (str(self.m_base.m_last_AT_ObjectID))
+                expression = "OBJECTID >%s" % (
+                    str(self.m_base.m_last_AT_ObjectID))
                 arcpy.MakeMosaicLayer_management(fullPath, lyrName, expression)
 
-                arcpy.BuildPyramidsandStatistics_management(lyrName,
-                                                            self.getProcessInfoValue(processKey, 'include_subdirectories', index),
-                                                            self.getProcessInfoValue(processKey, 'build_pyramids', index),
-                                                            self.getProcessInfoValue(processKey, 'calculate_statistics', index),
-                                                            self.getProcessInfoValue(processKey, 'BUILD_ON_SOURCE', index),
-                                                            self.getProcessInfoValue(processKey, 'block_field', index),
-                                                            self.getProcessInfoValue(processKey, 'estimate_statistics', index),
-                                                            self.getProcessInfoValue(processKey, 'x_skip_factor', index),
-                                                            self.getProcessInfoValue(processKey, 'y_skip_factor', index),
-                                                            self.getProcessInfoValue(processKey, 'ignore_values', index),
-                                                            self.getProcessInfoValue(processKey, 'pyramid_level', index),
-                                                            self.getProcessInfoValue(processKey, 'SKIP_FIRST', index),
-                                                            self.getProcessInfoValue(processKey, 'resample_technique', index),
-                                                            self.getProcessInfoValue(processKey, 'compression_type', index),
-                                                            self.getProcessInfoValue(processKey, 'compression_quality', index),
-                                                            self.getProcessInfoValue(processKey, 'skip_existing', index)
-                                                            )
+                arcpy.BuildPyramidsandStatistics_management(
+                    lyrName, self.getProcessInfoValue(
+                        processKey, 'include_subdirectories', index), self.getProcessInfoValue(
+                        processKey, 'build_pyramids', index), self.getProcessInfoValue(
+                        processKey, 'calculate_statistics', index), self.getProcessInfoValue(
+                        processKey, 'BUILD_ON_SOURCE', index), self.getProcessInfoValue(
+                        processKey, 'block_field', index), self.getProcessInfoValue(
+                            processKey, 'estimate_statistics', index), self.getProcessInfoValue(
+                                processKey, 'x_skip_factor', index), self.getProcessInfoValue(
+                                    processKey, 'y_skip_factor', index), self.getProcessInfoValue(
+                                        processKey, 'ignore_values', index), self.getProcessInfoValue(
+                                            processKey, 'pyramid_level', index), self.getProcessInfoValue(
+                                                processKey, 'SKIP_FIRST', index), self.getProcessInfoValue(
+                                                    processKey, 'resample_technique', index), self.getProcessInfoValue(
+                                                        processKey, 'compression_type', index), self.getProcessInfoValue(
+                                                            processKey, 'compression_quality', index), self.getProcessInfoValue(
+                                                                processKey, 'skip_existing', index))
 
                 arcpy.Delete_management(lyrName)
 
@@ -463,16 +594,21 @@ class Solutions(Base.Base):
 
         elif(com == 'BP'):
             try:
-                self.m_log.Message("\tBuilding Pyramid for the mosaic dataset/raster dataset : " + self.m_base.m_mdName, self.m_log.const_general_text)
-                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                self.m_log.Message(
+                    "\tBuilding Pyramid for the mosaic dataset/raster dataset : " +
+                    self.m_base.m_mdName,
+                    self.m_log.const_general_text)
+                fullPath = os.path.join(
+                    self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'buildpyramids'
-                arcpy.BuildPyramids_management(fullPath,
-                                               self.getProcessInfoValue(processKey, 'pyramid_level', index),
-                                               self.getProcessInfoValue(processKey, 'SKIP_FIRST', index),
-                                               self.getProcessInfoValue(processKey, 'resample_technique', index),
-                                               self.getProcessInfoValue(processKey, 'compression_type', index),
-                                               self.getProcessInfoValue(processKey, 'compression_quality', index),
-                                               self.getProcessInfoValue(processKey, 'skip_existing', index))
+                arcpy.BuildPyramids_management(
+                    fullPath, self.getProcessInfoValue(
+                        processKey, 'pyramid_level', index), self.getProcessInfoValue(
+                        processKey, 'SKIP_FIRST', index), self.getProcessInfoValue(
+                        processKey, 'resample_technique', index), self.getProcessInfoValue(
+                        processKey, 'compression_type', index), self.getProcessInfoValue(
+                        processKey, 'compression_quality', index), self.getProcessInfoValue(
+                            processKey, 'skip_existing', index))
                 return True
             except BaseException:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
@@ -480,40 +616,103 @@ class Solutions(Base.Base):
 
         elif(com == 'BF'):
             try:
-                self.m_log.Message("\tRecomputing footprint for the mosaic dataset: " + self.m_base.m_mdName, self.m_log.const_general_text)
-                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                self.m_log.Message(
+                    "\tRecomputing footprint for the mosaic dataset: " +
+                    self.m_base.m_mdName,
+                    self.m_log.const_general_text)
+                fullPath = os.path.join(
+                    self.m_base.m_geoPath, self.m_base.m_mdName)
 
                 processKey = 'buildfootprint'
 
                 isQuery = False
-                query = self.getProcessInfoValue(processKey, 'where_clause', index)
+                query = self.getProcessInfoValue(
+                    processKey, 'where_clause', index)
                 if (len(query) > 0 and
                         query != '#'):
                     isQuery = True
 
-                expression = "OBJECTID >%s" % (str(self.m_base.m_last_AT_ObjectID))
-                if (isQuery == True):
+                expression = "OBJECTID >%s" % (
+                    str(self.m_base.m_last_AT_ObjectID))
+                if (isQuery):
                     expression += ' AND %s' % (query)
 
                 args = []
                 args.append(fullPath)
                 args.append(expression)
-                args.append(self.getProcessInfoValue(processKey, 'reset_footprint', index))
-                args.append(self.getProcessInfoValue(processKey, 'min_data_value', index))
-                args.append(self.getProcessInfoValue(processKey, 'max_data_value', index))
-                args.append(self.getProcessInfoValue(processKey, 'approx_num_vertices', index))
-                args.append(self.getProcessInfoValue(processKey, 'shrink_distance', index))
-                args.append(self.getProcessInfoValue(processKey, 'maintain_edges', index))
-                args.append(self.getProcessInfoValue(processKey, 'skip_derived_images', index))
-                args.append(self.getProcessInfoValue(processKey, 'update_boundary', index))
-                args.append(self.getProcessInfoValue(processKey, 'request_size', index))
-                args.append(self.getProcessInfoValue(processKey, 'min_region_size', index))
-                args.append(self.getProcessInfoValue(processKey, 'simplification_method', index))
-                args.append(self.getProcessInfoValue(processKey, 'edge_tolerance', index))
-                args.append(self.getProcessInfoValue(processKey, 'max_sliver_size', index))
-                args.append(self.getProcessInfoValue(processKey, 'min_thinness_ratio', index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'reset_footprint',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'min_data_value',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'max_data_value',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'approx_num_vertices',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'shrink_distance',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'maintain_edges',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'skip_derived_images',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'update_boundary',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'request_size',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'min_region_size',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'simplification_method',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'edge_tolerance',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'max_sliver_size',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'min_thinness_ratio',
+                        index))
 
-                setBuitFootprints = Base.DynaInvoke('arcpy.BuildFootprints_management', args, None, self.m_log.Message)
+                setBuitFootprints = Base.DynaInvoke(
+                    'arcpy.BuildFootprints_management', args, None, self.m_log.Message)
                 if (setBuitFootprints.init() == False):
                     return False
                 return setBuitFootprints.invoke()
@@ -523,28 +722,85 @@ class Solutions(Base.Base):
 
         elif (com == 'BS'):
             try:
-                self.m_log.Message("\tBuild Seamline for the mosaic dataset: " + self.m_base.m_mdName, self.m_log.const_general_text)
-                fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+                self.m_log.Message(
+                    "\tBuild Seamline for the mosaic dataset: " +
+                    self.m_base.m_mdName,
+                    self.m_log.const_general_text)
+                fullPath = os.path.join(
+                    self.m_base.m_geoPath, self.m_base.m_mdName)
                 processKey = 'buildseamlines'
                 args = []
                 args.append(fullPath)
-                args.append(self.getProcessInfoValue(processKey, 'cell_size', index))
-                args.append(self.getProcessInfoValue(processKey, 'sort_method', index))
-                args.append(self.getProcessInfoValue(processKey, 'sort_order', index))
-                args.append(self.getProcessInfoValue(processKey, 'order_by_attribute', index))
-                args.append(self.getProcessInfoValue(processKey, 'order_by_base_value', index))
-                args.append(self.getProcessInfoValue(processKey, 'view_point', index))
-                args.append(self.getProcessInfoValue(processKey, 'computation_method', index))
-                args.append(self.getProcessInfoValue(processKey, 'blend_width', index))
-                args.append(self.getProcessInfoValue(processKey, 'blend_type', index))
-                args.append(self.getProcessInfoValue(processKey, 'request_size', index))
-                args.append(self.getProcessInfoValue(processKey, 'request_size_type', index))
-                args.append(self.getProcessInfoValue(processKey, 'blend_width_units', index))
-                args.append(self.getProcessInfoValue(processKey, 'area_of_interest', index))
-                args.append(self.getProcessInfoValue(processKey, 'where_clause', index))
-                args.append(self.getProcessInfoValue(processKey, 'update_existing', index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey, 'cell_size', index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'sort_method',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey, 'sort_order', index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'order_by_attribute',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'order_by_base_value',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey, 'view_point', index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'computation_method',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'blend_width',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey, 'blend_type', index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'request_size',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'request_size_type',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'blend_width_units',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'area_of_interest',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'where_clause',
+                        index))
+                args.append(
+                    self.getProcessInfoValue(
+                        processKey,
+                        'update_existing',
+                        index))
 
-                setBuitSeamlines = Base.DynaInvoke('arcpy.BuildSeamlines_management', args, None, self.m_log.Message)
+                setBuitSeamlines = Base.DynaInvoke(
+                    'arcpy.BuildSeamlines_management', args, None, self.m_log.Message)
                 if (setBuitSeamlines.init() == False):
                     return False
                 return setBuitSeamlines.invoke()
@@ -553,8 +809,13 @@ class Solutions(Base.Base):
                 return False
 
         elif (com == 'EMDG'):
-            self.m_log.Message("\tExport mosaic dataset geometry:" + self.m_base.m_mdName, self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\tExport mosaic dataset geometry:" +
+                self.m_base.m_mdName,
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'exportmosaicdatasetgeometry',
@@ -563,8 +824,13 @@ class Solutions(Base.Base):
             )
 
         elif (com == 'EMDI'):
-            self.m_log.Message("\tExport mosaic dataset items:" + self.m_base.m_mdName, self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\tExport mosaic dataset items:" +
+                self.m_base.m_mdName,
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'exportmosaicdatasetitems',
@@ -573,8 +839,13 @@ class Solutions(Base.Base):
             )
 
         elif (com == 'SMDI'):
-            self.m_log.Message("\tSplit mosaic dataset items:" + self.m_base.m_mdName, self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\tSplit mosaic dataset items:" +
+                self.m_base.m_mdName,
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'splitmosaicdatasetitems',
@@ -583,8 +854,13 @@ class Solutions(Base.Base):
             )
 
         elif (com == 'SY'):
-            self.m_log.Message("\tSynchronize mosaic dataset:" + self.m_base.m_mdName, self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\tSynchronize mosaic dataset:" +
+                self.m_base.m_mdName,
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'synchronizemosaicdataset',
@@ -593,17 +869,25 @@ class Solutions(Base.Base):
             )
 
         elif (com == 'CSDD'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
             return self.__invokeDynamicFn(
-                [fullPath],
+                [],
                 'createimagesddraft',
                 'arcpy.CreateImageSDDraft',
-                index
+                index,
+                info=invokeDynamicFnInfo
             )
 
         elif (com == 'STS'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
             return self.__invokeDynamicFn(
                 [],
                 'stageservice_server',
@@ -612,7 +896,10 @@ class Solutions(Base.Base):
             )
 
         elif (com == 'USD'):
-            self.m_log.Message("\t{}".format(self.commands[com]['desc']), self.m_log.const_general_text)
+            self.m_log.Message(
+                "\t{}".format(
+                    self.commands[com]['desc']),
+                self.m_log.const_general_text)
             return self.__invokeDynamicFn(
                 [],
                 'uploadservicedefinition_server',
@@ -621,44 +908,65 @@ class Solutions(Base.Base):
             )
 
         elif (com == 'CPCSLP'):
-            self.m_log.Message("\t{}".format(self.commands[com]['desc']), self.m_log.const_general_text)
-            return self.__invokeDynamicFn(
-                [],
-                'analyzemosaicdataset',
-                'arcpy.management.CreatePointCloudSceneLayerPackage',
-                index
-            )
+            self.m_log.Message(
+                "\t{}".format(
+                    self.commands[com]['desc']),
+                self.m_log.const_general_text)
+            try:
+                processKey = 'createpointcloudscenelayerpackage'
+                arcpy.management.CreatePointCloudSceneLayerPackage(
+                    self.getProcessInfoValue(
+                        processKey, 'in_dataset', index), self.getProcessInfoValue(
+                        processKey, 'out_slpk', index), arcpy.SpatialReference(
+                        int(
+                            self.getProcessInfoValue(
+                                processKey, 'out_coor_system', index))), None, self.getProcessInfoValue(
+                            processKey, 'attributes', index), self.getProcessInfoValue(
+                                processKey, 'point_size_m', index), self.getProcessInfoValue(
+                                    processKey, 'xy_max_error_m', index), self.getProcessInfoValue(
+                                        processKey, 'z_max_error_m', index), None, self.getProcessInfoValue(
+                                            processKey, 'scene_layer_version', index))
+                return True
+            except BaseException:
+                self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                return False
         elif(com == 'JF'):
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             try:
                 processKey = 'joinfield'
-                arcpy.JoinField_management(self.getProcessInfoValue(processKey, 'in_data', index),
-                                           self.getProcessInfoValue(processKey, 'in_field', index),
-                                           self.getProcessInfoValue(processKey, 'join_table', index),
-                                           self.getProcessInfoValue(processKey, 'join_field', index),
-                                           self.getProcessInfoValue(processKey, 'fields', index))
+                arcpy.JoinField_management(
+                    self.getProcessInfoValue(
+                        processKey, 'in_data', index), self.getProcessInfoValue(
+                        processKey, 'in_field', index), self.getProcessInfoValue(
+                        processKey, 'join_table', index), self.getProcessInfoValue(
+                        processKey, 'join_field', index), self.getProcessInfoValue(
+                        processKey, 'fields', index))
                 return True
             except BaseException:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
         elif(com == 'DN'):
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             try:
                 processKey = 'definemosaicdatasetnodata'
 
                 lyrName = 'lyr_%s' % str(self.m_base.m_last_AT_ObjectID)
-                expression = "OBJECTID >%s" % (str(self.m_base.m_last_AT_ObjectID))
+                expression = "OBJECTID >%s" % (
+                    str(self.m_base.m_last_AT_ObjectID))
                 arcpy.MakeMosaicLayer_management(fullPath, lyrName, expression)
 
                 arcpy.DefineMosaicDatasetNoData_management(
-                    lyrName,
-                    self.getProcessInfoValue(processKey, 'num_bands', index),
-                    self.getProcessInfoValue(processKey, 'bands_for_nodata_value', index),
-                    self.getProcessInfoValue(processKey, 'bands_for_valid_data_range', index),
-                    self.getProcessInfoValue(processKey, 'where_clause', index),
-                    self.getProcessInfoValue(processKey, 'composite_nodata_value', index)
-                )
+                    lyrName, self.getProcessInfoValue(
+                        processKey, 'num_bands', index), self.getProcessInfoValue(
+                        processKey, 'bands_for_nodata_value', index), self.getProcessInfoValue(
+                        processKey, 'bands_for_valid_data_range', index), self.getProcessInfoValue(
+                        processKey, 'where_clause', index), self.getProcessInfoValue(
+                        processKey, 'composite_nodata_value', index))
                 arcpy.Delete_management(lyrName)
                 return True
 
@@ -666,94 +974,104 @@ class Solutions(Base.Base):
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
 
         elif(com == 'IG'):
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             try:
                 processKey = 'importgeometry'
-                importPath = self.getProcessInfoValue(processKey, 'input_featureclass', index)
+                importPath = self.getProcessInfoValue(
+                    processKey, 'input_featureclass', index)
                 const_ig_search_ = '.gdb\\'
                 igIndx = importPath.lower().find(const_ig_search_)
                 igIndxSep = importPath.find('\\')
 
                 if (igIndxSep == igIndx + len(const_ig_search_) - 1):
-                    importPath = self.prefixFolderPath(importPath, self.m_base.const_import_geometry_features_path_)
+                    importPath = self.prefixFolderPath(
+                        importPath, self.m_base.const_import_geometry_features_path_)
 
                 arcpy.ImportMosaicDatasetGeometry_management(
-                    fullPath,
-                    self.getProcessInfoValue(processKey, 'target_featureclass_type', index),
-                    self.getProcessInfoValue(processKey, 'target_join_field', index),
-                    importPath,
-                    self.getProcessInfoValue(processKey, 'input_join_field', index)
-                )
+                    fullPath, self.getProcessInfoValue(
+                        processKey, 'target_featureclass_type', index), self.getProcessInfoValue(
+                        processKey, 'target_join_field', index), importPath, self.getProcessInfoValue(
+                        processKey, 'input_join_field', index))
                 return True
             except BaseException:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
 
         elif(com == 'IF'):
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             processKey = 'importfieldvalues'
 
             try:
                 j = 0
+                joinTable = self.getProcessInfoValue(
+                    processKey, 'input_featureclass', index)
+                confTableName = os.path.basename(joinTable)
 
-                joinTable = self.getProcessInfoValue(processKey, 'input_featureclass', index)
-                confTableName = os.path.splitext(os.path.basename(joinTable))[0]
-
-                joinFeildList = [f.name for f in arcpy.ListFields(joinTable) if f.type not in ('OID','Geometry')]
-
-
-                in_fieldNameList = self.getProcessInfoValue(processKey, 'fieldnamelist', index)
-                in_fieldNameList = in_fieldNameList.split(",")
-
-                fieldNameList = []
-                for i in in_fieldNameList:
-                        fieldNameList.append(i)
-
-                for f in fieldNameList:
-                    if f not in joinFeildList:
-                        self.log("Field "+ f + " not found in join table", self.m_log.const_critical_text)
-                        return False
-
+                joinFeildList = [f.name for f in arcpy.ListFields(joinTable)]
+                self.log(joinFeildList)
                 mlayer = os.path.basename(fullPath) + "layer" + str(j)
                 j = j + 1
                 arcpy.MakeMosaicLayer_management(fullPath, mlayer)
-                self.log("Joining the mosaic dataset layer with the configuration table", self.m_log.const_general_text)
+                self.log(
+                    "Joining the mosaic dataset layer with the configuration table",
+                    self.m_log.const_general_text)
                 mlayerJoin = arcpy.AddJoin_management(
                     mlayer + "/Footprint",
-                    self.getProcessInfoValue(processKey, 'input_join_field', index),
+                    self.getProcessInfoValue(
+                        processKey,
+                        'input_join_field',
+                        index),
                     joinTable,
-                    self.getProcessInfoValue(processKey, 'target_join_field', index),
-                    "KEEP_ALL"
-                )
-                #for jfl in joinFeildList:
-                for jfl in fieldNameList:
+                    self.getProcessInfoValue(
+                        processKey,
+                        'target_join_field',
+                        index),
+                    "KEEP_ALL")
+                for jfl in joinFeildList:
                     if jfl == "Comments" or jfl == "OBJECTID" or jfl == "Dataset_ID":
-                        self.log("\t\tvalues exist for the field : " + jfl, self.m_log.const_general_text)
+                        self.log(
+                            "\t\tvalues exist for the field : " + jfl,
+                            self.m_log.const_general_text)
                     else:
-                        fieldcal = "AMD_" + self.m_base.m_mdName + "_CAT." + jfl
-##                        fieldcal = confTableName + "."+ jfl
-                        fromfield = "!" + confTableName + ".{}!".format(jfl)
+                        fieldcal = "AMD_" + mdName + "_CAT." + jfl
+                        fromfield = "[" + confTableName + "." + jfl + "]"
                         try:
-                            arcpy.CalculateField_management(mlayerJoin, fieldcal, fromfield)
-                            self.log("\t\tDone calculating values for the Field :" + fieldcal, self.m_log.const_general_text)
+                            arcpy.CalculateField_management(
+                                mlayerJoin, fieldcal, fromfield)
+                            self.log(
+                                "\t\tDone calculating values for the Field :" + fieldcal,
+                                self.m_log.const_general_text)
                         except BaseException:
-                            self.log("Failed to calculate values for the field : " + fieldcal, self.m_log.const_warning_text)
-                            self.log(arcpy.GetMessages(), self.m_log.const_warning_text)
+                            self.log(
+                                "Failed to calculate values for the field : " + fieldcal,
+                                self.m_log.const_warning_text)
+                            self.log(
+                                arcpy.GetMessages(),
+                                self.m_log.const_warning_text)
                 return True
             except BaseException:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
-                return False
 
         elif(com == 'BB'):
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             processKey = 'buildboundary'
-            self.log("Building the boundary " + self.getProcessInfoValue(processKey, 'simplification_method', index))
+            self.log(
+                "Building the boundary " +
+                self.getProcessInfoValue(
+                    processKey,
+                    'simplification_method',
+                    index))
             try:
                 arcpy.BuildBoundary_management(
-                    fullPath,
-                    self.getProcessInfoValue(processKey, 'where_clause', index),
-                    self.getProcessInfoValue(processKey, 'append_to_existing', index),
-                    self.getProcessInfoValue(processKey, 'simplification_method', index)
-                )
+                    fullPath, self.getProcessInfoValue(
+                        processKey, 'where_clause', index), self.getProcessInfoValue(
+                        processKey, 'append_to_existing', index), self.getProcessInfoValue(
+                        processKey, 'simplification_method', index))
                 return True
             except BaseException:
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
@@ -761,10 +1079,17 @@ class Solutions(Base.Base):
 
         # Delete fields
         elif(com == 'DF'):
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             processKey = 'deletefield'
             try:
-                self.log("Deleting fields (%s) " % (self.getProcessInfoValue(processKey, 'drop_field', index)))
+                self.log(
+                    "Deleting fields (%s) " %
+                    (self.getProcessInfoValue(
+                        processKey,
+                        'drop_field',
+                        index)))
 
                 arcpy.DeleteField_management(
                     fullPath,
@@ -777,7 +1102,9 @@ class Solutions(Base.Base):
                 return False
 
         elif(com == 'RP'):
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             processKey = 'repairmosaicdatasetpaths'
             self.log("Repairing mosaic dataset paths ")
             try:
@@ -792,12 +1119,19 @@ class Solutions(Base.Base):
                 return False
 
         elif(com == 'SS'):
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             processKey = 'setstatistics'
-            self.log("Setting MD statistics for:" + fullPath, self.m_log.const_general_text)
-            stats_file_ss = self.m_base.getAbsPath(self.getProcessInfoValue(processKey, 'stats_file', index))
+            self.log(
+                "Setting MD statistics for:" + fullPath,
+                self.m_log.const_general_text)
+            stats_file_ss = self.m_base.getAbsPath(
+                self.getProcessInfoValue(
+                    processKey, 'stats_file', index))
             if stats_file_ss != '#' and stats_file_ss != '':
-                stats_file_ss = self.prefixFolderPath(self.getProcessInfoValue(processKey, 'stats_file', index), self.m_base.const_statistics_path_)
+                stats_file_ss = self.prefixFolderPath(self.getProcessInfoValue(
+                    processKey, 'stats_file', index), self.m_base.const_statistics_path_)
 
             try:
                 arcpy.SetRasterProperties_management(
@@ -813,9 +1147,14 @@ class Solutions(Base.Base):
                 return False
 
         elif(com == 'CC'):
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             processKey = 'calculatecellsizeranges'
-            self.log("Calculating cell ranges for:" + fullPath, self.m_log.const_general_text)
+            self.log(
+                "Calculating cell ranges for:" +
+                fullPath,
+                self.m_log.const_general_text)
 
             try:
                 arcpy.CalculateCellSizeRanges_management(
@@ -833,9 +1172,13 @@ class Solutions(Base.Base):
                 return False
 
         elif(com == 'BO'):
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             processKey = 'buildoverviews'
-            self.log("Building overviews for:" + fullPath, self.m_log.const_general_text)
+            self.log(
+                "Building overviews for:" + fullPath,
+                self.m_log.const_general_text)
 
             try:
                 arcpy.BuildOverviews_management(
@@ -852,9 +1195,13 @@ class Solutions(Base.Base):
                 return False
 
         elif(com == 'DO'):
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             processKey = 'defineoverviews'
-            self.log("Define overviews for:" + fullPath, self.m_log.const_general_text)
+            self.log(
+                "Define overviews for:" + fullPath,
+                self.m_log.const_general_text)
 
             try:
                 arcpy.DefineOverviews_management(
@@ -878,7 +1225,9 @@ class Solutions(Base.Base):
                 return False
 
         elif(com == 'AI'):
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             processKey = 'addindex'
             self.log("Adding Index:" + fullPath, self.m_log.const_general_text)
 
@@ -887,30 +1236,43 @@ class Solutions(Base.Base):
             for indx in range(0, maxValues):
 
                 try:
-                    arcpy.AddIndex_management(fullPath,
-                                              self.getProcessInfoValue(processKey, 'fields', index, indx),
-                                              self.getProcessInfoValue(processKey, 'index_name', index, indx),
-                                              self.getProcessInfoValue(processKey, 'unique', index, indx),
-                                              self.getProcessInfoValue(processKey, 'ascending', index, indx)
-                                              )
+                    arcpy.AddIndex_management(
+                        fullPath, self.getProcessInfoValue(
+                            processKey, 'fields', index, indx), self.getProcessInfoValue(
+                            processKey, 'index_name', index, indx), self.getProcessInfoValue(
+                            processKey, 'unique', index, indx), self.getProcessInfoValue(
+                            processKey, 'ascending', index, indx))
                 except BaseException:
-                    self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                    self.log(
+                        arcpy.GetMessages(),
+                        self.m_log.const_critical_text)
                     isError = True
 
             return not isError
 
         elif(com == 'CFC'):
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             processKey = 'cachefeatureclass'
 
             seamlineFC_name = 'AMD_' + self.m_base.m_mdName + '_SML'
-            seamlineFC_Path = os.path.join(self.m_base.m_geoPath, seamlineFC_name)
+            seamlineFC_Path = os.path.join(
+                self.m_base.m_geoPath, seamlineFC_name)
             if (arcpy.Exists(seamlineFC_Path) == False):
-                self.log("Seamline does not exist for the mosaic dataset: " + fullPath, self.m_log.const_general_text)
+                self.log(
+                    "Seamline does not exist for the mosaic dataset: " +
+                    fullPath,
+                    self.m_log.const_general_text)
                 return False
 
             try:
-                outCFC = self.getProcessInfoValue(processKey, 'out_cache_featureclass', index).replace('\\', '/')
+                outCFC = self.getProcessInfoValue(
+                    processKey,
+                    'out_cache_featureclass',
+                    index).replace(
+                    '\\',
+                    '/')
             except Exception as inf:
                 self.log(str(inf), self.m_log.const_critical_text)
                 return False
@@ -919,19 +1281,29 @@ class Solutions(Base.Base):
                 outCFC = os.path.join(self.m_base.m_geoPath, outCFC)
 
             if arcpy.Exists(outCFC):
-                self.log("Output cache feature class already exists: " + outCFC, self.m_log.const_critical_text)
+                self.log(
+                    "Output cache feature class already exists: " + outCFC,
+                    self.m_log.const_critical_text)
                 return False
 
             (outCFC_wrk, outCFC_name) = os.path.split(outCFC)
-            self.log("Exporting seamline as a feaure class: " + outCFC, self.m_log.const_general_text)
+            self.log("Exporting seamline as a feaure class: " +
+                     outCFC, self.m_log.const_general_text)
 
             try:
-                arcpy.FeatureClassToFeatureClass_conversion(seamlineFC_Path, outCFC_wrk, outCFC_name, "#", "#", "#")
+                arcpy.FeatureClassToFeatureClass_conversion(
+                    seamlineFC_Path, outCFC_wrk, outCFC_name, "#", "#", "#")
             except BaseException:
-                self.log('Failed to create the output featue class (%s): (%s)' % (outCFC, arcpy.GetMessages()), self.m_log.const_critical_text)
+                self.log(
+                    'Failed to create the output featue class (%s): (%s)' %
+                    (outCFC, arcpy.GetMessages()), self.m_log.const_critical_text)
                 return False
             try:
-                dropFList = ['BlendWidthUnits', 'BlendType', 'BlendWidth', 'ItemHash']
+                dropFList = [
+                    'BlendWidthUnits',
+                    'BlendType',
+                    'BlendWidth',
+                    'ItemHash']
                 sfieldList = arcpy.ListFields(seamlineFC_Path)
                 for sfield in sfieldList:
                     if sfield.name.lower() in dropFList:
@@ -939,69 +1311,120 @@ class Solutions(Base.Base):
 
                 arcpy.DeleteField_management(outCFC, dropFList)
             except BaseException:
-                self.log('Failed to delete the fields: ' + arcpy.GetMessages(), self.m_log.const_critical_text)
+                self.log(
+                    'Failed to delete the fields: ' +
+                    arcpy.GetMessages(),
+                    self.m_log.const_critical_text)
 
             catfieldList = []
             catfield = arcpy.ListFields(fullPath)
             for field in catfield:
                 catfieldList.append(field.name)
-            removelist = [u'OBJECTID', u'Shape', u'Raster', u'MinPS', u'MaxPS', u'HighPS', u'Category', u'Tag', u'GroupName', u'ProductName', u'CenterX', u'CenterY', u'ZOrder', u'TypeID', u'ItemTS', u'UriHash', u'Uri', u'Shape_Length', u'Shape_Area', u'SOrder', u'SLevelPS']
+            removelist = [
+                u'OBJECTID',
+                u'Shape',
+                u'Raster',
+                u'MinPS',
+                u'MaxPS',
+                u'HighPS',
+                u'Category',
+                u'Tag',
+                u'GroupName',
+                u'ProductName',
+                u'CenterX',
+                u'CenterY',
+                u'ZOrder',
+                u'TypeID',
+                u'ItemTS',
+                u'UriHash',
+                u'Uri',
+                u'Shape_Length',
+                u'Shape_Area',
+                u'SOrder',
+                u'SLevelPS']
             importField = list(set(catfieldList) - set(removelist))
 
             try:
-                arcpy.JoinField_management(outCFC, "RasterID", fullPath, "OBJECTID", importField)
+                arcpy.JoinField_management(
+                    outCFC, "RasterID", fullPath, "OBJECTID", importField)
             except BaseException:
-                self.log("Failed to import metadata fields:" + arcpy.GetMessages(), self.m_log.const_critical_text)
+                self.log(
+                    "Failed to import metadata fields:" +
+                    arcpy.GetMessages(),
+                    self.m_log.const_critical_text)
                 return False
 
             return True
 
         elif(com == 'CV'):
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             processKey = 'calculatevalues'
 
             max_CV = len(self.processInfo.processInfo[processKey])
             if (index > max_CV - 1):
-                self.log('Wrong index (%s) specified for (%s). Max index is (%s)' % (index, processKey, max_CV - 1), self.m_log.const_critical_text)
+                self.log(
+                    'Wrong index (%s) specified for (%s). Max index is (%s)' %
+                    (index, processKey, max_CV - 1), self.m_log.const_critical_text)
                 return False
 
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             maxValues = len(self.processInfo.processInfo[processKey][index])
-            self.log("Calculate values:" + fullPath, self.m_log.const_general_text)
+            self.log(
+                "Calculate values:" + fullPath,
+                self.m_log.const_general_text)
             isError = False
             for indx in range(0, maxValues):
                 isQuery = False
-                query = self.getProcessInfoValue(processKey, 'query', index, indx)
-                lyrName = 'lyr_%s_%s' % (str(self.m_base.m_last_AT_ObjectID),datetime.strftime(datetime.now(),"%Y%d%d%H%M%S"))
+                query = self.getProcessInfoValue(
+                    processKey, 'query', index, indx)
+                lyrName = 'lyr_%s_%s' % (str(
+                    self.m_base.m_last_AT_ObjectID),
+                    datetime.strftime(
+                    datetime.now(),
+                    "%Y%d%d%H%M%S%f"))
                 if (query != '#'):
                     isQuery = True
 
-                expression = "OBJECTID >%s" % (str(self.m_base.m_last_AT_ObjectID))
-                if (isQuery == True):
+                expression = "OBJECTID >%s" % (
+                    str(self.m_base.m_last_AT_ObjectID))
+                if (isQuery):
                     expression += ' AND %s' % (query)
                 try:
                     arcpy.MakeMosaicLayer_management(fullPath, lyrName)
-                    arcpy.SelectLayerByAttribute_management(lyrName, "NEW_SELECTION", expression)
-                    lyrName_footprint = lyrName #+ "/Footprint"
-                    arcpy.CalculateField_management(lyrName_footprint,
-                                                    self.getProcessInfoValue(processKey, 'fieldname', index, indx),
-                                                    self.getProcessInfoValue(processKey, 'expression', index, indx),
-                                                    self.getProcessInfoValue(processKey, 'expression_type', index, indx),
-                                                    self.getProcessInfoValue(processKey, 'code_block', index, indx)
-                                                    )
+                    arcpy.SelectLayerByAttribute_management(
+                        lyrName, "NEW_SELECTION", expression)
+                    lyrName_footprint = lyrName  # + "/Footprint"
+                    arcpy.CalculateField_management(
+                        lyrName_footprint, self.getProcessInfoValue(
+                            processKey, 'fieldname', index, indx), self.getProcessInfoValue(
+                            processKey, 'expression', index, indx), self.getProcessInfoValue(
+                            processKey, 'expression_type', index, indx), self.getProcessInfoValue(
+                            processKey, 'code_block', index, indx))
                 except BaseException:
-                    self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                    self.log(
+                        arcpy.GetMessages(),
+                        self.m_log.const_critical_text)
                     isError = True
                 try:
-                    arcpy.Delete_management(lyrName)     # passes for unknown/uncreated layer names
+                    # passes for unknown/uncreated layer names
+                    arcpy.Delete_management(lyrName)
                 except BaseException:
-                    self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                    self.log(
+                        arcpy.GetMessages(),
+                        self.m_log.const_critical_text)
                     isError = True
 
             return not isError
 
         elif(com == 'CP'):
-            self.log("Compacting file geodatabase:" + self.m_base.m_geoPath, self.m_log.const_general_text)
+            self.log(
+                "Compacting file geodatabase:" +
+                self.m_base.m_geoPath,
+                self.m_log.const_general_text)
 
             try:
                 arcpy.Compact_management(self.m_base.m_geoPath)
@@ -1011,12 +1434,15 @@ class Solutions(Base.Base):
                 return False
 
         elif(com == 'SE'):
-            self.log("Set environment variables on index: %s" % (index), self.m_log.const_general_text)
+            self.log("Set environment variables on index: %s" %
+                     (index), self.m_log.const_general_text)
 
             node = self.m_base.m_doc.getElementsByTagName('Environment')
             if (len(node) == 0 or
                     index > len(node) - 1):
-                self.log('No environment variables could be found/at index (%s)' % (index), self.m_log.const_warning_text)
+                self.log(
+                    'No environment variables could be found/at index (%s)' %
+                    (index), self.m_log.const_warning_text)
                 return False
             json = {}
             self.processEnv(node[index].firstChild, 0, json)
@@ -1042,9 +1468,11 @@ class Solutions(Base.Base):
                             if (pIndx == 0):
                                 key_ = k
                                 val_ = v.strip()
-                                if (val_ not in ['', '#']):
+                                if val_ not in ['', '#']:
                                     arcpy.env[key_] = val_
-                                    self.log('Env[%s]=%s' % (key_, val_), self.m_log.const_general_text)
+                                    self.log(
+                                        'Env[%s]=%s' %
+                                        (key_, val_), self.m_log.const_general_text)
                                 continue
                             else:
                                 key_ = json[p]['parent']
@@ -1054,23 +1482,34 @@ class Solutions(Base.Base):
                             else:
                                 if (val_.strip() != ''):
                                     arcpy.env[key_] = val_
-                                    self.log('Env[%s]=%s' % (key_, val_), self.m_log.const_general_text)
+                                    self.log(
+                                        'Env[%s]=%s' %
+                                        (key_, val_), self.m_log.const_general_text)
                         except Exception as inst:
                             self.log(str(inst), self.m_log.const_warning_text)
                             continue
             return True  # should unable to set environment variables return False?
 
         elif (com == 'MTC'):
+
             mdName = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             processKey = 'managetilecache'
-            self.log("Building cache for:" + mdName, self.m_log.const_general_text)
+            self.log(
+                "Building cache for:" + mdName,
+                self.m_log.const_general_text)
             self.log("Getting tiling Schema : ", self.m_log.const_general_text)
-            tileSchemeMtc = self.m_base.getAbsPath(self.getProcessInfoValue(processKey, 'import_tiling_scheme', index))
+            tileSchemeMtc = self.m_base.getAbsPath(
+                self.getProcessInfoValue(
+                    processKey, 'import_tiling_scheme', index))
             if tileSchemeMtc != '#' and tileSchemeMtc != '':
-                tileSchemeMtc = self.prefixFolderPath(self.getProcessInfoValue(processKey, 'import_tiling_scheme', index), os.path.dirname(self.config))
+                tileSchemeMtc = self.prefixFolderPath(
+                    self.getProcessInfoValue(
+                        processKey, 'import_tiling_scheme', index), os.path.dirname(
+                        self.config))
             self.log(tileSchemeMtc, self.m_log.const_general_text)
             try:
-                cacheLocation = self.getProcessInfoValue(processKey, 'in_cache_location', index)
+                cacheLocation = self.getProcessInfoValue(
+                    processKey, 'in_cache_location', index)
                 if (os.path.exists(cacheLocation)) == False:
                     os.makedirs(cacheLocation)
                 arcpy.ManageTileCache_management(
@@ -1087,33 +1526,51 @@ class Solutions(Base.Base):
                     self.getProcessInfoValue(processKey, 'max_cached_scale', index))
                 try:
                     if os.path.isfile(tileSchemeMtc):
-                        cachepath = os.path.join(self.getProcessInfoValue(processKey, 'in_cache_location', index), self.getProcessInfoValue(processKey, 'in_cache_name', index))
-                        lodNodesList = returnLevelDetails(os.path.join(cachepath, 'conf.xml'))
-                        lodNodesList = sorted(lodNodesList, key=lambda k: int(k['level']))
+                        cachepath = os.path.join(
+                            self.getProcessInfoValue(
+                                processKey, 'in_cache_location', index), self.getProcessInfoValue(
+                                processKey, 'in_cache_name', index))
+                        lodNodesList = returnLevelDetails(
+                            os.path.join(cachepath, 'conf.xml'))
+                        lodNodesList = sorted(
+                            lodNodesList, key=lambda k: int(
+                                k['level']))
                         maxLODNode = lodNodesList[-1]
                         maxScale = maxLODNode['scale']
-                        modifyConfProperties(os.path.join(cachepath, 'conf.properties'), maxScale)
-                except BaseException:
-                    self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                        modifyConfProperties(
+                            os.path.join(
+                                cachepath,
+                                'conf.properties'),
+                            maxScale)
+                except Exception as exp:
+                    self.log(str(exp), self.m_log.const_critical_text)
                 return True
-            except Exception as exp:
+            except BaseException as exp:
+                self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 self.log(str(exp), self.m_log.const_critical_text)
                 return False
 
         elif (com == 'ETC'):
             processKey = 'exporttilecache'
             try:
-                self.log("Exporting cache for:" + self.getProcessInfoValue(processKey, 'in_target_cache_name', index), self.m_log.const_general_text)
-                targetLocation = self.getProcessInfoValue(processKey, 'in_target_cache_folder', index)
+                self.log(
+                    "Exporting cache for:" +
+                    self.getProcessInfoValue(
+                        processKey,
+                        'in_target_cache_name',
+                        index),
+                    self.m_log.const_general_text)
+                targetLocation = self.getProcessInfoValue(
+                    processKey, 'in_target_cache_folder', index)
                 os.makedirs(targetLocation)
                 arcpy.ExportTileCache_management(
-                    self.getProcessInfoValue(processKey, 'in_cache_source', index),
-                    targetLocation,
-                    self.getProcessInfoValue(processKey, 'in_target_cache_name', index),
-                    self.getProcessInfoValue(processKey, 'export_cache_type', index),
-                    self.getProcessInfoValue(processKey, 'storage_format_type', index),
-                    self.getProcessInfoValue(processKey, 'scales', index),
-                    self.getProcessInfoValue(processKey, 'area_of_interest', index))
+                    self.getProcessInfoValue(
+                        processKey, 'in_cache_source', index), targetLocation, self.getProcessInfoValue(
+                        processKey, 'in_target_cache_name', index), self.getProcessInfoValue(
+                        processKey, 'export_cache_type', index), self.getProcessInfoValue(
+                        processKey, 'storage_format_type', index), self.getProcessInfoValue(
+                        processKey, 'scales', index), self.getProcessInfoValue(
+                            processKey, 'area_of_interest', index))
 
                 return True
             except BaseException:
@@ -1123,7 +1580,13 @@ class Solutions(Base.Base):
         elif (com == 'STP'):
             processKey = 'sharepackage'
             try:
-                self.log("Publishing Tile Package:" + self.getProcessInfoValue(processKey, 'in_package', index), self.m_log.const_general_text)
+                self.log(
+                    "Publishing Tile Package:" +
+                    self.getProcessInfoValue(
+                        processKey,
+                        'in_package',
+                        index),
+                    self.m_log.const_general_text)
 
                 arcpy.SharePackage_management(
                     self.getProcessInfoValue(processKey, 'in_package', index),
@@ -1140,8 +1603,15 @@ class Solutions(Base.Base):
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
         elif (com == 'CRTT'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, "AMD_{0}_ART".format(self.m_base.m_mdName))
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                "AMD_{0}_ART".format(
+                    self.m_base.m_mdName))
             return self.__invokeDynamicFn(
                 [fullPath],
                 'clearrastertypetable',
@@ -1149,8 +1619,15 @@ class Solutions(Base.Base):
                 index
             )
         elif (com == 'CLT'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, "AMD_{0}_LOG".format(self.m_base.m_mdName))
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                "AMD_{0}_LOG".format(
+                    self.m_base.m_mdName))
             return self.__invokeDynamicFn(
                 [fullPath],
                 'clearlogstable',
@@ -1158,7 +1635,9 @@ class Solutions(Base.Base):
                 index
             )
         elif(com == 'RP'):
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             processKey = 'repairmosaicdatasetpaths'
             self.log("Repairing mosaic dataset paths ")
             try:
@@ -1172,8 +1651,14 @@ class Solutions(Base.Base):
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
         elif (com == 'CCM'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'computecameramodel',
@@ -1181,8 +1666,14 @@ class Solutions(Base.Base):
                 index
             )
         elif (com == 'BSM'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'buildstereomodel',
@@ -1190,8 +1681,14 @@ class Solutions(Base.Base):
                 index
             )
         elif (com == 'GPC'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'generatepointcloud',
@@ -1199,7 +1696,11 @@ class Solutions(Base.Base):
                 index
             )
         elif (com == 'IFPC'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
             return self.__invokeDynamicFn(
                 [],
                 'interpolatefrompointcloud',
@@ -1207,17 +1708,27 @@ class Solutions(Base.Base):
                 index
             )
         elif (com == 'CRA'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
             return self.__invokeDynamicFn(
-                [fullPath],
+                [],
                 'copyraster',
                 'arcpy.CopyRaster_management',
-                index
+                index,
+                info=invokeDynamicFnInfo  # info = to pass extra args to the fnc '__invokeDynamicFn'
             )
         elif (com == 'DEL'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [],
                 'delete',
@@ -1225,16 +1736,26 @@ class Solutions(Base.Base):
                 index
             )
         elif (com == 'BMI'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'buildmultidimensionalinfo',
-                'arcpy.management.BuildMultidimensionalInfo',
+                'arcpy.BuildMultidimensionalInfo_management',
                 index
             )
         elif (com == 'AMR'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
             return self.__invokeDynamicFn(
                 [],
                 'aggregatemultidimensionalraster',
@@ -1242,7 +1763,11 @@ class Solutions(Base.Base):
                 index
             )
         elif (com == 'ACUC'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
             return self.__invokeDynamicFn(
                 [],
                 'analyzechangesusingccdc',
@@ -1250,7 +1775,11 @@ class Solutions(Base.Base):
                 index
             )
         elif (com == 'DCUCAR'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
             return self.__invokeDynamicFn(
                 [],
                 'detectchangeusingchangeanalysis',
@@ -1258,7 +1787,11 @@ class Solutions(Base.Base):
                 index
             )
         elif (com == 'FAS'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
             return self.__invokeDynamicFn(
                 [],
                 'findargumentstatistics',
@@ -1266,7 +1799,11 @@ class Solutions(Base.Base):
                 index
             )
         elif (com == 'GMA'):    # chs
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
             return self.__invokeDynamicFn(
                 [],
                 'generatemultidimensionalanomaly',
@@ -1274,8 +1811,14 @@ class Solutions(Base.Base):
                 index
             )
         elif (com == 'CF'):    # chs
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'computefiducials',
@@ -1283,8 +1826,14 @@ class Solutions(Base.Base):
                 index
             )
         elif (com == 'UIO'):    # chs
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'updateinteriororientation',
@@ -1292,17 +1841,29 @@ class Solutions(Base.Base):
                 index
             )
         elif (com == 'EFACP'):    # chs
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'exportframeandcameraparameters',
-                'arcpy.management.ExportFrameAndCameraParameters',
+                'arcpy.ExportFrameAndCameraParameters_management',
                 index
             )
         elif (com == 'GBAR'):    # chs
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            fullPath = os.path.join(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName)
             return self.__invokeDynamicFn(
                 [fullPath],
                 'generateblockadjustmentreport',
@@ -1310,7 +1871,11 @@ class Solutions(Base.Base):
                 index
             )
         elif (com == 'GTR'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
             return self.__invokeDynamicFn(
                 [],
                 'generatetrendraster',
@@ -1318,7 +1883,11 @@ class Solutions(Base.Base):
                 index
             )
         elif (com == 'PUTR'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
             return self.__invokeDynamicFn(
                 [],
                 'predictusingtrendraster',
@@ -1326,14 +1895,22 @@ class Solutions(Base.Base):
                 index
             )
         elif (com == 'RR'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            fullPath = fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            fullPath = fullPath = os.path.join(
+                self.m_base.m_geoPath, self.m_base.m_mdName)
             processKey = 'registerraster'
             try:
-                query = self.m_base.getXMLXPathValue('Application/Workspace/MosaicDataset/Processes/RegisterRaster/query', 'query')
+                query = self.m_base.getXMLXPathValue(
+                    'Application/Workspace/MosaicDataset/Processes/RegisterRaster/query', 'query')
             except Exception as exp:
                 self.log(str(exp), self.m_log.const_critical_text)
-                self.log("Setting query value as #", self.m_log.const_warning_text)
+                self.log(
+                    "Setting query value as #",
+                    self.m_log.const_warning_text)
                 query = "#"
             if query == "#":  # run the tool on the entire mosaic dataset
                 return self.__invokeDynamicFn(
@@ -1346,48 +1923,61 @@ class Solutions(Base.Base):
                 with arcpy.da.SearchCursor(fullPath, ["OBJECTID", "Name"], where_clause=query) as sc:
                     for row in sc:
                         try:
-                            rasteritem = os.path.join(fullPath, "OBJECTID={}".format(row[0]))
+                            rasteritem = os.path.join(
+                                fullPath, "OBJECTID={}".format(row[0]))
                             status = self.__invokeDynamicFn(
                                 [rasteritem],
                                 'registerraster',
                                 'arcpy.RegisterRaster_management',
                                 index
                             )
-                            if status == False:
-                                self.log("Failed for {}".format(row[1]), self.m_log.const_critical_text)
+                            if not status:
+                                self.log(
+                                    "Failed for {}".format(
+                                        row[1]), self.m_log.const_critical_text)
                             else:
-                                self.log("Successful for {}".format(row[1]), self.m_log.const_general_text)
+                                self.log(
+                                    "Successful for {}".format(
+                                        row[1]), self.m_log.const_general_text)
                         except Exception as exp:
-                            self.log("Failed for {}...{}".format(row[1], str(exp)), self.m_log.const_critical_text)
+                            self.log(
+                                "Failed for {}...{}".format(
+                                    row[1],
+                                    str(exp)),
+                                self.m_log.const_critical_text)
                             continue
                 del sc
                 return True
-        elif (com == 'TF'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            return self.__invokeDynamicFn(
-                [],
-                'transferfiles',
-                'arcpy.TransferFiles_management',
-                index
-            )
-            
         elif (com == 'CPUDL'):
             self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
             processKey = 'classifypixelsusingdeeplearning'
             fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             in_raster = self.getProcessInfoValue(processKey, 'in_raster', index)
+            output_path = self.getProcessInfoValue(processKey, 'out_classified_raster', index)
             if in_raster == '#':
                 in_raster = fullPath
-            dlpk_path = self.getProcessInfoValue(processKey, 'in_model_definition', index)
-            if not os.path.isabs(dlpk_path):
-                dlpk_path = os.path.join(self.m_base.const_workspace_path_, 'Parameter/DLPKpackages', dlpk_path)
+            if output_path == '#':
+                output_path = f'{fullPath}{processKey}'
+
             try:
                 out_classified_raster = arcpy.ia.ClassifyPixelsUsingDeepLearning(
-                    in_raster, 
-                    dlpk_path,
-                    self.getProcessInfoValue(processKey, 'arguments', index),
-                    self.getProcessInfoValue(processKey, 'processing_mode', index))
-                out_classified_raster.save(self.getProcessInfoValue(processKey, 'out_classified_raster', index))
+                    in_raster,
+                    os.path.join(
+                        self.m_base.const_workspace_path_,
+                        'Parameter/DLPKpackages',
+                        self.getProcessInfoValue(
+                            processKey,
+                            'in_model_definition',
+                            index)),
+                    self.getProcessInfoValue(
+                        processKey,
+                        'arguments',
+                        index),
+                    self.getProcessInfoValue(
+                        processKey,
+                        'processing_mode',
+                        index))
+                out_classified_raster.save(output_path)
             except Exception as exp:
                 return False
             return True
@@ -1397,33 +1987,41 @@ class Solutions(Base.Base):
             processKey = 'detectobjectsusingdeeplearning'
             fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             in_raster = self.getProcessInfoValue(processKey, 'in_raster', index)
+            output_path = self.getProcessInfoValue(processKey, 'out_detected_objects', index)
             if in_raster == '#':
                 in_raster = fullPath
-            dlpk_path = self.getProcessInfoValue(processKey, 'in_model_definition', index)
-            if not os.path.isabs(dlpk_path):
-                dlpk_path = os.path.join(self.m_base.const_workspace_path_, 'Parameter/DLPKpackages', dlpk_path)
+            if output_path == '#':
+                output_path = f'{fullPath}{processKey}'
             return self.__invokeDynamicFn(
-                [in_raster, 
-                self.getProcessInfoValue(processKey, 'out_detected_objects', index), 
-                dlpk_path], 
-                processKey, 
-                'arcpy.ia.DetectObjectsUsingDeepLearning', 
-                index)
+                [
+                    in_raster, output_path, os.path.join(
+                        self.m_base.const_workspace_path_, 'Parameter/DLPKpackages', self.getProcessInfoValue(
+                            processKey, 'in_model_definition', index)), self.getProcessInfoValue(
+                        processKey, 'arguments', index), self.getProcessInfoValue(
+                            processKey, 'run_nms', index), self.getProcessInfoValue(
+                                processKey, 'confidence_score_field', index), self.getProcessInfoValue(
+                                    processKey, 'class_value_field', index), self.getProcessInfoValue(
+                                        processKey, 'max_overlap_ratio', index), self.getProcessInfoValue(
+                                            processKey, 'processing_mode', index)], processKey, 'arcpy.ia.DetectObjectsUsingDeepLearning', index)
 
         elif (com == 'COUDL'):
             self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
             processKey = 'classifyobjectsusingdeeplearning'
             fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             in_raster = self.getProcessInfoValue(processKey, 'in_raster', index)
+            output_path = self.getProcessInfoValue(processKey, 'out_feature_class', index)
             if in_raster == '#':
                 in_raster = fullPath
-            dlpk_path = self.getProcessInfoValue(processKey, 'in_model_definition', index)
-            if not os.path.isabs(dlpk_path):
-                dlpk_path = os.path.join(self.m_base.const_workspace_path_, 'Parameter/DLPKpackages', dlpk_path)
+            if output_path == '#':
+                output_path = f'{fullPath}{processKey}'
             return self.__invokeDynamicFn(
                 [in_raster,
-                 self.getProcessInfoValue(processKey, 'out_feature_class', index),
-                 dlpk_path],
+                 output_path,
+                 os.path.join(self.m_base.const_workspace_path_, 'Parameter/DLPKpackages', self.getProcessInfoValue(processKey, 'in_model_definition', index)),
+                 self.getProcessInfoValue(processKey, 'in_features', index),
+                 self.getProcessInfoValue(processKey, 'class_label_field', index),
+                 self.getProcessInfoValue(processKey, 'processing_mode', index),
+                 self.getProcessInfoValue(processKey, 'model_arguments', index)],
                 processKey,
                 'arcpy.ia.ClassifyObjectsUsingDeepLearning',
                 index
@@ -1433,44 +2031,79 @@ class Solutions(Base.Base):
             processKey = 'extractfeaturesusingaimodels'
             fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             in_raster = self.getProcessInfoValue(processKey, 'in_raster', index)
+            output_path = self.getProcessInfoValue(processKey, 'out_location', index)
+            out_prefix = self.getProcessInfoValue(processKey, 'out_prefix', index)
             if in_raster == '#':
                 in_raster = fullPath
+            if output_path == '#':
+                output_path = f'{fullPath}{processKey}'
+            if out_prefix == '#':
+                out_prefix = f'{fullPath}{processKey}'
             return self.__invokeDynamicFn(
-                [in_raster],
+                [in_raster,
+                 self.getProcessInfoValue(processKey, 'mode', index),
+                 output_path,
+                 out_prefix,
+                 self.getProcessInfoValue(processKey, 'area_of_interest', index),
+                 self.getProcessInfoValue(processKey, 'pretrained_models', index),
+                 self.getProcessInfoValue(processKey, 'additional_models', index),
+                 self.getProcessInfoValue(processKey, 'confidence_threshold', index),
+                 self.getProcessInfoValue(processKey, 'save_intermediate_output', index),
+                 self.getProcessInfoValue(processKey, 'test_time_augmentation', index),
+                 self.getProcessInfoValue(processKey, 'buffer_distance', index),
+                 self.getProcessInfoValue(processKey, 'extend_length', index),
+                 self.getProcessInfoValue(processKey, 'smoothing_tolerance', index),
+                 self.getProcessInfoValue(processKey, 'dangle_length', index),
+                 self.getProcessInfoValue(processKey, 'in_road_features', index),
+                 self.getProcessInfoValue(processKey, 'road_buffer_width', index),
+                 self.getProcessInfoValue(processKey, 'regularize_parcels', index),
+                 self.getProcessInfoValue(processKey, 'post_processing_workflow', index),
+                 self.getProcessInfoValue(processKey, 'out_features', index),
+                 self.getProcessInfoValue(processKey, 'parcel_tolerance', index),
+                 self.getProcessInfoValue(processKey, 'regularization_method', index),
+                 self.getProcessInfoValue(processKey, 'poly_tolerance', index)],
                 processKey,
                 'arcpy.geoai.ExtractFeaturesUsingAIModels',
                 index
             )
 
         else:
-            # The command could be a user defined function externally defined in the module (MDCS_UC.py). Let's invoke it.
-            data = {
-                'log': self.m_log,
-                'workspace': self.m_base.m_geoPath,
-                'mosaicdataset': self.m_base.m_mdName,
-                'mdcs': self.m_base.m_doc,
-                'sourcePath': self.m_base.m_sources,
-                'base': self.m_base    # pass in the base object to allow access to common functions.
-            }
+            # The command could be a user defined function externally defined
+            # in the module (MDCS_UC.py). Let's invoke it.
+            data = self.m_base.m_data
             bSuccess = self.m_base.invoke_user_function(com, data)
             if (bSuccess):
-                ParentRoot = 'Application/Workspace'
-                mosaicDataset = self.m_base.getXMLXPathValue('{}/MosaicDataset/Name'.format(ParentRoot), 'Name')
-                workspace = self.m_base.getXMLXPathValue('{}/WorkspacePath'.format(ParentRoot), 'WorkspacePath')
-                geoDatabase = self.m_base.getXMLXPathValue('{}/Geodatabase'.format(ParentRoot), 'Geodatabase')
-                mkGeoPath = '{}{}'.format(os.path.join(workspace, geoDatabase), self.m_base.const_geodatabase_ext.lower() if (not geoDatabase.lower().endswith(self.m_base.const_geodatabase_ext.lower()) and not geoDatabase.lower().endswith('sde'))  else '').replace('\\', '/')
-                self.m_base.m_geodatabase = geoDatabase
-                self.m_base.m_workspace = workspace
-                data['mosaicdataset'] = self.m_base.m_mdName = mosaicDataset
-                data['workspace'] = self.m_base.m_geoPath = mkGeoPath
-                ret = self.processInfo.init(self.config)   # Update internal data structures if user function has modifield the in-memory xml dom.
+                if self.config:
+                    ParentRoot = 'Application/Workspace'
+                    mosaicDataset = self.m_base.getXMLXPathValue(
+                        '{}/MosaicDataset/Name'.format(ParentRoot), 'Name')
+                    workspace = self.m_base.getXMLXPathValue(
+                        '{}/WorkspacePath'.format(ParentRoot), 'WorkspacePath')
+                    geoDatabase = self.m_base.getXMLXPathValue(
+                        '{}/Geodatabase'.format(ParentRoot), 'Geodatabase')
+                    mkGeoPath = '{}{}'.format(
+                        os.path.join(
+                            workspace, geoDatabase), self.m_base.const_geodatabase_ext.lower() if (
+                            not geoDatabase.lower().endswith(
+                                self.m_base.const_geodatabase_ext.lower()) and not geoDatabase.lower().endswith('sde')) else '').replace(
+                        '\\', '/')
+                    self.m_base.m_geodatabase = geoDatabase
+                    self.m_base.m_workspace = workspace
+                    data['mosaicdataset'] = self.m_base.m_mdName = mosaicDataset
+                    data['workspace'] = self.m_base.m_geoPath = mkGeoPath
+                # Update internal data structures if user function has
+                # modifield the in-memory xml dom.
+                ret = True if not self.config else self.processInfo.init(self.config)
                 if ('useResponse' in data and
                         data['useResponse']):
                     response = {'response': data['response']}
                     if ('code' in data):
-                        response['code'] = data['code']  # Optional, any user defined code regardless of the function status.
+                        # Optional, any user defined code regardless of the
+                        # function status.
+                        response['code'] = data['code']
                     if ('status' in data):
-                        response['status'] = data['status']  # Overall function status, i.e. True or False
+                        # Overall function status, i.e. True or False
+                        response['status'] = data['status']
                     return response
                 return ret
         return False            # main function body return, no matching command found!
@@ -1566,7 +2199,7 @@ class Solutions(Base.Base):
              'fnc': executeCommand
              },
             'RRFMD':
-            {'desc': 'Remove Rasters from Mosaic Dataset.',
+            {'desc': 'Remove Rasters from Mosaic ataset.',
              'fnc': executeCommand
              },
             'DMD':
@@ -1753,26 +2386,26 @@ class Solutions(Base.Base):
             {'desc': 'Generate Multidimensional Anomaly.',
              'fnc': executeCommand
              },
-             'CF':
-             {
-              'desc': 'Compute Fiducials.',
-             'fnc': executeCommand
-             },
-             'UIO':
-             {
-              'desc': 'Update Interior Orientation.',
-             'fnc': executeCommand
-             },
-             'EFACP':
-             {
-              'desc': 'Export Frame And Camera Parameters.',
-             'fnc': executeCommand
-             },
-             'GBAR':
-             {
-              'desc': 'Generate Block Adjustment Report.',
-             'fnc': executeCommand
-             },
+            'CF':
+            {
+                'desc': 'Compute Fiducials.',
+                'fnc': executeCommand
+            },
+            'UIO':
+            {
+                'desc': 'Update Interior Orientation.',
+                'fnc': executeCommand
+            },
+            'EFACP':
+            {
+                'desc': 'Export Frame And Camera Parameters.',
+                'fnc': executeCommand
+            },
+            'GBAR':
+            {
+                'desc': 'Generate Block Adjustment Report.',
+                'fnc': executeCommand
+            },
             'GTR':
             {'desc': 'Generate Trend Raster.',
              'fnc': executeCommand
@@ -1783,10 +2416,6 @@ class Solutions(Base.Base):
              },
             'CPCSLP':
             {'desc': 'Creates a point cloud scene layer package (.slpk file) from LAS, zLAS, LAZ, or LAS dataset input.',
-             'fnc': executeCommand
-             },
-            'TF':
-            {'desc': 'Transfers files between a file system and a cloud storage workspace.',
              'fnc': executeCommand
              },
             'CPUDL':
@@ -1867,8 +2496,10 @@ class Solutions(Base.Base):
                      self.const_critical_text)
             raise
 
-        if (indx > -1):     # handle process info on keys [addindex, calculatevalues]
-            if (key in self.processInfo.processInfo[process][index][indx].keys()):
+        if (indx > -
+                1):     # handle process info on keys [addindex, calculatevalues]
+            if (key in self.processInfo.processInfo[process][index][indx].keys(
+            )):
                 return self.processInfo.processInfo[process][index][indx][key]
             return '#'
 
@@ -1880,7 +2511,7 @@ class Solutions(Base.Base):
         self.config = conf  # configuration/XML template
         self.userInfo = info  # callback information for commands /e.t.c.
         try:
-            self.m_base.m_doc = minidom.parse(self.config)
+            self.m_base.m_doc = minidom.parse(self.config) if conf else None
             (ret, msg) = self.m_base.init()
             if (ret == False):
                 if (msg == self.m_base.const_init_ret_version or
@@ -1888,25 +2519,40 @@ class Solutions(Base.Base):
                         msg == self.m_base.const_init_ret_patch):
                     return False
                 raise
+            UserArgs = '__user'
+            # removes any previously initialized user-args data.
+            self.m_base.m_data[UserArgs] = {}
+            self.m_base.m_data[UserArgs] = self.userInfo[UserArgs]
+            del self.userInfo[UserArgs]
         except Exception as e:
-            self.log('Unable to read the input parameter file ({})\n{}\nQuitting...'.format(self.config, str(e)), self.const_critical_text)
+            self.log(
+                'Unable to read the input parameter file ({})\n{}\nQuitting...'.format(
+                    self.config, str(e)), self.const_critical_text)
             return False
         self.processInfo = self.ProcessInfo.ProcessInfo(self.m_base)
-        bSuccess = self.processInfo.init(self.config)
-        if (bSuccess == False):
-            self.log('Unable to process the parameter file ({})'.format(self.config), self.const_critical_text)
-            return False
-        bSuccess = self.processInfo.hasProcessInfo
+        if conf:
+            bSuccess = self.processInfo.init(self.config)
+            if (bSuccess == False):
+                self.log(
+                    'Unable to process the parameter file ({})'.format(
+                        self.config),
+                    self.const_critical_text)
+                return False
+            bSuccess = self.processInfo.hasProcessInfo
+            self.log('Using template:' + self.config, self.const_general_text)
         # split commands with '+'
-        self.log('Using template:' + self.config, self.const_general_text)
         com_ = com
         if (com_.upper() == self.const_cmd_default_text.upper()):
             try:
-                com_ = self.getXMLNodeValue(self.m_base.m_doc, "Command")  # gets command defaults.
+                # gets command defaults.
+                com_ = self.getXMLNodeValue(self.m_base.m_doc, "Command")
                 self.log('Using default command(s):' + com_)
             except BaseException:
-                self.log("Error: Reading input config file:" + self.config + "\nQuitting...",
-                         self.const_critical_text)
+                self.log(
+                    "Error: Reading input config file:" +
+                    self.config +
+                    "\nQuitting...",
+                    self.const_critical_text)
                 return False
             if (len(com_.strip()) == 0):
                 self.log('Error: Empty command.',
@@ -1919,53 +2565,72 @@ class Solutions(Base.Base):
             ucCommand = command
             command = command.upper()
             is_user_cmd = False
-            cmd = ''.join(ch for ch in command if ch in (ascii_letters))
+            cmd = ''.join(ch for ch in command if ch in (ascii_letters + '_'))
             index = 0
             if (len(command) > len(cmd)):
                 try:
                     index = int(command[len(cmd):])
                 except BaseException:
-##                    self.log("Command/Err: Invalid command index:" + command, self.const_warning_text)
-                     pass
+                    self.log(
+                        "Command/Err: Invalid command index:" + command,
+                        self.const_warning_text)
                     # catch any float values entered, e.t.c
             if ((cmd in self.commands.keys()) == False):
-                if (self.m_base.isUser_Function(ucCommand) == True):
+                if (self.m_base.isUser_Function(ucCommand)):
                     try:
                         self.commands[ucCommand] = {}
-                        self.commands[ucCommand]['desc'] = 'User defined command (%s)' % (ucCommand)
-                        self.commands[ucCommand]['fnc'] = self.commands['CM']['fnc']        # can't use self.executeCommand directly here. Need to check.
-                        cmd = ucCommand     # preserve user defined function case.
+                        self.commands[ucCommand]['desc'] = 'User defined command (%s)' % (
+                            ucCommand)
+                        # can't use self.executeCommand directly here. Need to
+                        # check.
+                        self.commands[ucCommand]['fnc'] = self.commands['CM']['fnc']
+                        # preserve user defined function case.
+                        cmd = ucCommand
                         is_user_cmd = True
                     except BaseException:
-                        self.log('Unabled to add user defined function/command (%s) to command chain.' % (ucCommand), self.const_warning_text)
+                        self.log(
+                            'Unabled to add user defined function/command (%s) to command chain.' %
+                            (ucCommand), self.const_warning_text)
                         return False    # return to prevent further processing.
                 else:
-                    self.log("Command/Err: Unknown command:" + cmd, self.const_warning_text)
+                    self.log(
+                        "Command/Err: Unknown command:" + cmd,
+                        self.const_warning_text)
                     continue
             indexed_cmd = False if index == 0 else True
             cat_cmd = '%s%s' % (cmd, '' if not indexed_cmd else index)
-            if (self.isLog() == True):
+            if (self.isLog()):
                 self.m_log.CreateCategory(cat_cmd)
-            self.log("Command:" + cat_cmd + '->' + '%s' % self.commands[cmd]['desc'], self.const_general_text)
+            self.log("Command:" + cat_cmd + '->' + '%s' %
+                     self.commands[cmd]['desc'], self.const_general_text)
             if (indexed_cmd):
-                self.log('Using parameter values at index (%s)' % index, self.const_general_text)
+                self.log(
+                    'Using parameter values at index (%s)' %
+                    index, self.const_general_text)
             success = 'OK'
             response = self.commands[cmd]['fnc'](self, cmd, index)
-            cmdResults.append({'cmd': cmd, 'value': response})
+            respVals = {'cmd': cmd}
+            status = False
             if (isinstance(response, bool)):
                 status = response
             elif (isinstance(response, dict)):
-                status = False
+                if ('response' in response and
+                    response['response'] and
+                        isinstance(response['response'], dict)):
+                    response = response['response']
                 if ('status' in response):
                     status = self.m_base.getBooleanValue(response['status'])
+                if ('output' in response):
+                    respVals['output'] = response['output']
+            respVals['value'] = status
+            cmdResults.append(respVals)
             if (status == False):
                 success = 'Failed!'
             self.log(success, self.const_status_text)
-            if (self.isLog() == True):
+            if (self.isLog()):
                 self.m_log.CloseCategory()
             if (status == False and     # do not continue with any following commands if AR / user defined function commands fail.
-                (cmd == 'AR' or
-                 cmd == 'CM' or
-                 is_user_cmd == True)):
+                (cmd in ['AR', 'CM', 'CBA', 'ABA'] or
+                 is_user_cmd)):
                 break
         return cmdResults

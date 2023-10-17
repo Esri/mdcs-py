@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Copyright 2023 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,13 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
 # Version: 20230726
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 #!/usr/bin/env python
 
 import os
@@ -29,22 +29,24 @@ try:
     else:
         from winreg import *
 except ImportError as e:
-    print ('winreg support is disabled!\n{}'.format(e))
-
+    print('winreg support is disabled!\n{}'.format(e))
 from datetime import datetime
-from xml.dom import minidom
-
+from defusedxml import minidom
+from inspect import signature
+mdcs_uc_error = None
 try:
     import MDCS_UC
     from importlib import reload
-    MDCS_UC = reload(MDCS_UC)
+    MDCS_UC = reload(MDCS_UC)  # ArcGIS Pro PYT EVN requires a reload to clear previous instances.
 except Exception as e:
-    print (f'User-Code functions disabled.\n{e}')
+    mdcs_uc_error = e
+    print(f'User-Code functions disabled.\n{e}')
 try:
     from arcpy.ia import *
     arcpy.CheckOutExtension("ImageAnalyst")
-except:
-   print ('arcpy.ia is not available.')
+except BaseException:
+    print('arcpy.ia is not available.')
+
 
 class DynaInvoke:
     # log status types enums
@@ -55,7 +57,7 @@ class DynaInvoke:
     # ends
 
     def __init__(self, name, args, evnt_fnc_update_args=None, log=None):
-        self.m_name = name
+        self.m_name = name[name.find('.') + 1:]
         self.m_args = args
         self.m_evnt_update_args = evnt_fnc_update_args
         self.m_log = log
@@ -64,48 +66,53 @@ class DynaInvoke:
     def _message(self, msg, msg_type):
         if (self.m_log):
             return self.m_log(msg, msg_type)
-        print (msg)
+        print(msg)
 
     def init(self, **kwargs):
+        self.fnc_ptr = None
         if ('sArgs' in kwargs):
             self._sArgs = kwargs['sArgs']
             if (isinstance(self._sArgs, list)):
                 if (self._sArgs):
                     if (isinstance(self._sArgs[0], list)):
-                            self._sArgs = self._sArgs[0]        # handles only 1 sub method on the parent object for now.
-                                                                # sub args to use in a method of the main function object. e.g. X = a->fn1(args) X->fn2(sargs)
+                        self._sArgs = self._sArgs[0]        # handles only 1 sub method on the parent object for now.
+                        # sub args to use in a method of the main function object. e.g. X = a->fn1(args) X->fn2(sargs)
         try:
-            arg_count = eval('%s.__code__.co_argcount' % (self.m_name))
+            self.fnc_ptr = getattr(sys.modules['arcpy'], self.m_name)
+            arg_count = len(signature(self.fnc_ptr).parameters)
         except Exception as exp:
             self._message(str(exp), self.const_critical_text)
             return False
         len_args = len(self.m_args)
         if (len_args < arg_count):
-##            self._message('Args less than required, filling with default (#)', self.const_warning_text)
+            # self._message('Args less than required, filling with default (#)', self.const_warning_text)
             for i in range(len_args, arg_count):
                 self.m_args.append('#')
         elif (len_args > arg_count):
-##            self._message('More args supplied than required to function (%s)' % (self.m_name), self.const_warning_text)
+            ##            self._message('More args supplied than required to function (%s)' % (self.m_name), self.const_warning_text)
             self.m_args = self.m_args[:arg_count]
         return True
 
     def invoke(self):   # chs
         result = 'OK'
         try:
+            if self.fnc_ptr is None:
+                raise Exception(f'{self.__class__.__name__}/Not initialized.')
             if (self.m_evnt_update_args is not None):
                 usr_args = self.m_evnt_update_args(self.m_args, self.m_name)
                 if (usr_args is None):      # set to (None) to skip fnc invocation, it's treated as a non-error.
                     return True
                 if (usr_args is not None and
                         len(usr_args) == len(self.m_args)):      # user is only able to update the contents, not to trim or expand args.
-##                    self._message('Original args may have been updated through custom code.', self.const_warning_text)
+                    ##                    self._message('Original args may have been updated through custom code.', self.const_warning_text)
                     self.m_args = usr_args
             self._message('Calling (%s)' % (self.m_name), self.const_general_text)
-            ret = eval('%s(*self.m_args)' % (self.m_name))     # gp-tools return NULL?
+            ret = self.fnc_ptr(*self.m_args)    # gp-tools return NULL?
             if (self._sArgs):
                 fn = self._sArgs.pop(0)
                 if (hasattr(ret, fn)):
-                    ret = eval('ret.{}(*self._sArgs)'.format(fn))
+                    self.fnc_ptr = getattr(sys.modules[ret], fn)
+                    ret = self.fnc_ptr(*self._sArgs)
             return True
         except Exception as exp:
             result = 'FAILED'
@@ -153,6 +160,9 @@ class Base(object):
     CCMD_STATUS_OK = 'OK'
     CCMD_STATUS_FAILED = 'Failed!'
     # ends
+
+    NODE_TYPE_TEXT = 3
+    NODE_TYPE_ELEMENT = 1
 # ends
 
     def __init__(self):
@@ -203,6 +213,22 @@ class Base(object):
         self.m_data = None
 
     def init(self):  # return (status [true|false], reason)
+        self.m_data = {
+            'log': self.m_log,
+            'mdcs': self.m_doc,
+            'base': self    # pass in the base object to allow access to common functions.
+        }
+        try:
+            frame = sys._getframe(0).f_globals
+            module = frame[self.CMODULE_NAME]
+            self.m_userClassInstance = getattr(module, self.CCLASS_NAME)(self.m_data)
+        except BaseException:
+            error_msg = '{}/{} not found. Users commands disabled!'.format(self.CMODULE_NAME, self.CCLASS_NAME)
+            error_msg = (error_msg + ' User code error: {}'.format(mdcs_uc_error)) if mdcs_uc_error else error_msg
+            self.log(error_msg, self.const_warning_text)
+        if (self.m_doc is None):
+            return (True, 'UserCode only')
+        # version check.
         try:
             # Update in memory parameter DOM to reflect {-m} user values
             if (self.m_workspace):
@@ -230,63 +256,40 @@ class Base(object):
                     return (False, self.const_init_ret_version)  # version check failed.
         except Exception as inst:
             self.log('Version check failure/' + str(inst), self.const_critical_text)
-            return False
+            return (False, self.const_init_ret_version)
         # ends
-
         # ArcGIS patch test.
         if (self.isArcGISPatched() == False):
             self.log('An ArcGIS patch required to run MDCS is not yet installed. Unable to proceed.', self.const_critical_text)
             return (False, self.const_init_ret_patch)
         # ends
-
         self.setUserDefinedValues()  # replace user defined dynamic variables in config file with values provided at the command-line.
-
         if (self.m_workspace == ''):
             self.m_workspace = self.prefixFolderPath(self.getAbsPath(self.getXMLNodeValue(self.m_doc, "WorkspacePath")), self.const_workspace_path_)
-
         if (self.m_geodatabase == ''):
             self.m_geodatabase = self.getXMLNodeValue(self.m_doc, "Geodatabase")
-
         if (self.m_mdName == ''):
             self.m_mdName = self.getXMLXPathValue("Application/Workspace/MosaicDataset/Name", "Name")
-
         const_len_ext = len(self.const_geodatabase_ext)
         ext = self.m_geodatabase[-const_len_ext:].upper()
         if (ext != self.const_geodatabase_ext and
                 ext != self.const_geodatabase_SDE_ext):
             self.m_geodatabase += self.const_geodatabase_ext.lower()  # if no extension specified, defaults to '.gdb'
-
         self.m_gdbName = self.m_geodatabase[:len(self.m_geodatabase) - const_len_ext]  # .gdb
         self.m_geoPath = os.path.join(self.m_workspace, self.m_geodatabase)
-
         self.m_commands = self.getXMLNodeValue(self.m_doc, "Command")
-
         if (ext == self.const_geodatabase_SDE_ext):
             self.m_IsSDE = True
             try:
                 self.log('Reading SDE connection properties from (%s)' % (self.m_geoPath))
                 conProperties = arcpy.Describe(self.m_geoPath).connectionProperties
                 self.m_SDE_database_user = ('%s.%s.') % (conProperties.database, conProperties.user)
-
             except Exception as inst:
                 self.log(str(inst), self.const_critical_text)
                 return (False, self.const_init_ret_sde)
-        try:
-            self.m_data = {
-                'log': self.m_log,
-                'workspace': self.m_geoPath,
-                'mosaicdataset': self.m_mdName,
-                'mdcs': self.m_doc,
-                'sourcePath': self.m_sources,
-                'base': self    # pass in the base object to allow access to common functions.
-            }
-            frame = sys._getframe(0).f_globals
-            module = frame[self.CMODULE_NAME]
-            self.m_userClassInstance = getattr(module, self.CCLASS_NAME)(self.m_data)
-        except:
-            self.log('{}/{} not found. Users commands disabled!'.format(self.CMODULE_NAME, self.CCLASS_NAME), self.const_warning_text)
-        if (self.m_doc is None):
-            return (False, 'UserCode')
+        self.m_data['workspace'] = self.m_geoPath
+        self.m_data['mosaicdataset'] = self.m_mdName
+        self.m_data['sourcePath'] = self.m_sources
         return (True, 'OK')
 
     def invokeDynamicFnCallback(self, args, fn_name=None):
@@ -299,12 +302,12 @@ class Base(object):
 
     # cli callback ptrs
     def invoke_cli_callback(self, fname, args):
-        if (not self.m_cli_callback_ptr is None):
+        if (self.m_cli_callback_ptr is not None):
             return self.m_cli_callback_ptr(fname, args)
         return args
 
     def invoke_cli_msg_callback(self, mtype, args):
-        if (not self.m_cli_msg_callback_ptr is None):
+        if (self.m_cli_msg_callback_ptr is not None):
             return self.m_cli_msg_callback_ptr(mtype, args)
         return args
     # ends
@@ -339,7 +342,7 @@ class Base(object):
                             if (node.nextSibling.nextSibling.nodeName == subKey):
                                 node.nextSibling.nextSibling.firstChild.data = subValue
                             break
-                    except:
+                    except BaseException:
                         break
                     continue
                 node.firstChild.data = value
@@ -367,7 +370,7 @@ class Base(object):
         return True
 
     def isLog(self):
-        return (not self.m_log is None)
+        return (self.m_log is not None)
 
     def log(self, msg, level=const_general_text):
         if (self.m_log is not None):
@@ -379,18 +382,20 @@ class Base(object):
         elif(level == self.const_critical_text):
             errorTypeText = 'critical'
 
-        print ('log-' + errorTypeText + ': ' + msg)
+        print('log-' + errorTypeText + ': ' + msg)
 
         return True
 
 
 # user defined functions implementation code
+
+
     def isUser_Function(self, name):
         try:
             if (self.m_userClassInstance is None):
                 return None
             fnc = getattr(self.m_userClassInstance, name)
-        except:
+        except BaseException:
             return False
         return True
 
@@ -416,7 +421,7 @@ class Base(object):
     def processEnv(self, node, pos, json):  # support fnc for 'SE' command.
 
         while(node.nextSibling is not None):
-            if(node.nodeType != minidom.Node.TEXT_NODE):
+            if(node.nodeType != Base.NODE_TYPE_TEXT):
 
                 k = str(pos)
                 if ((k in json.keys()) == False):
@@ -442,7 +447,7 @@ class Base(object):
 
     def getAbsPath(self, input):
         absPath = input
-        if (os.path.exists(absPath) == True):
+        if (os.path.exists(absPath)):
             absPath = os.path.abspath(input)
 
         return absPath
@@ -485,7 +490,7 @@ class Base(object):
         while (patch_desc_node is not None):
             node_name = patch_desc_node.nodeName
             if (node_name == 'Name'):
-                if (patch_desc_node.hasChildNodes() == True):
+                if (patch_desc_node.hasChildNodes()):
                     search_key = patch_desc_node.firstChild.nodeValue
                     break
             patch_desc_node = patch_desc_node.nextSibling.nextSibling
@@ -544,10 +549,12 @@ class Base(object):
                     if (type == 1):   # reg_sz
                         if (value.lower().find(search_key.lower()) >= 0):
                             return True     # return true if the value is found!
-                except:
+                except Exception as exp:
+                    log.Message(str(exp), log.const_warning_text)
                     pass
                 i += 1
-        except:
+        except Exception as exp:
+            log.Message(str(exp), log.const_warning_text)
             pass
 
         return False
@@ -579,7 +586,7 @@ class Base(object):
                         buildNumber = int(d[k])
                     elif (key == CSPNUMBER):
                         spNumber = int(d[k])        # could be N/A
-                except:
+                except BaseException:
                     ValError = True
 
         CMAJOR_MINOR_REVISION = 3
@@ -649,10 +656,10 @@ class Base(object):
                     ver_failed = True
 
                 if (ver_failed):
-                    if (print_err_msg == True):
+                    if (print_err_msg):
                         self.log('MDCS can\'t proceed due to ArcGIS version incompatiblity.', self.const_critical_text)
-                        self.log('ArcGIS Desktop version is (%s.%s.%s.%s). MDCS min and max versions are (%s.%s.%s.%s) and (%s.%s.%s.%s) respectively.' %
-                                 (inst_major, inst_minor, inst_sp, inst_build, min_major, min_minor, min_sp, min_build, max_major, max_minor, max_cp, max_build), self.const_critical_text)
+                        self.log('ArcGIS Desktop version is (%s.%s.%s.%s). MDCS min and max versions are (%s.%s.%s.%s) and (%s.%s.%s.%s) respectively.' % (
+                            inst_major, inst_minor, inst_sp, inst_build, min_major, min_minor, min_sp, min_build, max_major, max_minor, max_cp, max_build), self.const_critical_text)
 
                     return False
 
@@ -670,7 +677,7 @@ class Base(object):
         if (node is None or
             node.length == 0 or
             node[0].hasChildNodes() == False or
-                node[0].firstChild.nodeType != minidom.Node.TEXT_NODE):
+                node[0].firstChild.nodeType != Base.NODE_TYPE_TEXT):
             return ''
 
         return node[0].firstChild.data
@@ -702,7 +709,7 @@ class Base(object):
             nodeName = 'NameString'
             node_list = doc.getElementsByTagName(nodeName)
             for node in node_list:
-                if (node.hasChildNodes() == True):
+                if (node.hasChildNodes()):
                     vals = node.firstChild.nodeValue.split(';')
                     upd_buff = []
                     for v in vals:
@@ -778,8 +785,8 @@ class Base(object):
                     if (uValue.upper() in self.m_dynamic_params.keys()):
                         revalue.append(self.m_dynamic_params[uValue.upper()])
                     else:
-                        if (uValue.find('\$') >= 0):
-                            uValue = uValue.replace('\$', '$')
+                        if (uValue.find(r'\$') >= 0):
+                            uValue = uValue.replace(r'\$', '$')
                         else:
                             if (default == ''):
                                 default = uValue
@@ -810,7 +817,7 @@ class Base(object):
         if (node is None or
             node.length == 0 or
             node[0].hasChildNodes() == False or
-                node[0].firstChild.nodeType != minidom.Node.TEXT_NODE):
+                node[0].firstChild.nodeType != Base.NODE_TYPE_TEXT):
             return ''
 
         return node[0]
@@ -892,4 +899,3 @@ class Base(object):
             if ('status' in resp):
                 status = self.getBooleanValue(resp['status'])
         return status
-
