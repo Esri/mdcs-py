@@ -1,5 +1,5 @@
-#------------------------------------------------------------------------------
-# Copyright 2013 Esri
+# ------------------------------------------------------------------------------
+# Copyright 2022 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,19 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Name: CreateMD.py
 # Description: Creates source mosaic datasets.
-# Version: 20201230
+# Version: 20221118
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 #!/usr/bin/env python
 
 import arcpy
 import os
 import sys
-from xml.dom import minidom
+from defusedxml import minidom
 
 import Base
 
@@ -40,16 +40,18 @@ class CreateMD(Base.Base):
         self.m_base = base
 
     def createGeodataBase(self):
-        if (self.m_base.m_IsSDE == True):       # MDCS doesn't create new SDE connections and assumes .SDE connection passed on exists @ the server
-            return True                         # to create new Mosaic Datasets.
+        resp = {
+            'status': False
+        }
+        if (self.m_base.m_IsSDE):       # MDCS doesn't create new SDE connections and assumes .SDE connection passed on exists @ the server
+            return self.m_base._updateResponse(resp, status=True)
         # create output workspace if missing.
         if (os.path.exists(self.m_base.m_workspace) == False):
             try:
                 os.makedirs(self.m_base.m_workspace)
-            except:
-                self.log("Failed to create folder: " + self.m_base.m_workspace, self.const_critical_text)
-                self.log(arcpy.GetMessages(), self.const_critical_text)
-                return False
+            except BaseException:
+                self.log('Failed to create folder: {}\n{}'.format(self.m_base.m_workspace, arcpy.GetMessages()), self.const_critical_text)
+                return resp
         # create Geodatabase
         try:
             self.log('Creating Geodatabase: ({})'.format(self.m_base.m_geoPath), self.const_general_text)
@@ -57,12 +59,16 @@ class CreateMD(Base.Base):
                 arcpy.CreateFileGDB_management(self.m_base.m_workspace, self.m_base.m_gdbName)
             else:
                 self.log("\t000258: File geodatabase already exists!", self.const_warning_text)
-            return True
-        except:
-            return False
+            return self.m_base._updateResponse(resp, status=True, output=self.m_base.m_geoPath)
+        except Exception as e:
+            self.log('\t{}'.format(e), self.const_critical_text)
+        return resp
 
     def createMD(self):
         self.log("Creating source mosaic datasets:", self.const_general_text)
+        resp = {
+            'status': False
+        }
         try:
             mdPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
             if "/" in self.srs:
@@ -73,14 +79,22 @@ class CreateMD(Base.Base):
                     self.srs = arcpy.SpatialReference(hcs,vcs)
                 except:
                     pass
-            if not arcpy.Exists(mdPath):
-                self.log("\t" + self.m_base.m_mdName, self.const_general_text)
-                arcpy.CreateMosaicDataset_management(self.m_base.m_geoPath, self.m_base.m_mdName, self.srs, self.num_bands, self.pixel_type, self.product_definition, self.product_band_definitions)
-        except:
-            self.log("Failed!", self.const_critical_text)
-            self.log(arcpy.GetMessages(), self.const_critical_text)
-            return False
-        return True
+            if (arcpy.Exists(mdPath)):
+                return self.m_base._updateResponse(resp, status=True, output=mdPath)
+            self.log('\t{}'.format(self.m_base.m_mdName), self.const_general_text)
+            arcpy.CreateMosaicDataset_management(
+                self.m_base.m_geoPath,
+                self.m_base.m_mdName,
+                self.srs,
+                self.num_bands,
+                self.pixel_type,
+                self.product_definition,
+                self.product_band_definitions
+            )
+            return self.m_base._updateResponse(resp, status=True, output=mdPath)
+        except Exception as e:
+            self.log('Failed!\n{}\n{}'.format(arcpy.GetMessages(), e), self.const_critical_text)
+        return False
 
     def init(self, config):
         Nodelist = self.m_base.m_doc.getElementsByTagName("MosaicDataset")
@@ -90,7 +104,7 @@ class CreateMD(Base.Base):
         try:
             for node in Nodelist[0].childNodes:
                 node = node.nextSibling
-                if (node is not None and node.nodeType == minidom.Node.ELEMENT_NODE):
+                if (node is not None and node.nodeType == self.m_base.NODE_TYPE_ELEMENT):
                     if(node.nodeName == 'SRS'):   # required arg
                         self.srs = node.firstChild.nodeValue
                     elif(node.nodeName == 'pixel_type'):  # optional arg
@@ -105,7 +119,7 @@ class CreateMD(Base.Base):
                     elif(node.nodeName == 'product_band_definitions'):    # optional arg
                         if (node.hasChildNodes()):
                             self.product_band_definitions = node.firstChild.nodeValue
-        except:
+        except BaseException:
             self.log("\nErr. Reading MosaicDataset nodes.", self.const_critical_text)
             return False
         return True
