@@ -1,0 +1,57 @@
+{
+    "job": {
+        "type": "MDCS",
+        "id": "local_amberg1",
+        "params": {
+            "output": {
+                "enabled": "true",
+                "path": "md"
+            },
+            "build": {
+                "steps": [
+                    {
+                        "type": "MDCS",
+                        "id": "root",
+                        "enabled": 1,
+                        "args": {
+                            "i": "Parameter/config/Amberg1.xml",
+                            "c": "CM",
+                            "m": "Amberg.gdb/Amberg1",
+                            "s": "currFolder/data/Amberg"
+                        }
+                    },
+                    {
+                        "type": "MDCS",
+                        "id": "add_fields",
+                        "enabled": 1,
+                        "args": {
+                            "i": "@root/i/i",
+                            "m": "@root/o/CM",
+                            "c": "AF"
+                        }
+                    },
+                    {
+                        "type": "MDCS",
+                        "id": "add_rasters",
+                        "enabled": 1,
+                        "args": {
+                            "i": "@root/i/i",
+                            "m": "@root/o/CM",
+                            "c": "AR"
+                        }
+                    },
+                    {
+                        "type": "MDCS",
+                        "id": "tail_end",
+                        "enabled": 1,
+                        "args": {
+                            "i": "@root/i/i",
+                            "m": "@root/o/CM",
+                            "c": "BB+SP+CC+DO+BO+CV"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}
