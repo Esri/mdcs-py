@@ -2066,7 +2066,14 @@ class Solutions(Base.Base):
                 'arcpy.geoai.ExtractFeaturesUsingAIModels',
                 index
             )
-
+        elif (com == 'CL'):
+            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'convertlas',
+                'arcpy.conversion.ConvertLas',
+                index
+            )
         else:
             # The command could be a user defined function externally defined
             # in the module (MDCS_UC.py). Let's invoke it.
@@ -2432,6 +2439,10 @@ class Solutions(Base.Base):
              },
             'EFUAIM':
             {'desc': 'Extract Features Using AI Models',
+             'fnc': executeCommand
+             },
+            'CL':
+            {'desc': 'Convert LAS',
              'fnc': executeCommand
              }
         }
