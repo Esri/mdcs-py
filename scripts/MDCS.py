@@ -387,7 +387,15 @@ def worker(**params):
                 stepInfo.addInput(sId, args)
                 retVals = [{'cmd': sId, 'output': '', 'value': False}]
                 try:
-                    retVals[0]['output'] = fnProd if 0 == len(items) else fnProd(**args)
+                    ln = len(items)
+                    output = ''
+                    if ln == 0:
+                        output = fnProd
+                    elif ln == 1:
+                        output = value
+                    else:
+                        output = fnProd(**args)
+                    retVals[0]['output'] = output #  fnProd if 0 == len(items) or (1 == len(items) and k == 'value') else fnProd(**args)
                     retVals[0]['value'] = stepStatus = True
                 except Exception as e:
                     print (f'Err. Invoking/{sId}/{e}')
@@ -660,10 +668,10 @@ def parse_syntax(syntax):
             while len(blocks) > 1:
                 value = parse_syntax(blocks.pop())
                 if len(blocks) != 1:
-                    syn_upd = blocks.pop() + '=' + value
+                    syn_upd = blocks.pop() + '=' + str(value)
                     parse_syntax(syn_upd)
                 if len(blocks) == 1:
-                    syntax = blocks.pop() + '=' + value
+                    syntax = blocks.pop() + '=' + str(value)
                     break;
     cnt_op, op_pos = get_syntax_info(syntax, '(', 0, cnt_idx)
     cnt_cp, cp_pos = get_syntax_info(syntax, ')', cnt_op, cnt_idx)
@@ -673,9 +681,16 @@ def parse_syntax(syntax):
     inner_op = syntax[cnt_idx:max_pos]
     print (inner_op)
     # process
-    if not inner_op:    # no syntactic construct
+    if not inner_op:    # no syntactic construct, i.e fnc()
         inner_op = syntax
     objs = inner_op.split('.')
+    if 1 == len(objs):     # handles syntax obj[0]['extent']
+        for k, v in stepInfo._stepInput.items():
+            k = f'@{k}'
+            if syntax.startswith(k):
+                objs[0] = k
+                objs.append(syntax[len(k):])
+                break
     value = ''
     try:
         obj_id = objs.pop(0)
@@ -690,7 +705,8 @@ def parse_syntax(syntax):
         expression = inner_op[len(obj_id):]
         obj = stepInfo.getResults(f'{obj_id}/o/{obj_id[1:]}')
         if (expression and
-            -1 != expression.find('=')):
+            -1 != expression.find('=') and
+            not cnt_op):    # skip fnc calls with params with = signs.
             prop, value = expression.split('=')
             setattr(obj, prop[1:], value)
             return value
@@ -698,8 +714,10 @@ def parse_syntax(syntax):
     except Exception as e:
         print (f'Err. Invoking/{syntax}/*expression')
     # ends
-    if not isinstance(value, str):
-        return value
+    if (not isinstance(value, str) or
+        isinstance(value, dict) or
+        isinstance(value, list)):
+            return value
     final_value = syntax[:cnt_idx] + value
     if cnt_idx != max_pos:
         final_value += syntax[max_pos:]
