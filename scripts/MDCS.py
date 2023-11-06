@@ -391,7 +391,8 @@ def worker(**params):
                     output = ''
                     if ln == 0:
                         output = fnProd
-                    elif ln == 1:
+                    elif (ln == 1 and
+                        k == 'value'):
                         output = value
                     else:
                         output = fnProd(**args)
