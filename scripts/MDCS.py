@@ -249,17 +249,24 @@ def main(argc, argv):
         print("Failed to print input arguments")
     if jobFile:
         params = {}
-        with open (jobFile) as reader:
-            try:
-                payload = json.load(reader)
-            except Exception as e:
-                print (f'{e}')
-                return False
+        try:
+            if os.path.exists(jobFile):
+                with open (jobFile) as reader:
+                    try:
+                        payload = json.load(reader)
+                    except Exception as e:
+                        print (f'{e}')
+                        return False
+            else:
+                payload = json.loads(jobFile)
+        except Exception as e:
+            print (f'{e}')
+            return False
         params["payload"] = payload
-        params['__mdcs__'] = {}
+        params['__mdcs__'] = {'resp' : []}      # chs
         worker(**params)
-        if 'resp' not in params['__mdcs__']:
-            return []
+##        if 'resp' not in params['__mdcs__']:
+##            return []
         results = params['__mdcs__']['resp']
     else:
         results = runWorkflow (base, config, com, comInfo)
@@ -511,18 +518,18 @@ def doWork(usrOutput, hstCleanUpRoot, mdcs, captureMsg, **kwargs):  # returns an
         captureMsg.addMessage("Invoking MDCS..")
         Log_Workers = 1
         results = []
-##        results = runMDCS(argv)
-        with ProcessPoolExecutor(max_workers=Log_Workers) as executor:
-            tasks = {executor.submit(
-                runMDCS, argv)} # chs
-            for task in as_completed(tasks):
-                try:
-                    results = task.result()
-                    print(
-                        f'Response> {results}')
-                except Exception as e:
-                    raise Exception(f'Err. {e}') from e
-        kwargs['__mdcs__']['resp'] = results
+        results = runMDCS(argv)
+##        with ProcessPoolExecutor(max_workers=Log_Workers) as executor:
+##            tasks = {executor.submit(
+##                runMDCS, argv)} # chs
+##            for task in as_completed(tasks):
+##                try:
+##                    results = task.result()
+##                    print(
+##                        f'Response> {results}')
+##                except Exception as e:
+##                    raise Exception(f'Err. {e}') from e
+        kwargs['__mdcs__']['resp'].append({mdcs['__step__'] : results})   # chs
         response = json.dumps(results)
         served = bytes(response, "utf8")
         respVals = json.loads(served)
@@ -724,6 +731,86 @@ def parse_syntax(syntax):
         final_value += syntax[max_pos:]
     print (final_value)
     return parse_syntax(final_value)
+
+class NBAccess():
+
+    def __init__(self):
+        self._payload = {}
+
+    def init(self, prj_folder=''):
+        self._response = []
+        template = {
+            "job": {
+                "id": "no_id",
+                "type": "MDCS",
+                "params": {
+                    "output": {
+                        "enabled": "true",
+                        "path": prj_folder if prj_folder else ''
+                    },
+                    "build": {
+                        "steps": [
+                ]
+                    }
+                }
+            }
+        }
+        self._payload = template
+        return True
+
+    def add_job(self, job_id, job_type = 'MDCS', enabled = True, **kwargs):
+        try:
+            ptr_payload = self._payload['job']['params']['build']['steps']
+            job_template = {
+                    "type": job_type,
+                    "id": job_id,
+                    "enabled": 1 if enabled else 0,
+                    "args": kwargs
+            }
+            for k in ptr_payload:
+                if job_id == k['id']:
+                    k.update(job_template)
+                    return True
+            ptr_payload.append(job_template)
+            return True
+        except Exception as e:
+            print (f'Err. {e}')
+        return False
+
+    def run(self):
+        argv = [__file__,
+                f'-j:{json.dumps(self._payload)}'
+                ]
+        self._response = main(len(argv), argv)
+        return self._response
+
+    def __get_response(self, job_id, command, key):
+        if not self._response:
+            return None
+        CMD = 'cmd'
+        for job in self._response:
+            if job_id in job:
+                for cmd in job[job_id]:
+                    if (CMD in cmd and
+                        cmd[CMD] == command and
+                        key in cmd):
+                        return cmd[key]
+        return None
+
+    def get_output(self, job_id, command):
+        return self.__get_response(job_id, command, 'output')
+
+    def get_status(self, job_id, command=None):
+        if not command:
+            for job in self._response:
+                if job_id in job:
+                    key = 'value'
+                    return all([key in cmd and cmd[key] == True for cmd in job[job_id]])
+            return None
+        return self.__get_response(job_id, command, 'value')
+
+    def get_command(self, job_id, command):
+        return self.__get_response(job_id, command, 'cmd')
 
 if __name__ == '__main__':
     main(len(sys.argv), sys.argv)
