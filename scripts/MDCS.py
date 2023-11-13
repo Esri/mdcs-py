@@ -263,10 +263,8 @@ def main(argc, argv):
             print (f'{e}')
             return False
         params["payload"] = payload
-        params['__mdcs__'] = {'resp' : []}      # chs
+        params['__mdcs__'] = {'resp' : []}
         worker(**params)
-##        if 'resp' not in params['__mdcs__']:
-##            return []
         results = params['__mdcs__']['resp']
     else:
         results = runWorkflow (base, config, com, comInfo)
@@ -373,9 +371,9 @@ def worker(**params):
                 p = sId.split('.')
                 key = p[-1]
                 print (f'*{key}')
-                if (key.startswith('@')):
+                if key.startswith('@'):
                     key = key[1:]
-                if (sType not in gisBases):
+                if sType not in gisBases:
                     exec(f'from {sType} import *')
                     base = gisBases[sType] = eval(f'{sType}')
                 if len(p) > 1:
@@ -723,8 +721,7 @@ def parse_syntax(syntax):
         print (f'Err. Invoking/{syntax}/*expression')
     # ends
     if (not isinstance(value, str) or
-        isinstance(value, dict) or
-        isinstance(value, list)):
+        isinstance(value, (dict, list))):
             return value
     final_value = syntax[:cnt_idx] + value
     if cnt_idx != max_pos:
@@ -736,6 +733,7 @@ class NBAccess():
 
     def __init__(self):
         self._payload = {}
+        self._response = []
 
     def init(self, prj_folder=''):
         self._response = []
@@ -805,7 +803,7 @@ class NBAccess():
             for job in self._response:
                 if job_id in job:
                     key = 'value'
-                    return all([key in cmd and cmd[key] == True for cmd in job[job_id]])
+                    return all([key in cmd and cmd[key] is True for cmd in job[job_id]])
             return None
         return self.__get_response(job_id, command, 'value')
 
