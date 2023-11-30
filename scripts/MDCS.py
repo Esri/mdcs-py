@@ -39,6 +39,8 @@ Base = reload(Base)
 from ProgramCheckAndUpdate import ProgramCheckAndUpdate
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import json
+import shutil
+import uuid
 redacting_patterns = ["token", 'validatingToken']
 # cli callback ptrs
 g_cli_callback = None
@@ -350,7 +352,15 @@ def worker(**params):
                 mdcs["__step__"] = sId  # step Id
                 mdcs["__job__"] = payload["job"]["id"]  # AID job Id
                 updInput = stepInfo.addInput(sId, mdcs)
-                retVals, stepStatus = doWork(usrOutput, hstCleanUpRoot, updInput[sId], captureMsg, **params)
+                UseThreads = 'threads'
+                retVals, stepStatus = doWork(
+                        usrOutput,
+                        hstCleanUpRoot,
+                        updInput[sId],
+                        captureMsg,
+                        use_threads = False if UseThreads not in step else getBooleanValue(step[UseThreads]),
+                        **params
+                        )     # chs
                 stepInfo.addResults(sId, retVals)
                 if not stepStatus:
                     break
@@ -481,7 +491,7 @@ class CaptureMessages(object):
         self._zip = obj._zip
         return self
 
-def doWork(usrOutput, hstCleanUpRoot, mdcs, captureMsg, **kwargs):  # returns an array
+def doWork(usrOutput, hstCleanUpRoot, mdcs, captureMsg, use_threads=False, **kwargs):  # returns an array
     try:
         rootLogs = hstCleanUpRoot
         writeToPath = hstCleanUpRoot
@@ -516,18 +526,20 @@ def doWork(usrOutput, hstCleanUpRoot, mdcs, captureMsg, **kwargs):  # returns an
         captureMsg.addMessage("Invoking MDCS..")
         Log_Workers = 1
         results = []
-        results = runMDCS(argv)
-##        with ProcessPoolExecutor(max_workers=Log_Workers) as executor:
-##            tasks = {executor.submit(
-##                runMDCS, argv)} # chs
-##            for task in as_completed(tasks):
-##                try:
-##                    results = task.result()
-##                    print(
-##                        f'Response> {results}')
-##                except Exception as e:
-##                    raise Exception(f'Err. {e}') from e
-        kwargs['__mdcs__']['resp'].append({mdcs['__step__'] : results})   # chs
+        if not use_threads:
+            results = runMDCS(argv)
+        else:
+            with ProcessPoolExecutor(max_workers=Log_Workers) as executor:
+                tasks = {executor.submit(
+                    runMDCS, argv)} # chs
+                for task in as_completed(tasks):
+                    try:
+                        results = task.result()
+                        print(
+                            f'Response> {results}')
+                    except Exception as e:
+                        raise Exception(f'Err. {e}') from e
+        kwargs['__mdcs__']['resp'].append({mdcs['__step__'] : results})
         response = json.dumps(results)
         served = bytes(response, "utf8")
         respVals = json.loads(served)
@@ -735,8 +747,11 @@ class NBAccess():
         self._payload = {}
         self._response = []
 
-    def init(self, prj_folder=''):
+    def init(self, prj_folder='', session=True):
         self._response = []
+        self._root_session = prj_folder if prj_folder else ''
+        if session:
+            self._root_session = os.path.join(self._root_session, f'mdcs/{uuid.uuid4().hex}')
         template = {
             "job": {
                 "id": "no_id",
@@ -744,7 +759,7 @@ class NBAccess():
                 "params": {
                     "output": {
                         "enabled": "true",
-                        "path": prj_folder if prj_folder else ''
+                        "path": self._root_session
                     },
                     "build": {
                         "steps": [
@@ -756,14 +771,15 @@ class NBAccess():
         self._payload = template
         return True
 
-    def add_job(self, job_id, job_type = 'MDCS', enabled = True, **kwargs):
+    def add_job(self, job_id, job_type = 'MDCS', enabled = True, threads = False, **kwargs):
         try:
             ptr_payload = self._payload['job']['params']['build']['steps']
             job_template = {
                     "type": job_type,
                     "id": job_id,
                     "enabled": 1 if enabled else 0,
-                    "args": kwargs
+                    "args": kwargs,
+                    'threads' : threads
             }
             for k in ptr_payload:
                 if job_id == k['id']:
@@ -809,6 +825,20 @@ class NBAccess():
 
     def get_command(self, job_id, command):
         return self.__get_response(job_id, command, 'cmd')
+
+    def close(self):
+        """Deletes the task session root folder."""
+        try:
+            print (f"Session cleanup ({self._root_session})")
+            shutil.rmtree(self._root_session)
+        except Exception as exp:
+            print (f"Err. {exp}")
+            return False
+        return True
+
+    @property
+    def session_path(self):
+        return os.path.abspath(self._root_session)
 
 if __name__ == '__main__':
     main(len(sys.argv), sys.argv)
