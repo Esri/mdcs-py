@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
-# Version: 20230726
+# Version: 20231129
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ class DynaInvoke:
     # ends
 
     def __init__(self, name, args, evnt_fnc_update_args=None, log=None):
-        self.m_name = name[name.find('.') + 1:]
+        self.m_name = name
         self.m_args = args
         self.m_evnt_update_args = evnt_fnc_update_args
         self.m_log = log
@@ -78,7 +78,9 @@ class DynaInvoke:
                         self._sArgs = self._sArgs[0]        # handles only 1 sub method on the parent object for now.
                         # sub args to use in a method of the main function object. e.g. X = a->fn1(args) X->fn2(sargs)
         try:
-            self.fnc_ptr = getattr(sys.modules['arcpy'], self.m_name)
+            nspce = self.m_name.split(".")
+            cls = nspce.pop()
+            self.fnc_ptr = getattr(sys.modules[".".join(nspce)], cls)
             arg_count = len(signature(self.fnc_ptr).parameters)
         except Exception as exp:
             self._message(str(exp), self.const_critical_text)
