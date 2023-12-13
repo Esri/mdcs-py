@@ -39,6 +39,8 @@ Base = reload(Base)
 from ProgramCheckAndUpdate import ProgramCheckAndUpdate
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import json
+import shutil
+import uuid
 redacting_patterns = ["token", 'validatingToken']
 # cli callback ptrs
 g_cli_callback = None
@@ -46,18 +48,17 @@ g_cli_msg_callback = None
 # ends
 Enabled = "enabled"
 StatusKey = "__status"
+# agolapis
+stepInfo = {}
+# ends
 
 # cli arcpy callback
-
-
 def register_for_callbacks(fn_ptr):
     global g_cli_callback
     g_cli_callback = fn_ptr
 # ends
 
 # cli msg callback
-
-
 def register_for_msg_callbacks(fn_ptr):
     global g_cli_msg_callback
     g_cli_msg_callback = fn_ptr
@@ -250,14 +251,21 @@ def main(argc, argv):
         print("Failed to print input arguments")
     if jobFile:
         params = {}
-        with open (jobFile) as reader:
-            try:
-                payload = json.load(reader)
-            except Exception as e:
-                print (f'{e}')
-                return False
+        try:
+            if os.path.exists(jobFile):
+                with open (jobFile) as reader:
+                    try:
+                        payload = json.load(reader)
+                    except Exception as e:
+                        print (f'{e}')
+                        return False
+            else:
+                payload = json.loads(jobFile)
+        except Exception as e:
+            print (f'{e}')
+            return False
         params["payload"] = payload
-        params['__mdcs__'] = {}
+        params['__mdcs__'] = {'resp' : []}
         worker(**params)
         results = params['__mdcs__']['resp']
     else:
@@ -319,6 +327,8 @@ def worker(**params):
         hstRootMd = os.path.join(hstCleanUpRoot, "output")
         # }.
         # call step-functions
+        global stepInfo
+        gisBases = {}
         stepInfo = StepInfoMDCS()
         stepInfo.init(
             **{
@@ -342,7 +352,15 @@ def worker(**params):
                 mdcs["__step__"] = sId  # step Id
                 mdcs["__job__"] = payload["job"]["id"]  # AID job Id
                 updInput = stepInfo.addInput(sId, mdcs)
-                retVals, stepStatus = doWork(usrOutput, hstCleanUpRoot, updInput[sId], captureMsg, **params)
+                UseThreads = 'threads'
+                retVals, stepStatus = doWork(
+                        usrOutput,
+                        hstCleanUpRoot,
+                        updInput[sId],
+                        captureMsg,
+                        use_threads = False if UseThreads not in step else getBooleanValue(step[UseThreads]),
+                        **params
+                        )     # chs
                 stepInfo.addResults(sId, retVals)
                 if not stepStatus:
                     break
@@ -350,6 +368,57 @@ def worker(**params):
                     if "output" in cmd:
                         lclMdPath = cmd["output"]
                 stepInfo.addResults(sId, retVals)
+            else:
+                stepStatus = False
+                prod = None
+                for key, value in step.items():
+                    if isinstance(value, dict):
+                        prod = key
+                        break
+                if not prod:
+                    captureMsg.addMessage(f"Invalid step struct/{sId}..")
+                    break
+                p = sId.split('.')
+                key = p[-1]
+                print (f'*{key}')
+                if key.startswith('@'):
+                    key = key[1:]
+                if sType not in gisBases:
+                    exec(f'from {sType} import *')
+                    base = gisBases[sType] = eval(f'{sType}')
+                if len(p) > 1:
+                    p.pop()
+                    mk_id = '.'.join(p)
+                    base = stepInfo.getResults(f'@{mk_id}/o/{mk_id}')
+                fnProd = base.__getattribute__(prod)
+                args = step[prod]
+                items = args.items()
+                for k, v in items:
+                    print (f' {k} = {v}')
+                    value = parse_syntax(v)
+                    args[k] = value
+                print (f'pre calling gis/{prod}')
+                print (args)
+                stepInfo.addInput(sId, args)
+                retVals = [{'cmd': sId, 'output': '', 'value': False}]
+                try:
+                    ln = len(items)
+                    output = ''
+                    if ln == 0:
+                        output = fnProd
+                    elif (ln == 1 and
+                        k == 'value'):
+                        output = value
+                    else:
+                        output = fnProd(**args)
+                    retVals[0]['output'] = output #  fnProd if 0 == len(items) or (1 == len(items) and k == 'value') else fnProd(**args)
+                    retVals[0]['value'] = stepStatus = True
+                except Exception as e:
+                    print (f'Err. Invoking/{sId}/{e}')
+                stepInfo.addResults(sId, retVals)
+                print (f'post calling gis/{prod}')
+                if not stepStatus:
+                    break;
         params[StatusKey] = {"mdcs": {}}
         params[StatusKey]["mdcs"] = {"retVals": stepInfo.getStepResults(), "status": stepStatus}
         if not stepStatus:
@@ -422,7 +491,7 @@ class CaptureMessages(object):
         self._zip = obj._zip
         return self
 
-def doWork(usrOutput, hstCleanUpRoot, mdcs, captureMsg, **kwargs):  # returns an array
+def doWork(usrOutput, hstCleanUpRoot, mdcs, captureMsg, use_threads=False, **kwargs):  # returns an array
     try:
         rootLogs = hstCleanUpRoot
         writeToPath = hstCleanUpRoot
@@ -457,17 +526,20 @@ def doWork(usrOutput, hstCleanUpRoot, mdcs, captureMsg, **kwargs):  # returns an
         captureMsg.addMessage("Invoking MDCS..")
         Log_Workers = 1
         results = []
-        with ProcessPoolExecutor(max_workers=Log_Workers) as executor:
-            tasks = {executor.submit(
-                runMDCS, argv)}
-            for task in as_completed(tasks):
-                try:
-                    results = task.result()
-                    print(
-                        f'Response> {results}')
-                except Exception as e:
-                    raise Exception(f'Err. {e}') from e
-        kwargs['__mdcs__']['resp'] = results
+        if not use_threads:
+            results = runMDCS(argv)
+        else:
+            with ProcessPoolExecutor(max_workers=Log_Workers) as executor:
+                tasks = {executor.submit(
+                    runMDCS, argv)} # chs
+                for task in as_completed(tasks):
+                    try:
+                        results = task.result()
+                        print(
+                            f'Response> {results}')
+                    except Exception as e:
+                        raise Exception(f'Err. {e}') from e
+        kwargs['__mdcs__']['resp'].append({mdcs['__step__'] : results})
         response = json.dumps(results)
         served = bytes(response, "utf8")
         respVals = json.loads(served)
@@ -510,7 +582,8 @@ class StepInfoMDCS():
                 self._stepInput[self._stepId][k] = self.getResults(sInput[k])
             elif isinstance(sInput[k], list):
                 for i in range(0, len(sInput[k])):
-                    if sInput[k][i].startswith("@"):
+                    if (isinstance(sInput[k][i], str) and
+                        sInput[k][i].startswith("@")):
                         value, key = sInput[k][i].split("$")
                         self._stepInput[self._stepId][k][i] = f"{self.getResults(value)}${key}"
         return self._stepInput
@@ -577,6 +650,195 @@ def getBooleanValue(value):
     if val in ['true', 'yes', 't', '1', 'y']:
         return True
     return False
+
+def get_syntax_info(syntax, char, end_cnt, start_indx=0):
+    cnt_op = 0
+    cur_idx = cnt_idx = start_indx
+    while cur_idx < len(syntax):
+        if syntax[cur_idx:][0] == char:
+            cnt_op += 1
+            cnt_idx = cur_idx
+            if end_cnt != 0:
+                if cnt_op == end_cnt:
+                    cnt_idx += 1
+                    break
+        cur_idx += 1
+    return [cnt_op, cnt_idx]
+
+def parse_syntax(syntax):
+    if (not syntax or
+        not isinstance(syntax, str)):
+            return syntax
+    global stepInfo
+    last_hash = 0
+    while True:
+        indx = syntax.find('@', last_hash)
+        if -1 == indx:
+            break
+        last_hash = indx
+        last_hash += 1
+    cnt_idx = last_hash - 1
+    if cnt_idx == -1:
+        return syntax
+    if -1 != syntax.find('='):
+        blocks = syntax.split('=')
+        if blocks[-1][:1] == '@':
+            while len(blocks) > 1:
+                value = parse_syntax(blocks.pop())
+                if len(blocks) != 1:
+                    syn_upd = blocks.pop() + '=' + str(value)
+                    parse_syntax(syn_upd)
+                if len(blocks) == 1:
+                    syntax = blocks.pop() + '=' + str(value)
+                    break;
+    cnt_op, op_pos = get_syntax_info(syntax, '(', 0, cnt_idx)
+    cnt_cp, cp_pos = get_syntax_info(syntax, ')', cnt_op, cnt_idx)
+    cnt_ob, ob_pos = get_syntax_info(syntax, '[', 0, cnt_idx)
+    cnt_cb, cb_pos = get_syntax_info(syntax, ']', cnt_ob, cnt_idx)
+    max_pos = max(cp_pos, cb_pos)
+    inner_op = syntax[cnt_idx:max_pos]
+    print (inner_op)
+    # process
+    if not inner_op:    # no syntactic construct, i.e fnc()
+        inner_op = syntax
+    objs = inner_op.split('.')
+    if 1 == len(objs):     # handles syntax obj[0]['extent']
+        for k, v in stepInfo._stepInput.items():
+            k = f'@{k}'
+            if syntax.startswith(k):
+                objs[0] = k
+                objs.append(syntax[len(k):])
+                break
+    value = ''
+    try:
+        obj_id = objs.pop(0)
+        while objs:
+            gt_next = objs.pop(0)
+            id_upd = f'{obj_id}.{gt_next}'
+            if id_upd in stepInfo._stepInput:
+                obj_id = id_upd
+                continue
+            objs.insert(0, gt_next)
+            break
+        expression = inner_op[len(obj_id):]
+        obj = stepInfo.getResults(f'{obj_id}/o/{obj_id[1:]}')
+        if (expression and
+            -1 != expression.find('=') and
+            not cnt_op):    # skip fnc calls with params with = signs.
+            prop, value = expression.split('=')
+            setattr(obj, prop[1:], value)
+            return value
+        value = eval(f'obj{expression}')         # setattr(obj, 'filename', 'chs') for =
+    except Exception as e:
+        print (f'Err. Invoking/{syntax}/*expression')
+    # ends
+    if (not isinstance(value, str) or
+        isinstance(value, (dict, list))):
+            return value
+    final_value = syntax[:cnt_idx] + value
+    if cnt_idx != max_pos:
+        final_value += syntax[max_pos:]
+    print (final_value)
+    return parse_syntax(final_value)
+
+class NBAccess():
+
+    def __init__(self):
+        self._payload = {}
+        self._response = []
+
+    def init(self, prj_folder='', session=True):
+        self._response = []
+        self._root_session = prj_folder if prj_folder else ''
+        if session:
+            self._root_session = os.path.join(self._root_session, f'mdcs/{uuid.uuid4().hex}')
+        template = {
+            "job": {
+                "id": "no_id",
+                "type": "MDCS",
+                "params": {
+                    "output": {
+                        "enabled": "true",
+                        "path": self._root_session
+                    },
+                    "build": {
+                        "steps": [
+                ]
+                    }
+                }
+            }
+        }
+        self._payload = template
+        return True
+
+    def add_job(self, job_id, job_type = 'MDCS', enabled = True, threads = False, **kwargs):
+        try:
+            ptr_payload = self._payload['job']['params']['build']['steps']
+            job_template = {
+                    "type": job_type,
+                    "id": job_id,
+                    "enabled": 1 if enabled else 0,
+                    "args": kwargs,
+                    'threads' : threads
+            }
+            for k in ptr_payload:
+                if job_id == k['id']:
+                    k.update(job_template)
+                    return True
+            ptr_payload.append(job_template)
+            return True
+        except Exception as e:
+            print (f'Err. {e}')
+        return False
+
+    def run(self):
+        argv = [__file__,
+                f'-j:{json.dumps(self._payload)}'
+                ]
+        self._response = main(len(argv), argv)
+        return self._response
+
+    def __get_response(self, job_id, command, key):
+        if not self._response:
+            return None
+        CMD = 'cmd'
+        for job in self._response:
+            if job_id in job:
+                for cmd in job[job_id]:
+                    if (CMD in cmd and
+                        cmd[CMD] == command and
+                        key in cmd):
+                        return cmd[key]
+        return None
+
+    def get_output(self, job_id, command):
+        return self.__get_response(job_id, command, 'output')
+
+    def get_status(self, job_id, command=None):
+        if not command:
+            for job in self._response:
+                if job_id in job:
+                    key = 'value'
+                    return all([key in cmd and cmd[key] is True for cmd in job[job_id]])
+            return None
+        return self.__get_response(job_id, command, 'value')
+
+    def get_command(self, job_id, command):
+        return self.__get_response(job_id, command, 'cmd')
+
+    def close(self):
+        """Deletes the task session root folder."""
+        try:
+            print (f"Session cleanup ({self._root_session})")
+            shutil.rmtree(self._root_session)
+        except Exception as exp:
+            print (f"Err. {exp}")
+            return False
+        return True
+
+    @property
+    def session_path(self):
+        return os.path.abspath(self._root_session)
 
 if __name__ == '__main__':
     main(len(sys.argv), sys.argv)
