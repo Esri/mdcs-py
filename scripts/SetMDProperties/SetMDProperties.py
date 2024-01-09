@@ -160,7 +160,9 @@ class SetMDProperties(Base.Base):
             "max_num_of_records_returned":"maxRecordsReturned",
             "minimum_pixel_contribution":"minimumPixelContribution",
             "processing_templates":"processingTemplates",
-            "default_processing_template":"defaultProcessingTemplate"
+            "default_processing_template":"defaultProcessingTemplate",
+            "product_definition": "productDefinition",
+            "product_band_definitions": "productBandDefinitions"
         }
         dictObj = {}
         try:
@@ -321,6 +323,8 @@ class SetMDProperties(Base.Base):
         args.append(self.getInternalPropValue(mdName, 'default_processing_template'))
         args.append(self.getInternalPropValue(mdName, 'time_interval'))
         args.append(self.getInternalPropValue(mdName, 'time_interval_units'))
+        args.append(self.getInternalPropValue(mdName, 'product_definition'))
+        args.append(self.getInternalPropValue(mdName, 'product_band_definitions'))
         setProperties = Base.DynaInvoke('arcpy.SetMosaicDatasetProperties_management', args, self.__setpropertiesCallback, self._message)
 
         if (setProperties.init() == False):
