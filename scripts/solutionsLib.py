@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Copyright 2023 Esri
+# Copyright 2024 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: SolutionsLib.py
 # Description: To map MDCS command codes to GP Tool functions.
-# Version: 20231128
+# Version: 20240207
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -2547,6 +2547,7 @@ class Solutions(Base.Base):
     def run(self, conf, com, info):
         self.config = conf  # configuration/XML template
         self.userInfo = info  # callback information for commands /e.t.c.
+        Upd_Chain = 'upd_chain'
         try:
             self.m_base.m_doc = minidom.parse(self.config) if conf else None
             (ret, msg) = self.m_base.init()
@@ -2598,7 +2599,8 @@ class Solutions(Base.Base):
         self.log('Processing command(s):' + com_.upper(), self.const_general_text)
         aryCmds = com_.split('+')
         cmdResults = []
-        for command in aryCmds:
+        while aryCmds:
+            command = aryCmds.pop(0)
             ucCommand = command
             command = command.upper()
             is_user_cmd = False
@@ -2670,4 +2672,9 @@ class Solutions(Base.Base):
                 (cmd in ['AR', 'CM', 'CBA', 'ABA'] or
                  is_user_cmd)):
                 break
+            if (isinstance(response, dict) and
+                Upd_Chain in response and
+                isinstance(response[Upd_Chain], list)
+                ):
+                aryCmds[:] = response[Upd_Chain]
         return cmdResults
