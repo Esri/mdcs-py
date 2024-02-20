@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Copyright 2023 Esri
+# Copyright 2024 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
-# Version: 20231129
+# Version: 20240220
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -240,24 +240,16 @@ class Base(object):
             if (self.m_mdName):
                 self.setXMLNodeValue('Application/Workspace/MosaicDataset/Name', 'Name', self.m_mdName, '', '')
             # ends
-            min = self.getXMLXPathValue("Application/ArcGISVersion/Product/Min", "Min").split('.')
-            max = self.getXMLXPathValue("Application/ArcGISVersion/Product/Max", "Max").split('.')
-            if (len(min) == self.const_ver_len):  # version check is disabled if no values have been defined in the MDCS for min and max.
-                CMAJOR = 0
-                CBUILD = self.const_ver_len
-                if (len(max) != self.const_ver_len):
-                    max = [0, 0, 0, 0]               # zero up max if max version isn't defined / has errors.
-                for n in range(CMAJOR, CBUILD):
-                    if (min[n] == ''):
-                        min[n] = 0
-                    if (max[n] == ''):
-                        max[n] = 0
-                    min[n] = int(min[n])
-                    max[n] = int(max[n])
-                if (self.CheckMDCSVersion(min, max) == False):
-                    return (False, self.const_init_ret_version)  # version check failed.
+            min = [int(x) if x else 0 for x in self.getXMLXPathValue("Application/ArcGISVersion/Product/Min", "Min").split('.')]
+            max = [int(x) if x else 0 for x in self.getXMLXPathValue("Application/ArcGISVersion/Product/Max", "Max").split('.')]
+            if not sum(min):
+                min = [0] * self.const_ver_len
+            if not sum(max):
+                max = [0] * self.const_ver_len
+            if (self.CheckMDCSVersion(min, max) is False):
+                return (False, self.const_init_ret_version)  # version check failed.
         except Exception as inst:
-            self.log('Version check failure/' + str(inst), self.const_critical_text)
+            self.log(f'{inst}', self.const_critical_text)
             return (False, self.const_init_ret_version)
         # ends
         # ArcGIS patch test.
@@ -599,76 +591,59 @@ class Base(object):
         return version
 
     def CheckMDCSVersion(self, min, max, print_err_msg=True):
-
-        # if python version is >= 3, it's asssumed we're being run from ArcGIS Pro
-        if (sys.version_info[0] >= 3):
-            min = [1, 0, 0, 0]
-            max = [0, 0, 0, 0]
-
-        if (len(min) != self.const_ver_len or
-                len(max) != self.const_ver_len):
-            return False
-
+        if (not sum(min) and
+            not sum(max)):
+                self.log('Config version check is disabled.', self.const_warning_text)
+                return True     # ver check disabled
         CMAJOR = 0
         CMINOR = 1
         CSP = 2
         CBUILD = 3
-
         min_major = min[CMAJOR]
         min_minor = min[CMINOR]
         min_sp = min[CSP]
         min_build = min[CBUILD]
-
         max_major = max[CMAJOR]
         max_minor = max[CMINOR]
         max_cp = max[CSP]
         max_build = max[CBUILD]
-
         try:
             version = self.getDesktopVersion()
-            if (len(version) >= self.const_ver_len):  # major, minor, sp, build
-
+            if len(version) >= self.const_ver_len:  # major, minor, sp, build
                 inst_major = version[CMAJOR]
                 inst_minor = version[CMINOR]
                 inst_sp = version[CSP]
                 inst_build = version[CBUILD]
-
                 ver_failed = False
-
-                if (max_major > 0 and
-                        inst_major > max_major):
-                    ver_failed = True
-                elif (max_minor > 0 and
-                      inst_minor > max_minor):
-                    ver_failed = True
-                elif (max_cp > 0 and
-                      inst_sp > max_cp):
-                    ver_failed = True
-                elif (max_build > 0 and
-                      inst_build > max_build):
-                    ver_failed = True
-                elif (inst_major < min_major):
-                    ver_failed = True
-                elif (inst_minor < min_minor):
-                    ver_failed = True
-                elif (inst_sp < min_sp):
-                    ver_failed = True
-                elif (min_build > 0 and
-                      inst_build < min_build):
-                    ver_failed = True
-
-                if (ver_failed):
-                    if (print_err_msg):
-                        self.log('MDCS can\'t proceed due to ArcGIS version incompatiblity.', self.const_critical_text)
-                        self.log('ArcGIS Desktop version is (%s.%s.%s.%s). MDCS min and max versions are (%s.%s.%s.%s) and (%s.%s.%s.%s) respectively.' % (
-                            inst_major, inst_minor, inst_sp, inst_build, min_major, min_minor, min_sp, min_build, max_major, max_minor, max_cp, max_build), self.const_critical_text)
-
+                if sum(max):
+                    if max_major > 0 and inst_major > max_major:
+                        ver_failed = True
+                    elif max_minor > 0 and inst_minor > max_minor:
+                        ver_failed = True
+                    elif max_cp > 0 and inst_sp > max_cp:
+                        ver_failed = True
+                    elif max_build > 0 and inst_build > max_build:
+                        ver_failed = True
+                if sum(min):
+                    if inst_major < min_major:
+                        ver_failed = True
+                    elif inst_minor < min_minor:
+                        ver_failed = True
+                    elif inst_sp < min_sp:
+                        ver_failed = True
+                    elif min_build > 0 and inst_build < min_build:
+                        ver_failed = True
+                if ver_failed:
+                    if print_err_msg:
+                        self.log("MDCS can't proceed due to ArcGIS version incompatiblity.", self.const_critical_text)
+                        self.log(
+                            f"ArcGIS Desktop version is ({inst_major}.{inst_minor}.{inst_sp}.{inst_build}). MDCS min and max versions are ({min_major}.{min_minor}.{min_sp}.{min_build}) and ({max_major}.{max_minor}.{max_cp}.{max_build}) respectively.",
+                            self.const_critical_text,
+                        )
                     return False
-
         except Exception as inst:
-            self.log('Version check failed: (%s)' % (str(inst)), self.const_critical_text)
+            self.log(f"Version check failed: ({inst})", self.const_critical_text)
             return False
-
         return True
 
     def getXMLNodeValue(self, doc, nodeName):
