@@ -607,6 +607,8 @@ class Base(object):
         max_minor = max[CMINOR]
         max_cp = max[CSP]
         max_build = max[CBUILD]
+        min_ver = (min.pop(0) << 16 | min.pop(0) << 8 | min.pop(0)) << 32 | min.pop(0)
+        max_ver = (max.pop(0) << 16 | max.pop(0) << 8 | max.pop(0)) << 32 | max.pop(0)
         try:
             version = self.getDesktopVersion()
             if len(version) >= self.const_ver_len:  # major, minor, sp, build
@@ -614,24 +616,13 @@ class Base(object):
                 inst_minor = version[CMINOR]
                 inst_sp = version[CSP]
                 inst_build = version[CBUILD]
+                inst_version = (version.pop(0) << 16 | version.pop(0) << 8 | version.pop(0)) << 32 | version.pop(0)
                 ver_failed = False
-                if sum(max):
-                    if max_major > 0 and inst_major > max_major:
+                if max_ver:
+                    if inst_version > max_ver:
                         ver_failed = True
-                    elif max_minor > 0 and inst_minor > max_minor:
-                        ver_failed = True
-                    elif max_cp > 0 and inst_sp > max_cp:
-                        ver_failed = True
-                    elif max_build > 0 and inst_build > max_build:
-                        ver_failed = True
-                if sum(min):
-                    if inst_major < min_major:
-                        ver_failed = True
-                    elif inst_minor < min_minor:
-                        ver_failed = True
-                    elif inst_sp < min_sp:
-                        ver_failed = True
-                    elif min_build > 0 and inst_build < min_build:
+                if min_ver:
+                    if inst_version < min_ver:
                         ver_failed = True
                 if ver_failed:
                     if print_err_msg:
