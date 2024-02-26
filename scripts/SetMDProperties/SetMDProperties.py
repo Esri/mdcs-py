@@ -1,5 +1,5 @@
-#------------------------------------------------------------------------------
-# Copyright 2013 Esri
+# ------------------------------------------------------------------------------
+# Copyright 2024 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,8 +14,8 @@
 #------------------------------------------------------------------------------
 # Name: SetMDProperties.py
 # Description: To set mosaic dataset properties
-# Version: 20201230
-# Requirements: ArcGIS 10.1 SP1
+# Version: 20240226
+# Requirements: ArcGIS
 # Author: Esri Imagery Workflows team
 #------------------------------------------------------------------------------
 #!/usr/bin/env python
@@ -43,9 +43,6 @@ class SetMDProperties(Base.Base):
         self.setLog(base.m_log)
         self.m_base = base
 
-    def is101SP1(self):
-        return self.CheckMDCSVersion([10, 1, 0, 0], [0, 0, 0, 0])       # ver [major, minor, revision, build]
-
     def getInternalPropValue(self, md, key):
         if (key in self.dic_properties_lst.keys()):
             return self.dic_properties_lst[key]
@@ -54,13 +51,6 @@ class SetMDProperties(Base.Base):
 
     def _message(self, msg, type):
         self.log(msg, type)
-
-    def __setpropertiesCallback(self, args, fn_name):
-        CONST_ORDER_FIELD_POS = 16
-        if (self.is101SP1() == False):  # OrderField set to 'BEST' would fail in 10.1 without SP1
-            args[CONST_ORDER_FIELD_POS] = 'MinPS'
-        return args
-
 
     # write json from dictionary object
     def writeJson(self,filename,jsonData):
@@ -325,8 +315,7 @@ class SetMDProperties(Base.Base):
         args.append(self.getInternalPropValue(mdName, 'time_interval_units'))
         args.append(self.getInternalPropValue(mdName, 'product_definition'))
         args.append(self.getInternalPropValue(mdName, 'product_band_definitions'))
-        setProperties = Base.DynaInvoke('arcpy.SetMosaicDatasetProperties_management', args, self.__setpropertiesCallback, self._message)
-
+        setProperties = Base.DynaInvoke('arcpy.SetMosaicDatasetProperties_management', args, log=self._message)
         if (setProperties.init() == False):
             return False
         return setProperties.invoke()
