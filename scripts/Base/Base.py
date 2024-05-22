@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
-# Version: 20240220
+# Version: 20240522
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -721,59 +721,43 @@ class Base(object):
 
         nodes = self.m_doc.getElementsByTagName('*')
         for node in nodes:
-            if (node.firstChild is not None):
+            if node.firstChild is not None:
                 v = node.firstChild.data.strip()
-
-                if (v.find('$') == -1):
+                if v.find('$') == -1:
                     continue
-
                 usr_key = v
                 default = ''
-
-                d = v.split(';')
-
-                if (len(d) > 1):
+                d = self.get_split_values(v, ';')
+                if len(d) > 1:
                     default = d[0].strip()
                     usr_key = d[1].strip()
-
                 revalue = []
-
                 first = usr_key.find('$')
                 first += 1
-
                 second = first + usr_key[first + 1:].find('$') + 1
-
-                if (first > 1):
+                if first > 1:
                     revalue.append(usr_key[0:first - 1])
-
-                while(second >= 0):
-
+                while second >= 0:
                     uValue = usr_key[first:second]
-
-                    if (uValue.upper() in self.m_dynamic_params.keys()):
+                    if uValue.upper() in self.m_dynamic_params.keys():
                         revalue.append(self.m_dynamic_params[uValue.upper()])
                     else:
-                        if (uValue.find(r'\$') >= 0):
+                        if uValue.find(r'\$') >= 0:
                             uValue = uValue.replace(r'\$', '$')
                         else:
-                            if (default == ''):
+                            if default == '':
                                 default = uValue
-
                             if (first == 1
                                     and second == (len(usr_key) - 1)):
                                 uValue = default
-
                         revalue.append(uValue)
-
                     first = second + 1
                     indx = usr_key[first + 1:].find('$')
-                    if (indx == -1):
-                        if (first != len(usr_key)):
+                    if indx == -1:
+                        if first != len(usr_key):
                             revalue.append(usr_key[first:len(usr_key)])
                         break
-
                     second = first + indx + 1
-
                 updateVal = ''.join(revalue)
                 node.firstChild.data = updateVal
 
@@ -867,3 +851,30 @@ class Base(object):
             if ('status' in resp):
                 status = self.getBooleanValue(resp['status'])
         return status
+
+    def get_split_values(self, in_str, sep):
+        '''
+            Split the input string around {sep} while escaping \{sep}
+        '''
+        values = []
+        escape_marker = -2
+        if (not in_str or
+            len(in_str.strip()) == 0):
+            return values
+        start = 0
+        while start <= len(in_str):
+            end = escape_marker
+            upd_st = start
+            while end == escape_marker:
+                end = in_str.find(sep, upd_st)
+                if end == -1:
+                    end = len(in_str)
+                    break
+                if in_str[end - 1] == '\\':
+                    upd_st = end + 1
+                    end = escape_marker
+                    continue
+            values.append(in_str[start:end].replace(f'\\{sep}', sep))
+            start = end + 1
+        return values
+
