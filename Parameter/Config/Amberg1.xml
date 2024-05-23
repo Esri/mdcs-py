@@ -16,7 +16,7 @@
           <dataset_id>Amberg</dataset_id>
           <raster_type>Raster Dataset</raster_type>
           <Sources>
-            <data_path>c:\Image_Mgmt_Workflows\GitForWindows\mdcs-py\scripts\currFolder\data\Amberg\</data_path>
+            <data_path>currFolder\data\Amberg</data_path>
           </Sources>
           <filter>*</filter>
         </AddRaster>
