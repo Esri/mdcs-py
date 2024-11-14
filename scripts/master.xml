@@ -1057,6 +1057,21 @@
 					<compute_stats>COMPUTE_STATS;NO_COMPUTE_STATS</compute_stats>
 					<out_las_dataset>#</out_las_dataset>
 				</ColorizeLAS>
+				<!-- Create Cloud storage Connection File -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/create-cloud-storage-connection-file.htm -->
+				<CreateCloudStorageConnectionFile>
+					<out_folder_path>#</out_folder_path>
+					<out_name>#</out_name>
+					<service_provider>AZURE;AMAZON;GOOGLE;ALIBABA;WEBHDFS;MINIO;AZUREDATALAKE</service_provider>
+					<bucket_name></bucket_name>
+					<access_key_id></access_key_id>
+					<secret_access_key></secret_access_key>
+					<region></region>
+					<end_point></end_point>
+					<config_options>"configkeyname1 configkeyvalue1;configkeyname1 configkeyvalue1"</config_options>
+					<folder></folder>
+					<authentication></authentication>
+				</CreateCloudStorageConnectionFile>	
 		</Processes>
 	</MosaicDataset>
 </Workspace>
