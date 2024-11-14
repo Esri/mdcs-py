@@ -1722,6 +1722,17 @@ class Solutions(Base.Base):
                 index,
                 info=invokeDynamicFnInfo  # info = to pass extra args to the fnc '__invokeDynamicFn'
             )
+        elif (com == 'CCSCF'):
+            self.m_log.Message(
+                "\t{}".format(
+                    self.commands[com]['desc']),
+                self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'createcloudstorageconnectionfile',
+                'arcpy.CreateCloudStorageConnectionFile_management',
+                index
+            )
         elif (com == 'DEL'):
             self.m_log.Message(
                 "\t{}:{}".format(
@@ -2469,6 +2480,10 @@ class Solutions(Base.Base):
              },
             'EL':
             {'desc': 'Extract LAS',
+             'fnc': executeCommand
+             },
+            'CCSCF':
+            {'desc': 'Create Cloud Storage Connection File',
              'fnc': executeCommand
              }
         }
