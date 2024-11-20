@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Copyright 2023 Esri
+# Copyright 2024 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: MDCS.py
 # Description: This is the main program entry point to MDCS.
-# Version: 20230726
+# Version: 20241120
 # Requirements: ArcGIS 10.1 SP1
 # Required Arguments: -i:<config_file>
 # Usage: python.exe MDCS.py -c:<Optional:command(s)> -i:<config_file>
@@ -31,7 +31,7 @@ from importlib import reload
 solutionLib_path = os.path.dirname(os.path.abspath(__file__))  # set the location to the solutionsLib path
 [sys.path.append(x) for x in [solutionLib_path, os.path.join(solutionLib_path, 'SolutionsLog'), os.path.join(solutionLib_path, 'Base')]]
 import logger
-import solutionsLib  # import Raster Solutions library
+import solutionsLib # import Raster Solutions library
 import Base
 logger = reload(logger)  # ArcGIS Pro PYT EVN requires a reload to clear previous instances.
 solutionsLib = reload(solutionsLib)
@@ -106,7 +106,7 @@ def main(argc, argv):
                 "-l: Log file output path [path+file name]",
                 "-artdem: Update DEM path in ART file"
             ]
-        print("\nMDCS.py v6.0 [20230726]\nUsage: MDCS.py -c:<Optional:command> -i:<config_file>"
+        print("\nMDCS.py v6.0.1 [20241120]\nUsage: MDCS.py -c:<Optional:command> -i:<config_file>"
               "\n\nFlags to override configuration values,")
         for arg in user_args:
             print(arg)
@@ -282,7 +282,8 @@ def runMDCS(argv):
 
 def runWorkflow(base, config, com, comInfo):
     from importlib import reload
-    import solutionsLib  # import Raster Solutions library
+    sys.path.append(solutionLib_path)
+    import solutionsLib
     solutionsLib = reload(solutionsLib)
     solutions = solutionsLib.Solutions(base)
     results = solutions.run(config, com, comInfo)
