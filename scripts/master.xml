@@ -1072,6 +1072,13 @@
 					<folder></folder>
 					<authentication></authentication>
 				</CreateCloudStorageConnectionFile>	
+				<!-- Tranfer Files -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/transfer-files.htm -->
+				<TransferFiles>
+					<input_paths>#</input_paths>
+					<output_folder>#</output_folder>
+					<file_filter>#</file_filter>
+				</TransferFiles>
 		</Processes>
 	</MosaicDataset>
 </Workspace>

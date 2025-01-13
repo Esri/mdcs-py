@@ -2103,6 +2103,33 @@ class Solutions(Base.Base):
                 'arcpy.ddd.ColorizeLas',
                 index
             )
+        elif com == "TF":
+            try:
+                self.m_log.Message("\t{}:{}".format(self.commands[com]["desc"], self.m_base.m_mdName), self.m_log.const_general_text)
+                processKey = "transferfiles"
+                inacspath_update = []
+                inacspath = self.getProcessInfoValue(processKey, "input_paths", index)
+                inacspath_split = inacspath.split(";")
+                for inacsfile in inacspath_split:
+                    if (inacsfile.find(".acs")) > -1 and (inacsfile.find("/") == -1):
+                        inacspath_update.append(os.path.join(self.m_base.const_workspace_path_, "Parameter/ACSFiles", inacsfile))
+                    else:
+                        inacspath_update.append(inacsfile)
+                inacspath = ";".join(inacspath_update)
+                outpath = self.getProcessInfoValue(processKey, "output_folder", index)
+                if (outpath.find(".acs")) > -1 and (outpath.find("/") == -1):
+                    outpath = os.path.join(self.m_base.const_workspace_path_, "Parameter/ACSFiles", outpath)
+                return self.__invokeDynamicFn(
+                    [inacspath, outpath, self.getProcessInfoValue(processKey, "file_filter", index)],
+                    processKey,
+                    "arcpy.management.TransferFiles",
+                    index,
+                )
+
+            except BaseException as exp:
+                self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
+                return False
+
         else:
             # The command could be a user defined function externally defined
             # in the module (MDCS_UC.py). Let's invoke it.
@@ -2485,7 +2512,8 @@ class Solutions(Base.Base):
             'CCSCF':
             {'desc': 'Create Cloud Storage Connection File',
              'fnc': executeCommand
-             }
+             },
+        "TF": {"desc": "Transfer Files", "fnc": executeCommand},
         }
 
     # mapping of config/component paths.
