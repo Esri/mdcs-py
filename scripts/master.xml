@@ -3,7 +3,7 @@
 	<!-- Support for Dynamic Variable <Name>$xyz$</Name> or <Name>DefaultValue;$xyz$</Name> The variable value can be passed from the command line -->
 	<Name>Name_of_Project</Name>
 	<Command>DefaultCommand</Command>
-	<!-- Commands avaiable CM, AR, CR, SP, BP, AF, CFC, CC, CBMD, ERF, ANCP, APCP, ABA, SMDI, CBA, CCP, CTP, AMDS, AMD, BMDIC, CDA, GEA, CS, BPS, BF, BS, BB, DN, SY, IG, SS, DF, DO, BO, MMDI, DMD, RRFMD, RP, RI, AI, JF, CV, MTC, ETC, STP, SE, EMDG, EMDI, SMDI, CSDD, STS, CRTT, CLT,CCM,BSM,GPC,IFPC,CRA,USD,DEL,BMI,GMA,AMR,CF,UIO,EFACP,GBAR,RR,CPCSLP,TF,CPUDL,DOUDL,COUDL,EFUAIM,CL,EL,CLAS -->
+	<!-- Commands avaiable CM, AR, CR, SP, BP, AF, CFC, CC, CBMD, ERF, ANCP, APCP, ABA, SMDI, CBA, CCP, CTP, AMDS, AMD, BMDIC, CDA, GEA, CS, BPS, BF, BS, BB, DN, SY, IG, SS, DF, DO, BO, MMDI, DMD, RRFMD, RP, RI, AI, JF, CV, MTC, ETC, STP, SE, EMDG, EMDI, SMDI, CSDD, STS, CRTT, CLT,CCM,BSM,GPC,IFPC,CRA,USD,DEL,BMI,GMA,AMR,CF,UIO,EFACP,GBAR,RR,CPCSLP,TF,CPUDL,DOUDL,COUDL,EFUAIM,CL,EL,CLAS,TF -->
 	<!-- Commands can be combined using the + sign and some commands can be called multiple times, refer to MDCS document for more help -->
 	<ArcGISVersion>
 		<!-- Defines Min Max version required. Eg due to know issue in previsous versions -->
@@ -1072,6 +1072,13 @@
 					<folder></folder>
 					<authentication></authentication>
 				</CreateCloudStorageConnectionFile>	
+				<!-- Tranfer Files -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/data-management/transfer-files.htm -->
+				<TransferFiles>
+					<input_paths>#</input_paths>
+					<output_folder>#</output_folder>
+					<file_filter>#</file_filter>
+				</TransferFiles>
 		</Processes>
 	</MosaicDataset>
 </Workspace>
