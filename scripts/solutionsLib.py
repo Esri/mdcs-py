@@ -1962,38 +1962,9 @@ class Solutions(Base.Base):
                 del sc
                 return True
         elif (com == 'CPUDL'):
-            self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
-            processKey = 'classifypixelsusingdeeplearning'
+            self.m_log.Message("\t{}:{}".format(self.commands[com]["desc"], self.m_base.m_mdName), self.m_log.const_general_text)
             fullPath = os.path.join(self.m_base.m_geoPath, self.m_base.m_mdName)
-            in_raster = self.getProcessInfoValue(processKey, 'in_raster', index)
-            output_path = self.getProcessInfoValue(processKey, 'out_classified_raster', index)
-            if in_raster == '#':
-                in_raster = fullPath
-            if output_path == '#':
-                output_path = f'{fullPath}{processKey}'
-
-            try:
-                out_classified_raster = arcpy.ia.ClassifyPixelsUsingDeepLearning(
-                    in_raster,
-                    os.path.join(
-                        self.m_base.const_workspace_path_,
-                        'Parameter/DLPKpackages',
-                        self.getProcessInfoValue(
-                            processKey,
-                            'in_model_definition',
-                            index)),
-                    self.getProcessInfoValue(
-                        processKey,
-                        'arguments',
-                        index),
-                    self.getProcessInfoValue(
-                        processKey,
-                        'processing_mode',
-                        index))
-                out_classified_raster.save(output_path)
-            except Exception as exp:
-                return False
-            return True
+            return self.__invokeDynamicFn([], "classifypixelsusingdeeplearning", "arcpy.ia.ClassifyPixelsUsingDeepLearning", index)
 
         elif (com == 'DOUDL'):
             self.m_log.Message("\t{}:{}".format(self.commands[com]['desc'], self.m_base.m_mdName), self.m_log.const_general_text)
