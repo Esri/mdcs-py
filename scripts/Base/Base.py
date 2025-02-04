@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Copyright 2024 Esri
+# Copyright 2025 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
-# Version: 20240522
+# Version: 20250203
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -113,7 +113,7 @@ class DynaInvoke:
             if (self._sArgs):
                 fn = self._sArgs.pop(0)
                 if (hasattr(ret, fn)):
-                    self.fnc_ptr = getattr(sys.modules[ret], fn)
+                    self.fnc_ptr = getattr(ret, fn)
                     ret = self.fnc_ptr(*self._sArgs)
             return True
         except Exception as exp:
