@@ -2101,6 +2101,10 @@ class Solutions(Base.Base):
                 self.log(arcpy.GetMessages(), self.m_log.const_critical_text)
                 return False
 
+        elif com == "ZSAT":
+            self.m_log.Message("\t{}:{}".format(self.commands[com]["desc"], self.m_base.m_mdName), self.m_log.const_general_text)
+            return self.__invokeDynamicFn([], "zonalstatisticsastable", "arcpy.ia.ZonalStatisticsAsTable", index)
+
         else:
             # The command could be a user defined function externally defined
             # in the module (MDCS_UC.py). Let's invoke it.
@@ -2485,6 +2489,7 @@ class Solutions(Base.Base):
              'fnc': executeCommand
              },
         "TF": {"desc": "Transfer Files", "fnc": executeCommand},
+        "ZSAT": {"desc": "Zonal Statistics As Table", "fnc": executeCommand},
         }
 
     # mapping of config/component paths.
