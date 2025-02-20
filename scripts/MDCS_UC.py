@@ -86,35 +86,45 @@ class UserCode:
         return True
 
     def hello1(self, data):
-        base = data['base']         # using Base class for its XML specific common functions. (getXMLXPathValue, getXMLNodeValue, getXMLNode)
-        print ('hello1')
-        log = data['log']
-        log.Message('this is a log message', 0)
-        resp = {
-            'status' : False
-        }
+        base = data[
+            "base"
+        ]  # using Base class for its XML specific common functions. (getXMLXPathValue, getXMLNodeValue, getXMLNode)
+        print("hello1")
+        log = data["log"]
+        log.Message("this is a log message", 0)
+        resp = {"status": False}
         cnt = 0
-        print (f'***hello1 {cnt}')
-        resp = base._updateResponse(resp, status = True, output = cnt)
-        data['response'] = resp
-        data['useResponse'] = True
+        print(f"***hello1 {cnt}")
+        resp = base._updateResponse(resp, status=True, output=cnt)
+        data["response"] = resp
+        data["useResponse"] = True
         return True
 
-    def hello2(self,data):
-        base = data['base']
-        cnt = int(data['__user'].get('__hello1', 0)) + 1
-        pixel_val = data['__user'].get('__pixelval', 0)
-        print (f'***hello2 {cnt} {pixel_val}')
-        resp = {
-            'status' : False
-        }
-        resp = base._updateResponse(resp, status = True, output = cnt)
-        data['response'] = resp
-        data['useResponse'] = True
+    def hello2(self, data):
+        base = data["base"]
+        cnt = int(data["__user"].get("__hello1", 0)) + 1
+        pixel_val = data["__user"].get("__pixelval", 0)
+        print(f"***hello2 {cnt} {pixel_val}")
+        resp = {"status": False}
+        resp = base._updateResponse(resp, status=True, output=cnt)
+        data["response"] = resp
+        data["useResponse"] = True
         return True
 
-    def hello3(self,data):
-        cnt = int(data['__user'].get('__hello2', 0)) + 1
-        cnt += int(data['__user'].get('__pixelval', 0))
-        print (f'***hello3 {cnt}')
+    def hello3(self, data):
+        cnt = int(data["__user"].get("__hello2", 0)) + 1
+        cnt += int(data["__user"].get("__pixelval", 0))
+        print(f"***hello3 {cnt}")
+        return True
+
+    def _OnStart(self, data):
+        """Optional event function to trigger at the start of the w/f."""
+        print("On start event fired.")
+        return True
+
+    def _OnExit(self, data):
+        """Optional event function to fire at the (end) of the w/f.
+        This gets triggered at all times at the end regardless of the w/f final status.
+        """
+        print("On exit event fired.")
         return True

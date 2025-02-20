@@ -4,5 +4,6 @@
     "CheckFile": "https://imageryworkflowsversion.geocloud.com/imv/MDCS.json",
     "VersionMessage": "Added runtime source version check support.",
     "CheckForUpdate": "Daily",
-    "CurrentVersion": "20210328"
+    "CurrentVersion": "20210328",
+    "LastChecked": "2025-02-20"
 }

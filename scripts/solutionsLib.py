@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Copyright 2024 Esri
+# Copyright 2025 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: SolutionsLib.py
 # Description: To map MDCS command codes to GP Tool functions.
-# Version: 20240207
+# Version: 20240220
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -2660,7 +2660,7 @@ class Solutions(Base.Base):
         try:
             self.m_base.m_doc = minidom.parse(self.config) if conf else None
             (ret, msg) = self.m_base.init()
-            if (ret == False):
+            if ret == False:
                 if (msg == self.m_base.const_init_ret_version or
                     msg == self.m_base.const_init_ret_sde or
                         msg == self.m_base.const_init_ret_patch):
@@ -2679,7 +2679,7 @@ class Solutions(Base.Base):
         self.processInfo = self.ProcessInfo.ProcessInfo(self.m_base)
         if conf:
             bSuccess = self.processInfo.init(self.config)
-            if (bSuccess == False):
+            if bSuccess == False:
                 self.log(
                     'Unable to process the parameter file ({})'.format(
                         self.config),
@@ -2689,7 +2689,7 @@ class Solutions(Base.Base):
             self.log('Using template:' + self.config, self.const_general_text)
         # split commands with '+'
         com_ = com
-        if (com_.upper() == self.const_cmd_default_text.upper()):
+        if com_.upper() == self.const_cmd_default_text.upper():
             try:
                 # gets command defaults.
                 com_ = self.getXMLNodeValue(self.m_base.m_doc, "Command")
@@ -2701,12 +2701,16 @@ class Solutions(Base.Base):
                     "\nQuitting...",
                     self.const_critical_text)
                 return False
-            if (len(com_.strip()) == 0):
+            if len(com_.strip()) == 0:
                 self.log('Error: Empty command.',
                          self.const_critical_text)
                 return False
         self.log('Processing command(s):' + com_.upper(), self.const_general_text)
         aryCmds = com_.split('+')
+        if self.m_base.EVT_ON_START in self.m_base.on_evnt_args:
+            del self.m_base.on_evnt_args[self.m_base.on_evnt_args.index(self.m_base.EVT_ON_START)]
+            if self.m_base.isUser_Function(self.m_base.EVT_ON_START):
+                aryCmds.insert(0, self.m_base.EVT_ON_START)
         cmdResults = []
         while aryCmds:
             command = aryCmds.pop(0)
@@ -2715,7 +2719,7 @@ class Solutions(Base.Base):
             is_user_cmd = False
             cmd = ''.join(ch for ch in command if ch in (ascii_letters + '_'))
             index = 0
-            if (len(command) > len(cmd)):
+            if len(command) > len(cmd):
                 try:
                     index = int(command[len(cmd):])
                 except BaseException:
@@ -2723,8 +2727,8 @@ class Solutions(Base.Base):
                         "Command/Err: Invalid command index:" + command,
                         self.const_warning_text)
                     # catch any float values entered, e.t.c
-            if ((cmd in self.commands.keys()) == False):
-                if (self.m_base.isUser_Function(ucCommand)):
+            if (cmd in self.commands.keys()) == False:
+                if self.m_base.isUser_Function(ucCommand):
                     try:
                         self.commands[ucCommand] = {}
                         self.commands[ucCommand]['desc'] = 'User defined command (%s)' % (
@@ -2742,16 +2746,22 @@ class Solutions(Base.Base):
                         return False    # return to prevent further processing.
                 else:
                     self.log(
-                        "Command/Err: Unknown command:" + cmd,
+                        f"Command/Err: Unknown command:{cmd}",
                         self.const_warning_text)
+                    if self.on_exit():
+                        aryCmds = [self.m_base.EVT_ON_EXIT]
                     continue
             indexed_cmd = False if index == 0 else True
             cat_cmd = '%s%s' % (cmd, '' if not indexed_cmd else index)
-            if (self.isLog()):
+            if self.isLog():
                 self.m_log.CreateCategory(cat_cmd)
-            self.log("Command:" + cat_cmd + '->' + '%s' %
-                     self.commands[cmd]['desc'], self.const_general_text)
-            if (indexed_cmd):
+            msg_cmd = (
+                f"Event/{cat_cmd}"
+                if self.m_base._is_builtin_event(cat_cmd)
+                else f"Command:{cat_cmd}->{self.commands[cmd]['desc']}"
+            )
+            self.log(msg_cmd, self.const_general_text)
+            if indexed_cmd:
                 self.log(
                     'Using parameter values at index (%s)' %
                     index, self.const_general_text)
@@ -2759,31 +2769,49 @@ class Solutions(Base.Base):
             response = self.commands[cmd]['fnc'](self, cmd, index)
             respVals = {'cmd': cmd}
             status = False
-            if (isinstance(response, bool)):
+            if isinstance(response, bool):
                 status = response
-            elif (isinstance(response, dict)):
+            elif isinstance(response, dict):
                 if ('response' in response and
                     response['response'] and
                         isinstance(response['response'], dict)):
                     response = response['response']
-                if ('status' in response):
+                if 'status' in response:
                     status = self.m_base.getBooleanValue(response['status'])
-                if ('output' in response):
+                if 'output' in response:
                     respVals['output'] = response['output']
             respVals['value'] = status
             cmdResults.append(respVals)
-            if (status == False):
+            if status == False:
                 success = 'Failed!'
             self.log(success, self.const_status_text)
-            if (self.isLog()):
+            if self.isLog():
                 self.m_log.CloseCategory()
-            if (status == False and     # do not continue with any following commands if AR / user defined function commands fail.
-                (cmd in ['AR', 'CM', 'CBA', 'ABA'] or
-                 is_user_cmd)):
-                break
-            if (isinstance(response, dict) and
-                Upd_Chain in response and
-                isinstance(response[Upd_Chain], list)
-                ):
+            if (
+                status
+                == False  # do not continue with any following commands if AR / user defined function commands fail.
+                and (cmd in ["AR", "CM", "CBA", "ABA"] or is_user_cmd)
+            ):
+                if self.on_exit():
+                    aryCmds = [self.m_base.EVT_ON_EXIT]
+                continue
+            if (
+                isinstance(response, dict)
+                and Upd_Chain in response
+                and isinstance(response[Upd_Chain], list)
+            ):
                 aryCmds[:] = response[Upd_Chain]
+            if not aryCmds:
+                if self.on_exit():
+                    aryCmds.append(self.m_base.EVT_ON_EXIT)
         return cmdResults
+
+    def on_exit(self):
+        """ _OnExit event that gets fired at the end of the w/f """
+        if self.m_base.EVT_ON_EXIT in self.m_base.on_evnt_args:
+            del self.m_base.on_evnt_args[
+                self.m_base.on_evnt_args.index(self.m_base.EVT_ON_EXIT)
+            ]
+            if self.m_base.isUser_Function(self.m_base.EVT_ON_EXIT):
+                return True
+        return False
