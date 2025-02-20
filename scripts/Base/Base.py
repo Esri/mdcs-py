@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
-# Version: 20250203
+# Version: 20250220
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -126,7 +126,7 @@ class DynaInvoke:
 
 class Base(object):
 
-    #begin - constansts
+    # begin - constansts
     const_general_text = 0
     const_warning_text = 1
     const_critical_text = 2
@@ -165,17 +165,20 @@ class Base(object):
 
     NODE_TYPE_TEXT = 3
     NODE_TYPE_ELEMENT = 1
-# ends
+
+    EVT_ON_START = "_OnStart"
+    EVT_ON_EXIT = "_OnExit"
+    # ends
 
     def __init__(self):
         self.m_log = None
         self.m_doc = None
 
-# the follwoing variables could be overridden by the command-line to replace respective values in XML config file.
+        # the follwoing variables could be overridden by the command-line to replace respective values in XML config file.
         self.m_workspace = ''
         self.m_geodatabase = ''
         self.m_mdName = ''  # mosaic dataset name.
-# ends
+        # ends
 
         self.m_sources = ''
 
@@ -213,6 +216,7 @@ class Base(object):
         # ends
         self.m_userClassInstance = None
         self.m_data = None
+        self.on_evnt_args = [self.EVT_ON_START, self.EVT_ON_EXIT]
 
     def init(self):  # return (status [true|false], reason)
         self.m_data = {
@@ -380,9 +384,7 @@ class Base(object):
 
         return True
 
-
-# user defined functions implementation code
-
+    # user defined functions implementation code
 
     def isUser_Function(self, name):
         try:
@@ -395,6 +397,7 @@ class Base(object):
 
     def invoke_user_function(self, name, data):
         ret = False
+        type_event = self._is_builtin_event(name)
         try:
             if (self.m_userClassInstance is None):
                 return False
@@ -402,15 +405,15 @@ class Base(object):
             try:
                 ret = fnc(data)
             except Exception as inf:
-                self.log('Executing user defined function (%s)' % (name), self.const_critical_text)
+                self.log(f"Executing {'event' if type_event else 'user defined function'} ({name})", self.const_critical_text)
                 self.log(str(inf), self.const_critical_text)
                 return False
         except Exception as inf:
-            self.log('Please check if user function (%s) is found in class (%s) of MDCS_UC module.' % (name, self.CCLASS_NAME), self.const_critical_text)
+            self.log(f"Please check if {'event' if type_event else 'user'} function ({name}) is found in class ({self.CCLASS_NAME}) of MDCS_UC module.", self.const_critical_text)
             self.log(str(inf), self.const_critical_text)
             return False
         return ret
-# ends
+    # ends
 
     def processEnv(self, node, pos, json):  # support fnc for 'SE' command.
 
@@ -593,8 +596,8 @@ class Base(object):
     def CheckMDCSVersion(self, min, max, print_err_msg=True):
         if (not sum(min) and
             not sum(max)):
-                self.log('Config version check is disabled.', self.const_warning_text)
-                return True     # ver check disabled
+            self.log('Config version check is disabled.', self.const_warning_text)
+            return True     # ver check disabled
         CMAJOR = 0
         CMINOR = 1
         CSP = 2
@@ -878,3 +881,7 @@ class Base(object):
             start = end + 1
         return values
 
+    def _is_builtin_event(self, fnc_name: str):
+        if fnc_name is None:
+            return False
+        return fnc_name in [self.EVT_ON_EXIT, self.EVT_ON_START]
