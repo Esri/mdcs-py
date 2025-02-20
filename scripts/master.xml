@@ -3,7 +3,7 @@
 	<!-- Support for Dynamic Variable <Name>$xyz$</Name> or <Name>DefaultValue;$xyz$</Name> The variable value can be passed from the command line -->
 	<Name>Name_of_Project</Name>
 	<Command>DefaultCommand</Command>
-	<!-- Commands avaiable CM, AR, CR, SP, BP, AF, CFC, CC, CBMD, ERF, ANCP, APCP, ABA, SMDI, CBA, CCP, CTP, AMDS, AMD, BMDIC, CDA, GEA, CS, BPS, BF, BS, BB, DN, SY, IG, SS, DF, DO, BO, MMDI, DMD, RRFMD, RP, RI, AI, JF, CV, MTC, ETC, STP, SE, EMDG, EMDI, SMDI, CSDD, STS, CRTT, CLT,CCM,BSM,GPC,IFPC,CRA,USD,DEL,BMI,GMA,AMR,CF,UIO,EFACP,GBAR,RR,CPCSLP,TF,CPUDL,DOUDL,COUDL,EFUAIM,CL,EL,CLAS,TF,ZSAT -->
+	<!-- Commands avaiable CM, AR, CR, SP, BP, AF, CFC, CC, CBMD, ERF, ANCP, APCP, ABA, SMDI, CBA, CCP, CTP, AMDS, AMD, BMDIC, CDA, GEA, CS, BPS, BF, BS, BB, DN, SY, IG, SS, DF, DO, BO, MMDI, DMD, RRFMD, RP, RI, AI, JF, CV, MTC, ETC, STP, SE, EMDG, EMDI, SMDI, CSDD, STS, CRTT, CLT,CCM,BSM,GPC,IFPC,CRA,USD,DEL,BMI,GMA,AMR,CF,UIO,EFACP,GBAR,RR,CPCSLP,TF,CPUDL,DOUDL,COUDL,EFUAIM,CL,EL,CLAS,TF,ZSAT,COID,AITOID,AIFCIT,BOIF,GSFOID,UOIDP,CCSCF -->
 	<!-- Commands can be combined using the + sign and some commands can be called multiple times, refer to MDCS document for more help -->
 	<ArcGISVersion>
 		<!-- Defines Min Max version required. Eg due to know issue in previsous versions -->
@@ -1095,6 +1095,99 @@
 				<circular_wrap_value>#</circular_wrap_value>
 				<out_join_layer>#</out_join_layer>
 				</ZonalStatisticsAsTable>
+				<!-- Update Oriented Imagery Dataset Properties -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/oriented-imagery/update-oriented-imagery-dataset-properties.htm -->
+				<UpdateOrientedImageryDatasetProperties>
+				<in_oriented_imagery_dataset>#</in_oriented_imagery_dataset>
+				<maximum_distance>#</maximum_distance>
+				<coverage_percent>#</coverage_percent>
+				<footprint_item>#</footprint_item>
+				<elevation_source>DEM;CONSTANT_ELEVATION;NONE</elevation_source>
+				<constant_elevation>#</constant_elevation>
+				<dem>#</dem>
+				<lod>#</lod>
+				<raster_function>#</raster_function>
+				<vertical_measurement_unit>METER;FEET</vertical_measurement_unit>
+				<time_interval_unit>MINUTES;HOURS;DAYS;WEEKS;MONTHS;YEARS</time_interval_unit>
+				<oriented_imagery_type>HORIZONTAL;OBLIQUE;NADIR;360;INSPECTION;NONE</oriented_imagery_type>
+				<camera_heading></camera_heading>
+				<camera_pitch></camera_pitch>
+				<camera_roll></camera_roll>
+				<camera_height></camera_height>
+				<hfov></hfov>
+				<vfov></vfov>
+				<near_distance></near_distance>
+				<far_distance></far_distance>
+				<image_rotation></image_rotation>
+				<orientation_accuracy></orientation_accuracy>
+				<image_path_prefix></image_path_prefix>
+				<image_path_suffix></image_path_suffix>
+				<depth_image_path_prefix></depth_image_path_prefix>
+				<depth_image_path_suffix></depth_image_path_suffix>
+				<dem_path_prefix></dem_path_prefix>
+				<dem_path_suffix></dem_path_suffix>
+				</UpdateOrientedImageryDatasetProperties>
+
+				<!-- Generate Service From Oriented Imagery Dataset -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/oriented-imagery/generate-service-from-oriented-imagery-dataset.htm -->				
+				<GenerateServiceFromOrientedImageryDataset>
+				<in_oriented_imagery_dataset>#</in_oriented_imagery_dataset>
+				<service_name>#</service_name>
+				<service_name>#</service_name>
+				<share_with>PRIVATE;ORGANIZATION;PUBLIC</share_with>
+				<add_footprint>FOOTPRINT;NO_FOOTPRINT</add_footprint>
+				<attach_images>ATTACH;NO_ATTACH</attach_images>
+				<tags>#</tags>
+				<summary>#</summary>
+				</GenerateServiceFromOrientedImageryDataset>
+				
+				<!-- Create Oriented Imagery Dataset -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/oriented-imagery/create-oriented-imagery-dataset.htm -->
+				<CreateOrientedImageryDataset>
+				<out_dataset_path>#</out_dataset_path>
+				<out_dataset_name>#</out_dataset_name>
+				<spatial_reference>#</spatial_reference>
+				<elevation_source>DEM;CONSTANT_ELEVATION</elevation_source>
+				<constant_elevation>#</constant_elevation>
+				<dem>#</dem>
+				<lod>#</lod>
+				<raster_function>#</raster_function>
+				<template>#</template>
+				<out_dataset_alias>#</out_dataset_alias>
+				<config_keyword>#</config_keyword>
+				<has_z>DISABLED;ENABLED</has_z>
+				</CreateOrientedImageryDataset>
+			
+				<!-- Build Oriented Imagery Footprint -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/oriented-imagery/build-oriented-imagery-footprint.htm -->
+				<BuildOrientedImageryFootprint>
+				<in_oriented_imagery_dataset>#</in_oriented_imagery_dataset>
+				<out_dataset_path>#</out_dataset_path>
+				<out_dataset_name>#</out_dataset_name>
+				<footprint_option>PER_IMAGE;MERGE;BUFFER;EXTENT</footprint_option>
+				</BuildOrientedImageryFootprint>
+				
+				<!-- Add Images To Oriented Imagery Dataset -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/oriented-imagery/add-images-to-oriented-imagery-dataset.htm -->				
+				<AddImagesToOrientedImageryDataset>
+				<in_oriented_imagery_dataset>#</in_oriented_imagery_dataset>
+				<imagery_category>Horizontal;Oblique;Nadir;360;Inspection</imagery_category>
+				<input_data>#</input_data>
+				<include_sub_folders>SUBFOLDERS;NOSUBFOLDERS</include_sub_folders>
+				<folder_filter>#</folder_filter>
+				<where_clause>#</where_clause>
+				<include_all_fields>NO_INCLUDE_ALL_FIELDS;INCLUDE_ALL_FIELDS</include_all_fields>
+				</AddImagesToOrientedImageryDataset>
+				
+				<!-- Add Images From Custom Input Type -->
+				<!-- https://pro.arcgis.com/en/pro-app/latest/tool-reference/oriented-imagery/add-images-from-custom-input-type.htm -->
+				<AddImagesFromCustomInputType>
+				<in_oriented_imagery_dataset>#</in_oriented_imagery_dataset>
+				<input_type>#</input_type>
+				<in_type_folder>#</in_type_folder>
+				<in_data>#</in_data>
+				<auxiliary_parameters>#</auxiliary_parameters>
+				</AddImagesFromCustomInputType>
 		</Processes>
 	</MosaicDataset>
 </Workspace>

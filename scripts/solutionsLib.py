@@ -1775,6 +1775,72 @@ class Solutions(Base.Base):
                 'arcpy.ia.AggregateMultidimensionalRaster',
                 index
             )
+        elif (com == 'COID'):
+            self.m_log.Message(
+                "\t{}".format(
+                    self.commands[com]['desc']),
+                self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'createorientedimagerydataset',
+                'arcpy.oi.CreateOrientedImageryDataset',
+                index
+            )
+        elif (com == 'AITOID'):
+            self.m_log.Message(
+                "\t{}".format(
+                    self.commands[com]['desc']),
+                self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'addimagestoorientedimagerydataset',
+                'arcpy.oi.AddImagesToOrientedImageryDataset',
+                index
+            )
+        elif (com == 'AIFCIT'):
+            self.m_log.Message(
+                "\t{}".format(
+                    self.commands[com]['desc']),
+                self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'addimagesfromcustominputtype',
+                'arcpy.oi.AddImagesFromCustomInputType',
+                index
+            )
+        elif (com == 'BOIF'):
+            self.m_log.Message(
+                "\t{}".format(
+                    self.commands[com]['desc']),
+                self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'buildorientedimageryfootprint',
+                'arcpy.oi.BuildOrientedImageryFootprint',
+                index
+            )
+        elif (com == 'GSFOID'):
+            self.m_log.Message(
+                "\t{}".format(
+                    self.commands[com]['desc']),
+                self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'generateservicefromorientedimagerydataset',
+                'arcpy.oi.GenerateServiceFromOrientedImageryDataset',
+                index
+            )
+        elif (com == 'UOIDP'):
+            self.m_log.Message(
+                "\t{}".format(
+                    self.commands[com]['desc']),
+                self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'updateorientedimagerydatasetproperties',
+                'arcpy.oi.UpdateOrientedImageryDatasetProperties',
+                index
+            )
         elif (com == 'ACUC'):
             self.m_log.Message(
                 "\t{}:{}".format(
@@ -2482,6 +2548,30 @@ class Solutions(Base.Base):
              },
             'EL':
             {'desc': 'Extract LAS',
+             'fnc': executeCommand
+             },
+            'COID':
+            {'desc': 'Create Oriented Imagery Dataset',
+             'fnc': executeCommand
+             },
+            'GSFOID':
+            {'desc': 'Generate Service From Oriented Imagery Dataset',
+             'fnc': executeCommand
+             },
+            'BOIF':
+            {'desc': 'Build Oriented Imagery Footprint',
+             'fnc': executeCommand
+             },
+            'AIFCIT':
+            {'desc': 'Add Images From Custom Input Type',
+             'fnc': executeCommand
+             },
+            'AITOID':
+            {'desc': 'Add Images To Oriented Imagery Dataset',
+             'fnc': executeCommand
+             },
+            'UOIDP':
+            {'desc': 'Update Oriented Imagery Dataset Properties',
              'fnc': executeCommand
              },
             'CCSCF':
