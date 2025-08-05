@@ -397,7 +397,7 @@ class Base(object):
 
     def invoke_user_function(self, name, data):
         ret = False
-        type_event = self._is_builtin_event(name)
+        type_event = self.is_builtin_event(name)
         try:
             if (self.m_userClassInstance is None):
                 return False
@@ -881,7 +881,8 @@ class Base(object):
             start = end + 1
         return values
 
-    def _is_builtin_event(self, fnc_name: str):
+    def is_builtin_event(self, fnc_name: str):
         if fnc_name is None:
             return False
         return fnc_name in [self.EVT_ON_EXIT, self.EVT_ON_START]
+

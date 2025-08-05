@@ -33,6 +33,7 @@ solutionLib_path = os.path.dirname(os.path.abspath(__file__))  # set the locatio
 import logger
 import solutionsLib # import Raster Solutions library
 import Base
+from Base.Base import Base as CBase
 logger = reload(logger)  # ArcGIS Pro PYT EVN requires a reload to clear previous instances.
 solutionsLib = reload(solutionsLib)
 Base = reload(Base)
@@ -117,7 +118,7 @@ def main(argc, argv):
         for key in user_cmds:
             print("\t" + key + ' = ' + user_cmds[key]['desc'])
         sys.exit(1)
-    base = Base.Base()
+    base = CBase()
     comInfo = {
         'AR': {'cb': postAddData},  # assign a callback function to run custom user code when adding rasters.
         '__user': {}       # key to pass any custom userCode args to other userCode functions that are defined in MDCS_UC.
@@ -225,7 +226,7 @@ def main(argc, argv):
     # ends
     if (config and
             os.path.isfile(config) is False):
-        log.Message('Input config file is not specified/not found! ({})'.format(config), logger.Logger.const_critical_text)
+        log.Message(f'Input config file is not specified/not found! ({config})', logger.Logger.const_critical_text)
         log.Message(base.CCMD_STATUS_FAILED, logger.Logger.const_status_text)    # set (failed) status
         log.WriteLog('#all')
         return False
@@ -280,13 +281,18 @@ def runMDCS(argv):
     ret = MDCS.main(len(argv), argv)
     return ret
 
-def runWorkflow(base, config, com, comInfo):
+def runWorkflow(base, config, com, com_info):
     from importlib import reload
     sys.path.append(solutionLib_path)
     import solutionsLib
     solutionsLib = reload(solutionsLib)
     solutions = solutionsLib.Solutions(base)
-    results = solutions.run(config, com, comInfo)
+    solutions.m_base.m_cli_msg_callback_ptr = solutions.log_stream
+    results = solutions.init(config, com_info)
+    if not results:
+        log.Message("Solutions/init/failed", log.const_critical_text)
+    if results is True:
+        results = solutions.run(com)
     return results
 
 def worker(**params):
