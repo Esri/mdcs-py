@@ -51,7 +51,7 @@ class Logger(object):
         self.projects = {}
         self.command_order = []
         self.active_key = ""
-        self.logFolder = ""
+        self.logFolder = None
         self.projectName = "Project"  # default project name
         self.start_time = None
         self.end_time = None
@@ -97,8 +97,19 @@ class Logger(object):
         if self.start_time is not None:
             self.duration = self.end_time - self.start_time
 
-    def SetLogFolder(self, logFolder):
-        self.logFolder = logFolder
+    def SetLogFolder(self, log_folder):
+        """ Set log folder path. """
+        if not log_folder:
+            return False
+        try:
+            if os.path.exists(log_folder) is False:
+                os.makedirs(log_folder)
+        except IOError as exp:
+            print(f"\nErr. Set log folder.\n{exp}")
+            self.logFolder = None
+            return False
+        self.logFolder = log_folder
+        return True
 
     def SetCurrentCategory(self, category):
         if category == "":
@@ -161,7 +172,7 @@ class Logger(object):
 
     def WriteLog(self, project):
         """ Write to an XML log filename. """
-        if self.is_log_CSV():
+        if self.is_log_csv():
             return True
         const_startend_time_format = "%04d%02d%02dT%02d%02d%02d"
         prj = project.strip()
@@ -247,19 +258,18 @@ class Logger(object):
                         if key_ != "__root":
                             eleParent.appendChild(eleProject)
                         eleDoc.appendChild(eleParent)
-        try:
-            # try to create the log-folder if not found!
-            if os.path.exists(self.logFolder) is False:
-                os.mkdir(self.logFolder)
             log_path = self.make_log_filename()
             if not log_path:
-                raise ValueError("Log filename is empty!")
-            with open(log_path, "w", encoding="utf-8") as writer:
-                writer.write(doc.toprettyxml())
-        except Exception as exp:
-            print(f"\nError creating log file.\n{exp}")
+                print("Log filename is empty!")
+                return False
+            try:
+                with open(log_path, "w", encoding="utf-8") as writer:
+                    writer.write(doc.toprettyxml())
+            except IOError as exp:
+                print(f"\nError creating log file.\n{exp}")
+                return False
+        return True
 
-    
     def make_log_filename(self):
         """ log reports can be saved uniquely named with date and time for easy review. """
         if not self.logFolder:
@@ -280,9 +290,9 @@ class Logger(object):
             record_updated = self.logFileName
             if record_updated[-4:].lower() not in [".xml", ".csv"]:
                 record_updated += ".xml"
-        return os.path.join(self.logFolder, record_updated)        
-    
-    def is_log_CSV(self):
+        return os.path.join(self.logFolder, record_updated)
+
+    def is_log_csv(self):
         """ Returns True if the log output format is CSV """
         if not self.logFileName:
             return False
