@@ -79,6 +79,7 @@ class AddRasters(Base.Base):
                 return False
             self.m_base.m_last_AT_ObjectID = self.getLastObjectID(self.m_base.m_geoPath, MDName)
             for hshAddRaster in self.sMdNameList[sourceID]['addraster']:
+                sucessAddRaster= 0
                 try:
                     self.log("\tUsing mosaic dataset/ID:" + MDName + '/' +
                              hshAddRaster['dataset_id'], self.const_general_text)
@@ -136,20 +137,31 @@ class AddRasters(Base.Base):
                     AddRaster = Base.DynaInvoke('arcpy.AddRastersToMosaicDataset_management', args, None, self.m_base.m_log.Message)
                     if (AddRaster.init() == False):
                         return False
-                    AddRaster.invoke()
+                    addRasterResult = AddRaster.invoke()
                     newObjID = self.getLastObjectID(self.m_base.m_geoPath, MDName)
                     if (newObjID <= objID):
-                        self.log('No new mosaic dataset item was added for Dataset ID (%s)' % (hshAddRaster['dataset_id']))
-                        continue
+                        if (self.m_base.m_IsSDE):
+                            if (addRasterResult):
+                                sucessAddRaster= sucessAddRaster + 1
+                                self.log('Add raster to sde completed',self.const_general_text)
+                            else:
+                                self.log('No new mosaic dataset item was added to sde',self.const_general_text)
+                                continue
+                        else:
+                            self.log('No new mosaic dataset item was added for Dataset ID (%s)' % (hshAddRaster['dataset_id']))
+                            continue
                     for callback_fn in self.callback_functions:
                         if (callback_fn(self.m_base.m_geoPath, sourceID, self.sMdNameList[sourceID]) == False):
                             return False
+
                 except Exception as e:
                     self.log(str(e), self.const_warning_text)
                     self.log(arcpy.GetMessages(), self.const_warning_text)
                     Warning = True
             newObjID = self.getLastObjectID(self.m_base.m_geoPath, MDName)
             if (newObjID <= self.m_base.m_last_AT_ObjectID):
+                if (sucessAddRaster > 0):
+                    continue
                 self.log('No new mosaic dataset items added to dataset (%s). Verify the input data path/raster type is correct' % (MDName), self.const_critical_text)
                 self.log(arcpy.GetMessages(), self.const_critical_text)
                 return False
