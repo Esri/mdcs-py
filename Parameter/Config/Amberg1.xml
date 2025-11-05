@@ -68,6 +68,12 @@
             </Field>
           </Fields>
       </Table>
+      <setMDProperties>
+        <sp_inputjson>#;$sp_inputjson$</sp_inputjson>
+        <sp_mosaic>#;$sp_mosaic$</sp_mosaic>
+        <sp_outputjson>#;$sp_outputjson$</sp_outputjson>
+        <sp_flag>#;$sp_flag$</sp_flag>
+      </setMDProperties>
       <Processes>
       <CalculateValues>
           <CalculateValue>

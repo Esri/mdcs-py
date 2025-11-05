@@ -43,14 +43,17 @@ class SetMDProperties(Base.Base):
         self.setLog(base.m_log)
         self.m_base = base
 
+
     def getInternalPropValue(self, md, key):
         if (key in self.dic_properties_lst.keys()):
             return self.dic_properties_lst[key]
         else:
             return ''
 
+
     def _message(self, msg, type):
         self.log(msg, type)
+
 
     # write json from dictionary object
     def writeJson(self,filename,jsonData):
@@ -75,6 +78,7 @@ class SetMDProperties(Base.Base):
         except Exception as exp:
             log.Message(str(exp),log.const_critical_text)
             return False
+
 
     # Compare two dictionary and dump the difference in dictionary to json file
     def compare_dict(self, first_dict, second_dict, outputJson):
@@ -158,18 +162,20 @@ class SetMDProperties(Base.Base):
         try:
             MosaicObj = arcpy.Describe(mdObj)
             for key,value in propertyDict.items():
-                if key == "resampling_type":
-                    dictObj[key] = getattr(MosaicObj, value).split(' ', 1 )[0].upper()
-                elif key == "processing_templates":
-                    dictObj[key]="None"
-                else:
-                    dictObj[key] = getattr(MosaicObj, value)
+                if hasattr(MosaicObj, value):
+                    if key == "resampling_type":
+                        dictObj[key] = getattr(MosaicObj, value).split(' ', 1 )[0].upper()
+                    elif key == "processing_templates":
+                        dictObj[key]="None"
+                    else:
+                        dictObj[key] = getattr(MosaicObj, value)
 
             return dictObj
 
         except Exception as exp:
             log.Message(str(exp),log.const_critical_text)
             return False
+
 
     #set property of the Mosaic using json
     def setPropertybyJson(self,inputJson):
@@ -200,7 +206,6 @@ class SetMDProperties(Base.Base):
         except Exception as exp:
             log.Message(str(exp),self.self.const_critical_text)
             return False
-
 
 
     #set property of the Mosaic by reference mosaic
@@ -247,6 +252,7 @@ class SetMDProperties(Base.Base):
         except Exception as exp:
             log.Message(str(exp),self.const_critical_text)
             return False
+
 
     #compare properties of a mosaic and json (userinput)
     def comparePropertyByJson(self,internal_mosaic,inputJson,outputJson):
@@ -319,6 +325,7 @@ class SetMDProperties(Base.Base):
         if (setProperties.init() == False):
             return False
         return setProperties.invoke()
+
 
     #set property of the mosaic based on the user defined flag
     def setMDProperties(self, mdPath):
@@ -395,7 +402,6 @@ class SetMDProperties(Base.Base):
         except Exception as exp:
             log.Message(str(exp),self.const_critical_text)
             return False
-
 
 
     def init(self, config):
