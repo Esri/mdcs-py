@@ -115,7 +115,7 @@ class SetMDProperties(Base.Base):
             return False
 
 
-    #Extracting the property of mosaic and dumping properties to dictionar file
+    # Extracting the property of mosaic and dumping properties to dictionary file
     def mosaicProperty(self,mdObj):
         log = self.m_base.m_log
         # dictionary to match the name between MDCS config nodes and arcpy descripe mosaic properties
@@ -177,30 +177,117 @@ class SetMDProperties(Base.Base):
             return False
 
 
+    # Convert ArcPy / non-serializable objects to JSON-safe values
+    def propertySerialize(self, obj):
+        """Convert ArcPy / non-serializable objects to JSON-safe values."""
+        
+        # Basic JSON-safe types:
+        if isinstance(obj, (str, int, float, bool)) or obj is None:
+            return obj
+
+        # Lists / tuples
+        if isinstance(obj, (list, tuple, set)):
+            return [self.propertySerialize(x) for x in obj]
+
+        # Dictionaries
+        if isinstance(obj, dict):
+            return {k: self.propertySerialize(v) for k, v in obj.items()}
+
+        # Extent object
+        if hasattr(obj, "XMin") and hasattr(obj, "YMin"):
+            return {
+                "xmin": obj.XMin,
+                "ymin": obj.YMin,
+                "xmax": obj.XMax,
+                "ymax": obj.YMax,
+            }
+
+        # SpatialReference
+        if hasattr(obj, "factoryCode"):
+            try:
+                return {
+                    "name": obj.name,
+                    "factoryCode": obj.factoryCode,
+                    "type": obj.type
+                }
+            except:
+                return str(obj)
+
+        # Generic ArcPy object (fallback)
+        return str(obj)
+    
+    
+    # Extracting the general property of mosaic and dumping properties to dictionary file
+    def mosaicGeneralProperty(self,mdObj):
+        log = self.m_base.m_log
+        r = arcpy.Raster(mdObj)
+        dictObj = {}
+        for attr in dir(r):
+            # ignore built-in/private attributes
+            if attr.startswith("_"):
+                continue
+            try:
+                value = getattr(r, attr)
+                # ignore methods
+                if callable(value):
+                    continue
+                # store valid attributes
+                dictObj[attr] = self.propertySerialize(value)
+
+            except Exception as exp:
+                # skip unreadable attributes
+                log.Message(str(exp),log.const_critical_text)
+                continue
+
+        return dictObj
+
+
     #set property of the Mosaic using json
-    def setPropertybyJson(self,inputJson):
+    def setPropertybyJson(self, inputJson):
         log = self.m_base.m_log
         try:
             jsData = self.readJson(inputJson)
-            try:
-                if len(jsData)>0:
-                    for attribute in jsData:
-                        self.dic_properties_lst[attribute] = jsData[attribute] #assign the each property of mosaic with dictionary
-            except Exception as exp:
-                log.Message(str(exp),self.const_critical_text)
-                return False
-            return True
         except Exception as exp:
-            log.Message(str(exp),self.const_critical_text)
+            log.Message(f"JSON read error: {exp}", self.const_critical_text)
             return False
+        # Determine which section to load
+        if "default" in jsData:
+            target = jsData["default"]
+        elif "general" in jsData:
+            log.Message("JSON contains only 'general' block. No 'default' to load.", 
+                        self.const_critical_text)
+            return False
+        else:
+            # Old format, use entire JSON dict
+            target = jsData
+        # Validate
+        if not isinstance(target, dict):
+            log.Message("Invalid JSON structure: 'default' must be an object.", 
+                        self.const_critical_text)
+            return False
+        # Apply target properties
+        try:
+            for key, value in target.items():
+                self.dic_properties_lst[key] = value
+        except Exception as exp:
+            log.Message(f"Property assignment error: {exp}", self.const_critical_text)
+            return False
+        return True
 
 
     #extract property of the Mosaic and dump to json
     def extractPropertytoJson(self,mdObj,outputJson):
         log = self.m_base.m_log
         try:
-            dictObj = self.mosaicProperty(mdObj) #read mosaic property
-            self.writeJson(outputJson,dictObj)
+            defaultProperty = self.mosaicProperty(mdObj) # read mosaic property
+            generalProperty = self.mosaicGeneralProperty(mdObj) # read mosaic general property
+            
+            combined = {
+                "default": defaultProperty,
+                "general": generalProperty
+            }
+            
+            self.writeJson(outputJson,combined)
             return True
 
         except Exception as exp:
@@ -237,16 +324,27 @@ class SetMDProperties(Base.Base):
         log = self.m_base.m_log
         try:
             if arcpy.Exists(internal_mosaic):
-                firstMosaicProperty = self.mosaicProperty(internal_mosaic)
+                firstMosaicDefaultProperty = self.mosaicProperty(internal_mosaic)
+                firstMosaicGeneralProperty = self.mosaicGeneralProperty(internal_mosaic)
+                firstMosaicCombinedProperty = {
+                    "default": firstMosaicDefaultProperty,
+                    "general": firstMosaicGeneralProperty
+                }
+                
             else:
                 log.Message("Given Mosaic is not found or invalid",self.const_critical_text)
 
             if arcpy.Exists(external_mosaic):
-                secondMosiacProperty = self.mosaicProperty(external_mosaic)
+                secondDefaultProperty = self.mosaicProperty(external_mosaic)
+                secondMosaicGeneralProperty = self.mosaicGeneralProperty(internal_mosaic)
+                secondMosaicCombinedProperty = {
+                    "default": secondDefaultProperty,
+                    "general": secondMosaicGeneralProperty
+                }
             else:
                 log.Message("Given Mosaic is not found or invalid",self.const_critical_text)
 
-            self.compare_dict(firstMosaicProperty,secondMosiacProperty,outputJson)
+            self.compare_dict(firstMosaicCombinedProperty,secondMosaicCombinedProperty,outputJson)
             return True
 
         except Exception as exp:
@@ -259,14 +357,19 @@ class SetMDProperties(Base.Base):
         log = self.m_base.m_log
         try:
             if arcpy.Exists(internal_mosaic):
-                firstMosaicProperty = self.mosaicProperty(internal_mosaic)
+                firstMosaicDefaultProperty = self.mosaicProperty(internal_mosaic)
+                firstMosaicGeneralProperty = self.mosaicGeneralProperty(internal_mosaic)
+                firstMosaicCombinedProperty = {
+                    "default": firstMosaicDefaultProperty,
+                    "general": firstMosaicGeneralProperty
+                }
             else:
                 log.Message("Given Mosaic is not found or invalid",self.const_critical_text)
 
 
             secondMosiacProperty = self.readJson(inputJson)
 
-            self.compare_dict(firstMosaicProperty,secondMosiacProperty,outputJson)
+            self.compare_dict(firstMosaicCombinedProperty,secondMosiacProperty,outputJson)
             return True
 
         except Exception as exp:
