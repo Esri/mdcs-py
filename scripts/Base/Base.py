@@ -640,18 +640,18 @@ class Base(object):
             return False
         return True
 
-    def getXMLNodeValue(self, doc, nodeName):
+    def getXMLNodeValue(self, doc, nodeName, index=0):
         if (doc is None):
             return ''
         node = doc.getElementsByTagName(nodeName)
 
         if (node is None or
             node.length == 0 or
-            node[0].hasChildNodes() == False or
-                node[0].firstChild.nodeType != Base.NODE_TYPE_TEXT):
+            node[index].hasChildNodes() == False or
+                node[index].firstChild.nodeType != Base.NODE_TYPE_TEXT):
             return ''
 
-        return node[0].firstChild.data
+        return node[index].firstChild.data
 
     def updateART(self, doc, workspace, dataset):
         if (doc is None):
@@ -764,18 +764,18 @@ class Base(object):
                 updateVal = ''.join(revalue)
                 node.firstChild.data = updateVal
 
-    def getXMLNode(self, doc, nodeName):
+    def getXMLNode(self, doc, nodeName, index=0):
         if (doc is None):
             return ''
         node = doc.getElementsByTagName(nodeName)
 
         if (node is None or
             node.length == 0 or
-            node[0].hasChildNodes() == False or
-                node[0].firstChild.nodeType != Base.NODE_TYPE_TEXT):
+            node[index].hasChildNodes() == False or
+                node[index].firstChild.nodeType != Base.NODE_TYPE_TEXT):
             return ''
 
-        return node[0]
+        return node[index]
 
     def foundLockFiles(self, folder_path):
 
