@@ -1841,7 +1841,7 @@ class Solutions(Base.Base):
                 'arcpy.oi.UpdateOrientedImageryDatasetProperties',
                 index
             )
-        elif com == "PDT":
+        elif com == "PTDT":
             self.m_log.Message(f"\t{self.commands[com]['desc']}", self.m_log.const_general_text)
             return self.__invokeDynamicFn([], "package3dtiles", "arcpy.management.Package3DTiles", index)
         elif (com == 'ACUC'):
@@ -2583,7 +2583,7 @@ class Solutions(Base.Base):
              },
         "TF": {"desc": "Transfer Files", "fnc": executeCommand},
         "ZSAT": {"desc": "Zonal Statistics As Table", "fnc": executeCommand},
-        "PDT": {"desc": "Publish 3D Tiles", "fnc": executeCommand},
+        "PTDT": {"desc": "Publish 3D Tiles", "fnc": executeCommand},
         }
 
     # mapping of config/component paths.
