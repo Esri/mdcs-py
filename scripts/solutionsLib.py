@@ -2188,6 +2188,11 @@ class Solutions(Base.Base):
             self.m_log.Message("\t{}:{}".format(self.commands[com]["desc"], self.m_base.m_mdName), self.m_log.const_general_text)
             return self.__invokeDynamicFn([], "zonalstatisticsastable", "arcpy.ia.ZonalStatisticsAsTable", index)
 
+        elif com == "GRFRF":
+            self.m_log.Message("\t{}:{}".format(self.commands[com]["desc"], self.m_base.m_mdName), self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [], "generaterasterfromrasterfunction", "arcpy.management.GenerateRasterFromRasterFunction", index
+            )
         else:
             # The command could be a user defined function externally defined
             # in the module (MDCS_UC.py). Let's invoke it.
@@ -2598,6 +2603,7 @@ class Solutions(Base.Base):
         "TF": {"desc": "Transfer Files", "fnc": executeCommand},
         "ZSAT": {"desc": "Zonal Statistics As Table", "fnc": executeCommand},
         "PTDT": {"desc": "Publish 3D Tiles", "fnc": executeCommand},
+        "GRFRF": {"desc": "Generate Raster From Raster Function", "fnc": executeCommand},
         }
 
     # mapping of config/component paths.
