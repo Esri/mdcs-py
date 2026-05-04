@@ -860,6 +860,9 @@ class Base(object):
             resp[k] = kwargs[k]
         return resp
 
+    def update_response(self, resp, **kwargs):
+        return self._updateResponse(resp, **kwargs)
+
     def _getResponseResult(self, resp):
         if (resp is None):
             return False
