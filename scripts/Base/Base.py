@@ -57,12 +57,14 @@ def log_gptool_result(logger_method, log_level, result):
         log_level - the log level to use for logging the parsed information.
         result - the result object returned by a GPTool execution.
     """
-    logger_method(f"GPTool input: {[result.getInput(ind) for ind in range(result.inputCount)]}", log_level)
-    logger_method(f"GPTool messages: {result.getAllMessages()}", log_level)
-    logger_method(f"GPTool status: {result.status}", log_level)
-    logger_method(f"GPTool output: {[result.getOutput(ind) for ind in range(result.outputCount)]}", log_level)
-    logger_method(f"GPTool resultID: {result.resultID}", log_level)
-
+    if result:
+        logger_method(f"GPTool input: {[result.getInput(ind) for ind in range(result.inputCount)]}", log_level)
+        logger_method(f"GPTool messages: {result.getAllMessages()}", log_level)
+        logger_method(f"GPTool status: {result.status}", log_level)
+        logger_method(f"GPTool output: {[result.getOutput(ind) for ind in range(result.outputCount)]}", log_level)
+        logger_method(f"GPTool resultID: {result.resultID}", log_level)
+    else:
+        logger_method("GPTool did not return a result object.", log_level)
 class DynaInvoke:
     # log status types enums
     const_general_text = 0
