@@ -2157,6 +2157,42 @@ class Solutions(Base.Base):
                 'arcpy.ddd.ColorizeLas',
                 index
             )
+        elif (com == 'CSTCDL'):
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'createspacetimecubedefinedlocations',
+                'arcpy.stpm.CreateSpaceTimeCubeDefinedLocations',
+                index
+            )
+        elif (com == 'STCCPD'):
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'changepointdetection',
+                'arcpy.stpm.ChangePointDetection',
+                index
+            )
+        elif (com == 'STCTSC'):
+            self.m_log.Message(
+                "\t{}:{}".format(
+                    self.commands[com]['desc'],
+                    self.m_base.m_mdName),
+                self.m_log.const_general_text)
+            return self.__invokeDynamicFn(
+                [],
+                'timeseriesclustering',
+                'arcpy.stpm.TimeSeriesClustering',
+                index
+            )
         elif com == "TF":
             try:
                 self.m_log.Message("\t{}:{}".format(self.commands[com]["desc"], self.m_base.m_mdName), self.m_log.const_general_text)
@@ -2598,6 +2634,18 @@ class Solutions(Base.Base):
              },
             'CCSCF':
             {'desc': 'Create Cloud Storage Connection File',
+             'fnc': executeCommand
+             },
+            'CSTCDL':
+            {'desc': 'Create Space Time Cube Defined Locations.',
+             'fnc': executeCommand
+             },
+            'STCCPD':
+            {'desc': 'Change Point Detection.',
+             'fnc': executeCommand
+             },
+            'STCTSC':
+            {'desc': 'Time Series Clustering.',
              'fnc': executeCommand
              },
         "TF": {"desc": "Transfer Files", "fnc": executeCommand},

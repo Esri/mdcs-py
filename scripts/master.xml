@@ -1199,6 +1199,48 @@
 					<format>#</format>
 					<process_as_multidimensional>CURRENT_SLICE;ALL_SLICES</process_as_multidimensional>
 				</GenerateRasterFromRasterFunction>
+				<!-- Create Space Time Cube Defined Locations -->
+				<!-- https://doc.esri.com/en/arcgis-pro/latest/tool-reference/space-time-pattern-mining/createcubefromdefinedlocations.html?tabs=dialog -->
+				<CreateSpaceTimeCubeDefinedLocations>
+					<in_features>The input point or polygon feature class that will be converted to a space-time cube.</in_features>
+					<output_cube>The output netCDF data cube that will be created.</output_cube>
+					<location_id>An integer or text field containing the ID number for each unique location.</location_id>
+					<temporal_aggregation>APPLY_TEMPORAL_AGGREGATION;NO_TEMPORAL_AGGREGATION</temporal_aggregation>
+					<time_field>The field containing the time stamp for each row in the dataset. This field must be of type date.</time_field>
+					<time_step_interval>The number of seconds, minutes, hours, days, weeks, or years that will represent a single time step.</time_step_interval>
+					<time_step_alignment>END_TIME;START_TIME;REFERENCE_TIME</time_step_alignment>
+					<reference_time>The date and time that will be used to align the time-step intervals. </reference_time>
+					<variables>The numeric field containing attribute values that will be brought into the space-time cube.</variables>
+					<summary_fields>The numeric field containing attribute values that will be used to calculate the specified statistic when aggregating into a space-time cube.</summary_fields>
+					<in_related_table>The table or table view to be related to the input features.</in_related_table>
+					<related_location_id>An integer or text field in the related table that contains the location ID on which the relate will be based.</related_location_id>
+				</CreateSpaceTimeCubeDefinedLocations>
+
+				<!-- Change Point Detection -->
+				<!-- https://doc.esri.com/en/arcgis-pro/latest/tool-reference/space-time-pattern-mining/change-point-detection.html?tabs=dialog -->
+				<ChangePointDetection>
+					<in_cube>The space-time cube containing the variable to be analyzed.</in_cube>
+					<analysis_variable>The numeric variable of the space-time cube containing the time series values of each location.</analysis_variable>
+					<output_features>The output feature class that will contain the change point detection results.</output_features>
+					<change_type>MEAN;STANDARD_DEVIATION;SLOPE;COUNT</change_type>
+					<method>AUTO_DETECT;DEFINED_NUMBER</method>
+					<num_change_points>The number of change points that will be detected at each location.</num_change_points>
+					<sensitivity>A number between 0 and 1 that defines the sensitivity of the detection.</sensitivity>
+					<min_seg_len>The minimum number of time steps within each segment.</min_seg_len>
+				</ChangePointDetection>
+
+				<!-- Time Series Clustering -->
+				<!-- https://doc.esri.com/en/arcgis-pro/latest/tool-reference/space-time-pattern-mining/time-series-clustering.html?tabs=dialog -->
+				<TimeSeriesClustering>
+					<in_cube>The space-time cube containing the variable to be analyzed.</in_cube>
+					<analysis_variable>The numeric variable in the netCDF file, changing over time, that will be used to distinguish one cluster from another.</analysis_variable>
+					<output_features>The new output feature class containing all locations in the space-time cube and a field indicating cluster membership.</output_features>
+					<characteristic_of_interest>VALUE;PROFILE;PROFILE_FOURIER</characteristic_of_interest>
+					<cluster_count>The number of clusters to create.</cluster_count>
+					<output_table_for_charts>This table contains the representative time series for each cluster.</output_table_for_charts>
+					<shape_characteristic_to_ignore>TIME_LAG;RANGE</shape_characteristic_to_ignore>
+					<enable_time_series_popups>CREATE_POPUP;NO_POPUP</enable_time_series_popups>
+				</TimeSeriesClustering>
 		</Processes>
 	</MosaicDataset>
 </Workspace>
