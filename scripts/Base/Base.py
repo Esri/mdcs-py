@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Copyright 2025 Esri
+# Copyright 2026 Esri
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
-# Version: 20250220
+# Version: 20260701
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -906,3 +906,35 @@ class Base(object):
         if fnc_name is None:
             return False
         return fnc_name in [self.EVT_ON_EXIT, self.EVT_ON_START]
+
+    def add_raster_nodes(self, dynamic_data: dict) -> bool:
+        """
+        Add AddRaster nodes to the XML document based on the provided dynamic data.
+        """
+        if dynamic_data is None or len(dynamic_data) == 0 or self.m_doc is None:
+            self.log("Dynamic data or XML document is not available.", 1)
+            return False
+        key = "AR"
+        add_rasters = dynamic_data.get(key, [])
+        if not add_rasters:
+            self.log("No AddRasters data found in dynamic_data.", 1)
+            return False
+        parent = self.getXMLNode(self.m_doc, "AddRasters")
+        clone = self.getXMLNode(self.m_doc, "AddRaster")
+        for item in add_rasters:
+            cloned = clone.cloneNode(deep=True)
+            for node_key in item:
+                node = cloned.getElementsByTagName(node_key)
+                if 0 == len(node):
+                    self.log(f"Node {item} not found in XML.", 1)
+                    continue
+                try:
+                    node[0].firstChild.nodeValue = item[node_key]
+                except (IndexError, AttributeError) as e:
+                    self.log(
+                        f"Error occurred while setting node value for {node_key}: {e}",
+                        2,
+                    )
+                    return False  # if any error occurs, return False
+            parent.appendChild(cloned)
+        return True
