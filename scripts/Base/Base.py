@@ -14,7 +14,7 @@
 # ------------------------------------------------------------------------------
 # Name: Base.py
 # Description: Base class used by MDCS/All Raster Solutions components.
-# Version: 20260701
+# Version: 20260708
 # Requirements: ArcGIS 10.1 SP1
 # Author: Esri Imagery Workflows team
 # ------------------------------------------------------------------------------
@@ -907,9 +907,11 @@ class Base(object):
             return False
         return fnc_name in [self.EVT_ON_EXIT, self.EVT_ON_START]
 
-    def add_raster_nodes(self, dynamic_data: dict) -> bool:
+    def add_raster_nodes(self, dynamic_data: dict, purge_existing: bool = False) -> bool:
         """
         Add AddRaster nodes to the XML document based on the provided dynamic data.
+        purge_existing: If True, existing AddRaster nodes will be removed before 
+        adding new ones.
         """
         if dynamic_data is None or len(dynamic_data) == 0 or self.m_doc is None:
             self.log("Dynamic data or XML document is not available.", 1)
@@ -921,6 +923,9 @@ class Base(object):
             return False
         parent = self.getXMLNode(self.m_doc, "AddRasters")
         clone = self.getXMLNode(self.m_doc, "AddRaster")
+        if purge_existing:
+            while parent.hasChildNodes():
+                parent.removeChild(parent.lastChild)
         for item in add_rasters:
             cloned = clone.cloneNode(deep=True)
             for node_key in item:
@@ -929,6 +934,8 @@ class Base(object):
                     self.log(f"Node {item} not found in XML.", 1)
                     continue
                 try:
+                    if node[0].firstChild is None: # handles <node/> cases.
+                        node[0].appendChild(self.m_doc.createTextNode(item[node_key]))
                     node[0].firstChild.nodeValue = item[node_key]
                 except (IndexError, AttributeError) as e:
                     self.log(
