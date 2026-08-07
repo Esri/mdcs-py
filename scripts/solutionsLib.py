@@ -2203,11 +2203,8 @@ class Solutions(Base.Base):
                     data['useResponse']):
                 response = {'response': data['response']}
                 if ('code' in data):
-                    # Optional, any user defined code regardless of the
-                    # function status.
                     response['code'] = data['code']
                 if ('status' in data):
-                    # Overall function status, i.e. True or False
                     response['status'] = data['status']
                 elif (isinstance(data['response'], dict) and
                         'status' in data['response']):
