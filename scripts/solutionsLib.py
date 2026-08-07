@@ -2197,7 +2197,25 @@ class Solutions(Base.Base):
             # The command could be a user defined function externally defined
             # in the module (MDCS_UC.py). Let's invoke it.
             data = self.m_base.m_data
+            data['useResponse'] = False
             bSuccess = self.m_base.invoke_user_function(com, data)
+            if ('useResponse' in data and
+                    data['useResponse']):
+                response = {'response': data['response']}
+                if ('code' in data):
+                    # Optional, any user defined code regardless of the
+                    # function status.
+                    response['code'] = data['code']
+                if ('status' in data):
+                    # Overall function status, i.e. True or False
+                    response['status'] = data['status']
+                elif (isinstance(data['response'], dict) and
+                        'status' in data['response']):
+                    response['status'] = data['response']['status']
+                else:
+                    response['status'] = bSuccess
+                if (not bSuccess):
+                    return response
             if (bSuccess):
                 if self.config:
                     ParentRoot = 'Application/Workspace'
