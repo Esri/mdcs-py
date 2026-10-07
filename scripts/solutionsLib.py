@@ -338,10 +338,6 @@ class Solutions(Base.Base):
 
         elif (com == 'ERF'):
             try:
-                self.m_log.Message(
-                    "\tEditing raster function : " +
-                    self.m_base.m_mdName,
-                    self.m_log.const_general_text)
                 processKey = 'editrasterfunction'
                 rfunction_path = self.getProcessInfoValue(
                     processKey, 'function_chain_definition', index)
@@ -352,10 +348,24 @@ class Solutions(Base.Base):
                 fullPath = os.path.join(
                     self.m_base.m_geoPath, self.m_base.m_mdName)
 
+                in_mosaic_dataset = self.getProcessInfoValue(
+                    processKey, 'in_mosaic_dataset', index)
+                if in_mosaic_dataset in ('#', '', None):
+                    erf_input_md = fullPath
+                else:
+                    erf_input_md = in_mosaic_dataset
+                    if ('/' not in erf_input_md and '\\' not in erf_input_md):
+                        erf_input_md = os.path.join(self.m_base.m_geoPath, erf_input_md)
+                    erf_input_md = self.m_base.getAbsPath(erf_input_md)
+
+                self.m_log.Message(
+                    "\tEditing raster function on mosaic dataset : " + erf_input_md,
+                    self.m_log.const_general_text)
+
                 lyrName = 'lyr_%s' % str(self.m_base.m_last_AT_ObjectID)
                 expression = "OBJECTID >%s" % (
                     str(self.m_base.m_last_AT_ObjectID))
-                arcpy.MakeMosaicLayer_management(fullPath, lyrName, expression)
+                arcpy.MakeMosaicLayer_management(erf_input_md, lyrName, expression)
 
                 arcpy.EditRasterFunction_management(
                     lyrName, self.getProcessInfoValue(
