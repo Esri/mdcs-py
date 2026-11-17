@@ -41,7 +41,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import json
 import shutil
 import uuid
-redacting_patterns = ["token", "validatingToken", "accessKey", "secretKey"]
+redacting_patterns = ["token", "validatingToken", "accessKey", "secretKey", "outputStorageKey",  "inputStorageKey"]
 # cli callback ptrs
 g_cli_callback = None
 g_cli_msg_callback = None
