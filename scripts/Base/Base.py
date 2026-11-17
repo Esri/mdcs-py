@@ -60,6 +60,12 @@ def is_supported_installation(supported_versions):
     except Exception as exp:
         return False
 
+GET_ALL_MESSAGES_SUPPORTED = is_supported_installation({
+    "arcgispro": ((3, 2), (float("inf"), float("inf"))),
+    "server": ((11, 2), (float("inf"), float("inf"))),
+    "desktop": ((float("inf"), float("inf")), (float("inf"), float("inf")))
+})
+
 def log_gptool_result(logger_method, log_level, result):
     """
     Parse GPTool result object to log input parameters, messages, status, outputs, etc.
@@ -74,12 +80,7 @@ def log_gptool_result(logger_method, log_level, result):
     if result:
         try:
             logger_method(f"GPTool input: {[result.getInput(ind) for ind in range(result.inputCount)]}", log_level)
-            get_all_messages_supported = is_supported_installation({
-                "arcgispro": ((3, 2), (float("inf"), float("inf"))),
-                "server": ((11, 2), (float("inf"), float("inf"))),
-                "desktop": ((float("inf"), float("inf")), (float("inf"), float("inf")))
-            })
-            msgs = result.getAllMessages() if (get_all_messages_supported and hasattr(result, "getAllMessages")) \
+            msgs = result.getAllMessages() if (GET_ALL_MESSAGES_SUPPORTED and hasattr(result, "getAllMessages")) \
                 else result.getMessages() if hasattr(result, "getMessages") \
                 else ""
             logger_method(f"GPTool messages: {msgs}", log_level)
