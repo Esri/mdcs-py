@@ -47,6 +47,25 @@ try:
 except BaseException:
     print('arcpy.ia is not available.')
 
+def is_supported_installation(supported_versions):
+    try:
+        info = arcpy.GetInstallInfo()
+        version = tuple(map(int, info["Version"].split(".")[:2]))
+        product = info["ProductName"].lower()
+        minimum = supported_versions.get(product)
+        if minimum is None:
+            return False
+        min_version, max_version = minimum
+        return min_version <= version <= max_version
+    except Exception as exp:
+        return False
+
+GET_ALL_MESSAGES_SUPPORTED = is_supported_installation({
+    "arcgispro": ((3, 2), (float("inf"), float("inf"))),
+    "server": ((11, 2), (float("inf"), float("inf"))),
+    "desktop": ((float("inf"), float("inf")), (float("inf"), float("inf")))
+})
+
 def log_gptool_result(logger_method, log_level, result):
     """
     Parse GPTool result object to log input parameters, messages, status, outputs, etc.
@@ -57,14 +76,23 @@ def log_gptool_result(logger_method, log_level, result):
         log_level - the log level to use for logging the parsed information.
         result - the result object returned by a GPTool execution.
     """
+    const_warning_text = 1
     if result:
-        logger_method(f"GPTool input: {[result.getInput(ind) for ind in range(result.inputCount)]}", log_level)
-        logger_method(f"GPTool messages: {result.getAllMessages()}", log_level)
-        logger_method(f"GPTool status: {result.status}", log_level)
-        logger_method(f"GPTool output: {[result.getOutput(ind) for ind in range(result.outputCount)]}", log_level)
-        logger_method(f"GPTool resultID: {result.resultID}", log_level)
+        try:
+            logger_method(f"GPTool input: {[result.getInput(ind) for ind in range(result.inputCount)]}", log_level)
+            msgs = result.getAllMessages() if (GET_ALL_MESSAGES_SUPPORTED and hasattr(result, "getAllMessages")) \
+                else result.getMessages() if hasattr(result, "getMessages") \
+                else ""
+            logger_method(f"GPTool messages: {msgs}", log_level)
+            logger_method(f"GPTool status: {result.status if hasattr(result, 'status') else ''}", log_level)
+            logger_method(f"GPTool output: {[result.getOutput(ind) for ind in range(result.outputCount)] \
+                                            if hasattr(result, 'outputCount') and hasattr(result, 'getOutput') \
+                                                else ''}", log_level)
+            logger_method(f"GPTool resultID: {result.resultID if hasattr(result, 'resultID') else ''}", log_level)
+        except Exception as exp:
+            logger_method(f"Error parsing GPTool result object: {str(exp)}", const_warning_text)
     else:
-        logger_method("GPTool did not return a result object.", log_level)
+        logger_method("GPTool did not return a result object.", const_warning_text)
 class DynaInvoke:
     # log status types enums
     const_general_text = 0
