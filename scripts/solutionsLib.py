@@ -2810,6 +2810,7 @@ class Solutions(Base.Base):
                 aryCmds.insert(0, self.m_base.EVT_ON_START)
         cmdResults = []
         while aryCmds:
+            self.m_base.m_data["cmd_results"] = cmdResults
             command = aryCmds.pop(0)
             ucCommand = command
             command = command.upper()
