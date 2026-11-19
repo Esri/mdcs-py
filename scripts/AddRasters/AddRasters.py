@@ -45,15 +45,26 @@ class AddRasters(Base.Base):
     def getLastObjectID(self, gdb, md):
 
         path = os.path.join(gdb, md)
-        rows = arcpy.SearchCursor(path, "objectid = (SELECT MAX(\"objectid\") FROM %sAMD_%s_CAT)" % (self.m_base.m_SDE_database_user, md), None, 'objectid')
-        if (rows is None):
-            return 0  # new table
+        # Read from the mosaic dataset directly to avoid DB-specific SQL against AMD_*_CAT.
+        if not arcpy.Exists(path):
+            return 0
 
-        objID = 0
-        for row in rows:
-            objID = row.objectid
-            break
-        return objID
+        max_objectid = 0
+        try:
+            with arcpy.da.SearchCursor(
+                    path,
+                    ["OBJECTID"],
+                    sql_clause=(None, "ORDER BY OBJECTID DESC")) as rows:
+                row = next(rows, None)
+                if row is not None and row[0] is not None:
+                    max_objectid = row[0]
+        except Exception as e:
+            self.log(
+                f"Failed to get last OBJECTID for {path}: {e}",
+                self.const_critical_text)
+            raise
+
+        return max_objectid
 
     def GetValue(self, dic_values, key):
         try:
@@ -78,8 +89,9 @@ class AddRasters(Base.Base):
                 self.log("Path doesn't exist: %s" % (fullPath), self.const_critical_text)
                 return False
             self.m_base.m_last_AT_ObjectID = self.getLastObjectID(self.m_base.m_geoPath, MDName)
+            # Keep this outside the inner loop so the post-loop check is safe when no AddRaster nodes exist.
+            sucess_add_raster = 0
             for hshAddRaster in self.sMdNameList[sourceID]['addraster']:
-                sucess_add_raster = 0
                 try:
                     self.log("\tUsing mosaic dataset/ID:" + MDName + '/' +
                              hshAddRaster['dataset_id'], self.const_general_text)
