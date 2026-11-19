@@ -325,9 +325,20 @@ class Base(object):
         if (ext == self.const_geodatabase_SDE_ext):
             self.m_IsSDE = True
             try:
-                self.log('Reading SDE connection properties from (%s)' % (self.m_geoPath))
+                self.log(f'Reading SDE connection properties from ({self.m_geoPath})')
                 conProperties = arcpy.Describe(self.m_geoPath).connectionProperties
-                self.m_SDE_database_user = ('%s.%s.') % (conProperties.database, conProperties.user)
+                # Some enterprise geodatabases (for example Oracle) may not expose both properties.
+                # Build the owner prefix from whichever connection attributes are available.
+                database = getattr(conProperties, 'database', '')
+                user = getattr(conProperties, 'user', '')
+                if (database and user):
+                    self.m_SDE_database_user = f'{database}.{user}.'
+                elif (user):
+                    self.m_SDE_database_user = f'{user}.'
+                elif (database):
+                    self.m_SDE_database_user = f'{database}.'
+                else:
+                    self.m_SDE_database_user = ''
             except Exception as inst:
                 self.log(str(inst), self.const_critical_text)
                 return (False, self.const_init_ret_sde)
